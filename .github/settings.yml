@@ -91,8 +91,6 @@ labels:
     color: '#ffedcc'
   - name: 'priority: low'
     color: '#fff6e5'
-  - name: 'type: bug'
-    color: '#ff4c4c'
   - name: 'type: chore'
     color: '#ff7f7f'
   - name: 'type: documentation'
@@ -101,6 +99,9 @@ labels:
     color: '#ffb732'
   - name: 'type: build'
     color: '#666666'
+  - name: 'type: ci/cd'
+    color: '#777777'
+    description: "CI/CD Things "
   - name: 'type: breaking'
     color: '#c305d9'
   - name: 'type: dependencies'
