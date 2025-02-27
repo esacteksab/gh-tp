@@ -45,6 +45,15 @@ fi
     fi
     cc=""
     cgo_enabled="${CGO_ENABLED:-0}"
+    if [ "$goos" = "android" ]; then
+      if [ "$goarch" = "amd64" ]; then
+        cc="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android${ANDROID_SDK_VERSION}-clang"
+        cgo_enabled="1"
+      elif [ "$goarch" = "arm64" ]; then
+        cc="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android${ANDROID_SDK_VERSION}-clang"
+        cgo_enabled="1"
+      fi
+    fi
     GOOS="$goos" GOARCH="$goarch" CGO_ENABLED="$cgo_enabled" CC="$cc" go build -v -trimpath -ldflags="-s -w -X github.com/esacteksab/gh-tp/cmd.Version=${GH_RELEASE_TAG}" -o "dist/${p}${ext}"
   done
 #fi
