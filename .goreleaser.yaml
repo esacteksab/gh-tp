@@ -79,3 +79,7 @@ changelog:
 
 release:
   draft: true
+  prerelease: auto
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-devel"
