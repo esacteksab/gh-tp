@@ -40,6 +40,6 @@ changelog:
         - "type: chore"
         - "type: task"
 
-    - title: ":question: Other Changes"
+    - title: ":question: What's Changed"
       labels:
         - "*"

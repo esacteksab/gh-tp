@@ -29,6 +29,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
+	"runtime/debug"
 	"strings"
 
 	"github.com/cli/safeexec"
@@ -47,6 +49,9 @@ var (
 	sb          strings.Builder
 	Verbose     bool
 	Version     string
+	Date        string
+	Commit      string
+	BuiltBy     string
 	bold        = color.New(color.Bold).SprintFunc()
 	hiBlack     = color.New(color.FgHiBlack).SprintFunc()
 	green       = color.New(color.FgGreen).SprintFunc()
@@ -59,14 +64,30 @@ const (
 	SyntaxHighlightTerraform SyntaxHighlight = "terraform"
 )
 
+func buildVersion(version, commit, date, builtBy string) string {
+	result := version
+	if commit != "" {
+		result = fmt.Sprintf("%s\ncommit: %s", result, commit)
+	}
+	if date != "" {
+		result = fmt.Sprintf("%s\nbuilt at: %s", result, date)
+	}
+	if builtBy != "" {
+		result = fmt.Sprintf("%s\nbuilt by: %s", result, builtBy)
+	}
+	result = fmt.Sprintf("%s\ngoos: %s\ngoarch: %s", result, runtime.GOOS, runtime.GOARCH)
+	if info, ok := debug.ReadBuildInfo(); ok && info.Main.Sum != "" {
+		result = fmt.Sprintf("%s\nmodule version: %s, checksum: %s", result, info.Main.Version, info.Main.Sum)
+	}
+	return result
+}
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Version: Version,
+	Version: buildVersion(Version, Commit, Date, BuiltBy),
 	Use:     "tp [file]",
 	Short:   "do stuff with a [file]",
 	Long:    `With no FILE, or when FILE is '-', read stdIn.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
 		flagNoColor = viper.GetBool("no-color")
 		if flagNoColor {
@@ -203,10 +224,9 @@ func init() {
 	// will be global for your application.
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.tp)")
-
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 // initConfig reads in config file and ENV variables if set.

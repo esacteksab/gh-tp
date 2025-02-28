@@ -1,60 +1,42 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# vim: set ts=2 sw=2 tw=0 fo=cnqoj
+
 version: 2
 
 before:
   hooks:
+    # You may remove this if you don't use go modules.
     - go mod tidy
-
-gomod:
-  proxy: true
-  env:
-    - GOPROXY=https://proxy.golang.org,direct
-    - GOSUMDB=sum.golang.org
-  mod: mod
 
 builds:
   - env:
       - CGO_ENABLED=0
-    flags:
-      - -tags=nodbus
     goos:
-      - android
-      - freebsd
       - linux
       - windows
       - darwin
-    goarch:
-      - amd64
-      - arm64
-      - arm
-      - "386"
-    goarm:
-      - "6"
-      - "7"
     ldflags:
       - -s -w
-      - -X github.com/esacteksab/gh-tp/cmd.Version={{.Version}}
-#      - -X github.com/dlvhdr/gh-dash/cmd.Commit={{.Commit}}
-#      - -X github.com/dlvhdr/gh-dash/cmd.Date={{.CommitDate}}
-#      - -X github.com/dlvhdr/gh-dash/cmd.BuiltBy=goreleaser
-    # Skipping builds for Android non-ARM64 architectures as they need CGO enabled
-    # https://goreleaser.com/limitations/cgo/
-    ignore:
-      - goos: android
-        goarch: "386"
-      - goos: android
-        goarch: amd64
-      - goos: android
-        goarch: arm
-
+      - -X github.com/esacteksab/gh-tp/cmd.Version={{.Tag}}
+      - -X github.com/esacteksab/gh-tp/cmd.Date={{time "2006-01-02"}}
+      - -X github.com/esacteksab/gh-tp/cmd.Commit={{.ShortCommit}}
+      - -X github.com/esacteksab/gh-tp/cmd.BuiltBy=goreleaser
 archives:
-  - format: binary
-    name_template: "gh-dash_{{ .Tag }}_{{ .Os }}-{{ .Arch }}{{if .Arm}}_{{.Arm}}{{end}}"
-checksum:
-  name_template: "checksums.txt"
-snapshot:
-  version_template: "{{ incpatch .Version }}-next"
+  - formats: binary
+    # this name template makes the OS and Arch compatible with the results of `uname`.
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Tag }}_
+      {{- title .Os }}-
+      {{- .Arch }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    # use zip for windows archives
+    format_overrides:
+      - goos: windows
+        formats: zip
+
 changelog:
-  sort: asc
-  filters:
-    exclude:
-      - "^docs:"
+  use: github
+
+release:
+  draft: true
