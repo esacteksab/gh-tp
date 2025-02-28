@@ -77,6 +77,8 @@ changelog:
     - title: ":question: What's Changed"
       order: 999
 
+checksum:
+  name_template: "checksums.txt"
 release:
   draft: true
   prerelease: auto
