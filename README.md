@@ -64,7 +64,7 @@ Opening https://github.com/org/repo/pull/42 in your browser.
 
 ### Targeting with Terraform
 
-If you're targeting a resource, you can still get markdown from that plan's output. `tp` reads from `stdin` like so:
+If you're targeting a resource, you can still create markdown from that plan's output. `tp` reads from `stdin` like so:
 
 ```bash
 terraform plan -out plan.out -no-color  | gh tp -
