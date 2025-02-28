@@ -26,9 +26,43 @@ To create a plan and the markdown from that plan, run
 
 ```bash
 gh tp
+Using config file: /Users/tempuser/.tp
 ```
 
-Two files will be created, the first an output file named, what you defined for the value of `planfile` in `.tp` config and a Markdown file named what you defined for the value of the parameter `mdfile` in the `.tp` config file. While the end goal of this extension is to submit the pull request, that functionality doesn't exist on a public branch yet. **This feature exists in a prototype branch. It will be public _soon_!**
+Two files will be created, the first an output file named, what you defined for the value of `planfile` in `.tp` config and a Markdown file named what you defined for the value of the parameter `mdfile` in the `.tp` config file. 
+
+```bash
+ls |grep plan
+plan.md
+plan.out
+```
+
+### Create Commit
+
+```bash
+git add .
+git commit -m "feat: adding cool things"
+```
+
+### Create Pull Request with `gh`
+
+While the end goal of this extension is to submit the pull request, that functionality doesn't exist on a public branch yet. **This feature exists in a prototype branch. It will be public _soon_!** So to submit a pull request today, we can use the built-in functionality of `gh`.
+
+```bash
+gh pr create -F plan.md
+... gh things occur here ...
+https://github.com/org/repo/pull/42
+```
+
+### View Pull Request in Browser with `gh`
+
+
+```bash
+gh pr view -w
+Opening https://github.com/org/repo/pull/42 in your browser.
+```
+
+### Targeting with Terraform
 
 If you're targeting a resource, you can still get markdown from that plan's output. `tp` reads from `stdin` like so:
 
