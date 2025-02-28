@@ -93,28 +93,32 @@ labels:
     color: '#fff6e5'
   - name: 'type: chore'
     color: '#ff7f7f'
+    description: ":wrench: Chore"
   - name: 'type: documentation'
     color: '#ffa500'
+    description: ":books: Documentation"
   - name: 'type: feature'
     color: '#ffb732'
   - name: 'type: build'
     color: '#666666'
   - name: 'type: ci/cd'
     color: '#777777'
-    description: "CI/CD Things "
+    description: "CI/CD Things :robot: "
   - name: 'type: breaking'
     color: '#c305d9'
   - name: 'type: dependencies'
     color: '#6ae2da'
   - name: 'type: refactor'
     color: '#7e709c'
+    description: ":hammer: refactor"
   - name: 'type: release'
     color: '#97dbed'
+    description: ":sparkle: Release"
   - name: 'type: task'
     color: '#674ea7'
   - name: 'type: regression'
     color: '#bf9000'
-    description: 'Oops 💩'
+    description: 'Oops | Revert 💩'
   - name: 'status: WIP'
     color: '#7f7fff'
   - name: 'status: wontfix'
@@ -128,6 +132,7 @@ labels:
     color: '#9999ff'
   - name: 'topic: testing'
     color: '#66b266'
+    description: ":rotating_light: Testing"
   - name: 'type: bug'
     color: CC0000
     description: An issue with the system 🐛.
@@ -137,10 +142,12 @@ milestones:
   - title: v0.0.1
     description: A smidge past initial release.
 #    # The state of the milestone. Either `open` or `closed`
-    state: open
-  - title: v0.1.0
+    state: closed
+  - title: v0.5.0
     description: I can show my face.
     state: open
+  - title: v1.0.0
+    description: A boy can dream.
 
 # Collaborators: give specific users access to this repository.
 # See https://docs.github.com/en/rest/reference/repos#add-a-repository-collaborator for available options
