@@ -1,0 +1,12 @@
+# Save this to your $HOME directory as `.tp`
+# Or save it to the repository's root directory as `.tp`
+# Currently no file extension
+# Currently expects YAML
+# Name of the binary (e.g terraform or tofu. Must exist in your $PATH)
+binary: terraform
+# Plan output file created with `gh tp`
+planfile: "plan.out"
+# Markdown file created with `gh tp``
+mdfile: "plan.md"
+# set to true to disable colors in the terminal
+no-color: false
