@@ -142,10 +142,12 @@ milestones:
   - title: v0.0.1
     description: A smidge past initial release.
 #    # The state of the milestone. Either `open` or `closed`
-    state: open
-  - title: v0.1.0
+    state: closed
+  - title: v0.5.0
     description: I can show my face.
     state: open
+  - title: v1.0.0
+    description: A boy can dream.
 
 # Collaborators: give specific users access to this repository.
 # See https://docs.github.com/en/rest/reference/repos#add-a-repository-collaborator for available options
