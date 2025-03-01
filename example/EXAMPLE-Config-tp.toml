@@ -1,15 +1,16 @@
 # Save this to your $HOME directory as `.tp.toml`
 # Or save it to the repository's root directory as `.tp.toml`
 # Currently expects TOML -- https://toml.io
+# TOML is case-sensitive | Keys are mixedCase
 
 # Type: String. Name of the binary (e.g tofu or terraform. Must exist in your $PATH)
 binary = ""
 
 # Type: String. The name of the plan output file created with `gh tp`
-planfile = ""
+planFile = ""
 
 # Type: String. The name of the Markdown file that will be created with `gh tp``
-mdfile = ""
+mdFile = ""
 
 # Type: Bool. Uncomment and set to true to disable colors in the terminal
 # no-color = 
