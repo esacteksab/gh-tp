@@ -15,6 +15,14 @@ ifneq (,$(wildcard ./plan.out))
 	rm plan.out
 endif
 
+ifneq (,$(wildcard ./*.tf))
+	rm *.tf
+endif
+
+ifneq (,$(wildcard ./*.tofu))
+	rm *.tofu
+endif
+
 .PHONY: build
 build:
 
@@ -32,4 +40,4 @@ endif
 
 	gh ext install .
 
-	gh tp
+	-gh tp
