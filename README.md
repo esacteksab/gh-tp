@@ -9,16 +9,16 @@
 gh ext install esacteksab/gh-tp
 ```
 
-### `.tp` config file
+### `.tp.toml` config file
 
-I didn't want to make assumptions about your system, so `tp` does not define any default values today. `tp` uses a config file named `.tp`. This config file is written in [YAML](https://yaml.org/). The file today is rudimentary. It has 3 required parameters with one optional parameter. It can exist in your home directory or in the root of your project from where you will execute `gh tp` from. A annotated copy exists in the [example](./example) directory. **_The config file, the parameters and possibly the presence of default values is actively being worked on. This behavior may change in a future release._**
+I didn't want to make assumptions about your system, so `tp` does not define any default values today. `tp` uses a config file named `.tp.toml`. This config file is written in [TOML](https://toml.io/). The file today is rudimentary. It has 3 required parameters with one optional parameter. It can exist in your home directory or in the root of your project from where you will execute `gh tp` from. A annotated copy exists in the [example](./example) directory. **_The config file, the parameters and possibly the presence of default values is actively being worked on. This behavior may change in a future release._**
 
 | Parameter | Type   | Required | Description                                                                                                            |
 | --------- | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------- |
-| binary    | string | Y        | The name of the binary that you use. (e.g. `tofu` or `terraform`). It is expected to be in your $PATH. _Default: `""`_ |
-| planfile  | string | Y        | The name of the plan output file. _Default: `""`_                                                                      |
-| mdfile    | string | Y        | The name of the markdown file. _Default: `""`_                                                                         |
-| no-color  | bool   | N        | If `true`, `tp` will emit no color on the terminal. _Default: `false`_                                                 |
+| binary    | string | Y        | Expected to either be `tofu` or `terraform`. It is expected to be in your $PATH. _Default: `""`_ |
+| planFile  | string | Y        | The name of the plan's output file created by `gh tp`. _Default: `""`_                                                                      |
+| mdFile    | string | Y        | The name of the Markdown file created by `gh tp`. _Default: `""`_                                                                         |
+| no-color  | bool   | N        | If `true`, `gh tp` will emit no color on the terminal. _Default: `undefined`_                                                 |
 
 ### Using `tp`
 
@@ -26,7 +26,7 @@ To create a plan and the markdown from that plan, run
 
 ```bash
 gh tp
-Using config file: /Users/tempuser/.tp
+Using config file: /Users/tempuser/.tp.toml
 ```
 
 Two files will be created, the first an output file named, what you defined for the value of `planfile` in `.tp` config and a Markdown file named what you defined for the value of the parameter `mdfile` in the `.tp` config file. 
