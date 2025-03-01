@@ -19,6 +19,14 @@ indent_size = 2
 [package.json]
 indent_size = 2
 
+# Override for Makefile
+[{Makefile, makefile, GNUmakefile}]
+indent_style = tab
+indent_size = 4
+
+[Makefile.*]
+indent_style = tab
+indent_size = 4
 
 # https://google.github.io/styleguide/docguide/style.html
 [*.md]
