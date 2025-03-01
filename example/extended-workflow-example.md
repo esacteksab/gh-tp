@@ -1,23 +1,28 @@
  ## First time running `gh tp`
  
  ```bash
- ➜  sausage-factory [main] [X] gh tp          
-2025/02/28 22:56:56 Attention! Missing Config File: Config file should be named .tp.toml and exist in your home directory or in your project's root.
+gh tp
+2025/03/01 12:35:20 Attention! Missing Config File: Config file should be named .tp.toml and exist in your home directory or in your project's root.
 ```
 Let's grab our example config file and run `gh tp` again:
 
 ```bash
- ➜  sausage-factory [main] cp ../gh-tp/.tp.toml .                                                 
- ➜  sausage-factory [main] [X] gh tp
-2025/02/28 22:57:17 plan.out was created
+cp ../gh-tp/.tp.toml .
+gh tp
+2025/03/01 12:36:26 Plan file plan.out was created.
+2025/03/01 12:36:26 Markdown file plan.md was created.
 ```
+> [!NOTE]
+>
+> On projects with a large amount of resources, creating the plan can take some time. Currently `tp` does not provided feedback that it's doing anything. This might create the situation where you're wondering if it is doing anything, and contemplate pressing `CTRL-C`. Providing this awareness that things are happening is being tracked in this issue [Feat: Is it Doing Anything?](https://github.com/esacteksab/gh-tp/issues/20).
 
-We can view the plan like so: 
+
+### We can view the plan like so:
 
 
   
 ```bash
- ➜  sausage-factory [main] [X] terraform show plan.out     
+terraform show plan.out
 ```
 <details>
 
@@ -93,9 +98,10 @@ Plan: 5 to add, 0 to change, 0 to destroy.
 And we can verify the `plan.md` matches our output above :
 
 ```bash
- ➜  sausage-factory [main] [X] cat plan.md
-
+cat plan.md
 ```
+
+```md
 <details><summary>Terraform Plan</summary>
 
   ```terraform
@@ -166,15 +172,15 @@ And we can verify the `plan.md` matches our output above :
 
   Plan: 5 to add, 0 to change, 0 to destroy.
 
-  ```
+  \```
 
   </details>
+```
 
-
-We can then apply our Terraform:
+### We can then apply our Terraform:
 
 ```terraform
- ➜  sausage-factory [main] [X] terraform apply plan.out
+terraform apply plan.out
 random_uuid.uuid: Creating...
 random_pet.pet: Creating...
 archive_file.tf_pr: Creating...
@@ -192,16 +198,18 @@ Apply complete! Resources: 5 added, 0 changed, 0 destroyed.
 Run `gh tp` again, and there are no changes as expected.
 
 ```bash
- ➜  sausage-factory [main] [X] gh tp
+gh tp
 2025/02/28 22:58:27 No changes.Your infrastructure matches the configuration.
 2025/02/28 22:58:27 plan.out was created
-
 ```
 
 We can verify that our Markdown contains as much:
 
 ```bash
- ➜  sausage-factory [main] [X] cat plan.md
+cat plan.md
+```
+
+```md
  
    <details><summary>Terraform Plan</summary>
 
@@ -215,4 +223,5 @@ We can verify that our Markdown contains as much:
 
 ```
 
-The `\` above exists to escape the code fences. That _does not_ exist in `gh tp` output. It purely exists for this presentation. If you haven't already seen it, view the sample markdown [example PR](./EXAMPLE-PR.md) to see a file created by `gh tp`.
+> [!NOTE]
+> The `\` above exists to escape the code fences. That _does not_ exist in `gh tp` output. It purely exists for this presentation. If you haven't already seen it, view the sample markdown [example PR](./EXAMPLE-PR.md) to see a file created by `gh tp`.

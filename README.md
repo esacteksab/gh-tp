@@ -72,6 +72,11 @@ terraform plan -out plan.out -no-color  | gh tp -
 
 Like with `gh tp` two files will exist. The first being whatever you passed to `-out` for the file name in the above example (`plan.out` in the example above) and the Markdown file named whatever you defined as the value for the `mdFile` parameter in the `.tp` config file. `tp` does not create an additional plan having been passed the plan from `stdin`.
 
+
+### Extended Example
+
+The above example is intended to be just enough to get you started. If you'd like to see an example representative of a more real-world use case, one exists in the [example](./example/) directory. A note though, I've been unable to figure out how to put Markdown with code fences inside Markdown code fences. So the formatting on that example exists purely out of a need to handle the situation where I output Markdown and I'm trying to put it inside code fences. I hope you understand and I hope I can come up with a solution long-term to better display the output of `tp`.
+
 <!--`tp` also supports command-line flags as well as source environment variables. More [below](#disclaimer)-->
 
 > [!WARNING]
@@ -87,9 +92,9 @@ I write _a lot_ of Terraform daily and a part of that process includes submittin
 
 I feel like I'm in this _weird_ space. I programmatically run a `terraform plan -out plan.out --no-color` but Terraform _already_ does that. And it's not my intent to create a wrapper around an existing tool, especially one like Terraform. I also programmatically do a `gh pr create -t $title -F file.md`, but `gh` _already_ does that. So while I find my fit in the space, I felt it was important to call out what I'm not going to do. Today, it's not uncommon for me to have to do a `-target` to plan/apply around something. `tp` doesn't natively support passing arguements to Terraform. And I don't think I want it to. So in the example of not being able to pass the `-target` argument, but still desiring to create the formatted Markdown and the subsequent pull request, `tp` can read from `stdin` so today you can run `terraform plan -target resource.name -out plan.out | gh tp -` and `tp` will create the Markdown with your plan's output.
 
-## Contribute
+<!--## Contribute
 
-### Local Development Setup
+### Local Development Setup-->
 
 #### Disclaimer
 
