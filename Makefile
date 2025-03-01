@@ -8,4 +8,15 @@ SHELL := bash
 
 .PHONY: build
 build:
+
+ifneq (,$(wildcard ./plan.md))
+	rm plan.md
+endif
+
+ifneq (,$(wildcard .plan.out))
+	rm plan.out
+endif
+
 	scripts/build-dev.sh
+
+	gh tp

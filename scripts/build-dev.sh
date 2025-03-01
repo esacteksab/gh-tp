@@ -51,13 +51,4 @@ VERSION="$(version)"
 # build local binary
 go build -v -ldflags "-X github.com/esacteksab/gh-tp/cmd.Version=${VERSION} -X github.com/esacteksab/gh-tp/cmd.BuiltBy=yoMomma!"
 
-# remove previous extension
-gh ext remove tp
-
-# install new extension
-gh ext install .
-
-# call extension one time with no parameters
-gh tp
-
 # vim: tabstop=2 shiftwidth=2 softtabstop=2 expandtab:
