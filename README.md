@@ -11,7 +11,7 @@ gh ext install esacteksab/gh-tp
 
 ### `.tp.toml` config file
 
-I didn't want to make assumptions about your system, so `tp` does not define any default values today. `tp` uses a config file named `.tp.toml`. This config file is written in [TOML](https://toml.io/). TOML is case-sensitive and keys are [mixedCase]. It has 3 required parameters with one optional parameter. It can exist in your home directory or in the root of your project from where you will execute `gh tp` from. A annotated copy exists in the [example](./example) directory. **_The config file, the parameters and possibly the presence of default values is actively being worked on. This behavior may change in a future release._**
+I didn't want to make assumptions about your system, so `tp` does not define any default values today. `tp` uses a config file named `.tp.toml`. This config file is written in [TOML](https://toml.io/). TOML is case-sensitive and keys are [mixedCase or camelCase](https://en.wikipedia.org/wiki/Camel_case). It has 3 required parameters with one optional parameter. It can exist in your home directory or in the root of your project from where you will execute `gh tp` from. A annotated copy exists in the [example](./example) directory. **_The config file, the parameters and possibly the presence of default values is actively being worked on. This behavior may change in a future release._**
 
 | Parameter | Type   | Required | Description                                                                                                            |
 | --------- | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------- |
