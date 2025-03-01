@@ -259,3 +259,10 @@ dist
 
 # Added by goreleaser init:
 dist/
+
+#
+# TP Things
+#
+.tp.toml
+.tp
+.tp.yml
