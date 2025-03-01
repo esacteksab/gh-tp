@@ -92,6 +92,10 @@ plan.md
 .terraformrc
 terraform.rc
 
+# In this repo, we don't even want Terraform files!
+*.tf
+*.tofu
+
 ###############
 # Hugo Things #
 ###############
