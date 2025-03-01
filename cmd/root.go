@@ -54,8 +54,9 @@ var (
 	BuiltBy     string
 	bold        = color.New(color.Bold).SprintFunc()
 	hiBlack     = color.New(color.FgHiBlack).SprintFunc()
-	green       = color.New(color.FgGreen).SprintFunc()
-	red         = color.New(color.FgRed).SprintFunc()
+	green       = color.New(color.FgHiGreen).SprintFunc()
+	yellow      = color.New(color.FgHiYellow).SprintFunc()
+	red         = color.New(color.FgHiRed).SprintFunc()
 )
 
 type SyntaxHighlight string
@@ -85,94 +86,137 @@ func buildVersion(version, commit, date, builtBy string) string {
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Version: buildVersion(Version, Commit, Date, BuiltBy),
-	Use:     "tp [file]",
-	Short:   "do stuff with a [file]",
-	Long:    `With no FILE, or when FILE is '-', read stdIn.`,
+	Use:     "tp",
+	Short:   "A GitHub CLI extension to submit a pull request with Terraform or Tofu plan output.",
+	Long:    `tp is a GitHub CLI extension to submit a pull request with Terraform or Tofu plan output formatted in GitHub Flavored Markdown.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		flagNoColor = viper.GetBool("no-color")
-		if flagNoColor {
-			color.NoColor = true // disables colorized output
-		}
+
 		binary := viper.GetString("binary")
 
 		// the arg received looks like a file, we try to open it
 		if len(args) == 0 {
 			execPath, err := safeexec.LookPath(binary)
 			if err != nil {
-				log.Fatal("Please ensure terraform or tofu are installed and on your $PATH")
-				os.Exit(1)
+				log.Fatal(bold(red("Attention! ")), "Please ensure either `tofu` or `terraform` are installed and on your $PATH.")
+				//os.Exit(1)
 			}
 
 			workingDir := filepath.Base(".")
 			// Initialize tf -- NOT terraform init
 			tf, err := tfexec.NewTerraform(workingDir, execPath)
 			if err != nil {
-				log.Fatalf("error running NewTerraform: %s\n", err)
+				log.Fatalf("error calling binary: %s\n", err)
 			}
 
 			//Check for .terraform.lock.hcl -- do not need to do this every time
 			//terraform init | installs providers, etc.
-			err = tf.Init(context.Background())
-			if err != nil {
-				log.Fatalf("error running Init: %s", err)
-			}
+			//err = tf.Init(context.Background())
+			//if err != nil {
+			//	log.Fatalf("error running Init: %s", err)
+			//}
 
 			//the plan file
-			planPath := viper.GetString("planfile")
+			planPath := viper.GetString("planFile")
 			planOpts := []tfexec.PlanOption{
 				// terraform plan --out planPath (plan.out)
 				tfexec.Out(planPath),
 			}
 
-			// terraform plan -out plan.out -no-color
-			hasChanges, err := tf.Plan(context.Background(), planOpts...)
-			if err != nil {
-				log.Fatalf("error running Plan: %s", err)
-			}
-			// if tf.Plan has no changes, hasChanges is empty or false
-			if hasChanges {
-				// This is the actual plan output from terraform plan -out plan.out -no-color
-				planStr, err = tf.ShowPlanFileRaw(context.Background(), planPath)
+			exts := []string{".tf", ".tofu"}
+			files := checkFilesByExtension(workingDir, exts)
+			// we check to see if there are tf or tofu files in the current working directory. If not, we don't call tf.plan
+			if files {
+				// terraform plan -out plan.out -no-color
+				hasChanges, err := tf.Plan(context.Background(), planOpts...)
 				if err != nil {
-					log.Fatalf("error creating Plan: %s", err)
+					// binary defined. .tf or .tofu files exist. Still errors. Show me the error
+					log.Println(bold(red("Terraform returned the following error: ")), err)
+					// We need to exist on this error. tf.Plan actually returns status 1 -- maybe some day we can intercept it or have awareness that it was returned.
+					os.Exit(1)
 				}
-				if Verbose {
-					log.Println((planStr))
+				// if tf.Plan has no changes, hasChanges is empty or false
+				if hasChanges {
+					// This is the actual plan output from terraform plan -out plan.out -no-color
+
+					planStr, err = tf.ShowPlanFileRaw(context.Background(), planPath)
+					if err != nil {
+						log.Fatal("error internally attempting to create the human-readable Plan: ", err)
+					}
+
+					if Verbose {
+						log.Println((planStr))
+					}
+
+					//fmt.Printf("plan output: %s", planStr)
+					mdParam := viper.GetString("mdFile")
+
+					planMd, err := os.Create(mdParam)
+					if err != nil {
+						log.Fatalf("failed to create Markdown: %s", err)
+					}
+					// Close the file when we're done with it
+					defer planMd.Close()
+
+					// This has the plan wrapped in a code block in Markdown
+					planBody := md.NewMarkdown(os.Stdout).CodeBlocks(md.SyntaxHighlight(SyntaxHighlightTerraform), planStr)
+					if err != nil {
+						log.Fatalf("error generating plan Markdown: %s", err)
+					}
+
+					// NewMarkdown returns io.Writer
+					fmt.Fprintf(&sb, "\n%s\n", planBody)
+
+					// This turns NewMarkdown io.Writer into a String, which .Details expects
+					sbPlan := sb.String()
+
+					// This is what creates the final document (`mdoutfile`) plmd here could possibly be os.Stdout one day
+					md.NewMarkdown(planMd).Details("Terraform Plan", sbPlan).Build()
+
+				} else {
+
+					// hasChanges is false, so returns false. We mock a response mirroring Terraform's behavior to still create the Markdown
+					planStr = "No Changes. Your Infrastructure matches the configuration."
+
+					mdParam := viper.GetString("mdFile")
+
+					planMd, err := os.Create(mdParam)
+					if err != nil {
+						log.Fatalf("Failed when trying to create Markdown file: %s", err)
+					}
+					defer planMd.Close()
+
+					// This wraps the above string in a code block in Markdown
+					planBody := md.NewMarkdown(os.Stdout).CodeBlocks(md.SyntaxHighlight(SyntaxHighlightTerraform), planStr)
+
+					// Markdown returns an io.Writer
+					fmt.Fprintf(&sb, "\n%s'\n", planBody)
+
+					// This turns NewMarkdown io.Writer into a String, which .Details expects
+					sbPlan := sb.String()
+
+					// This is what creates the final document (`mdoutfile`) plmd here could possibly be os.Stdout one day
+					md.NewMarkdown(planMd).Details("Terraform Plan", sbPlan).Build()
+
+					log.Println(bold(green("No changes."), "Your infrastructure matches the configuration."))
 				}
-				//fmt.Printf("plan output: %s", planStr)
-				planmd := viper.GetString("mdfile")
-				plmd, err := os.Create(planmd)
-				if err != nil {
-					log.Fatalf("failed to create Markdown: %s", err)
-				}
-				// Close the file when we're done with it
-				defer plmd.Close()
-				// This has the plan wrapped in a code block in Markdown
-				plbody := md.NewMarkdown(os.Stdout).CodeBlocks(md.SyntaxHighlight(SyntaxHighlightTerraform), planStr)
-				if err != nil {
-					log.Fatalf("error generating plan Markdown: %s", err)
-				}
-				// NewMarkdown returns io.Writer
-				fmt.Fprintf(&sb, "\n%s\n", plbody)
-				// This turns NewMarkdown io.Writer into a String, which .Details expects
-				sbplan := sb.String()
-				// This is what creates the final document (`mdoutfile`) plmd here could possibly be os.Stdout one day
-				md.NewMarkdown(plmd).Details("Terraform Plan", sbplan).Build()
-			} else {
-				log.Println(bold(green("No changes."), "Your infrastructure matches the configuration."))
-			}
-			if _, err := os.Stat(planPath); err == nil {
-				// Only tell me about it if -v is passed
-				if Verbose {
+				if _, err := os.Stat(planPath); err == nil {
 					log.Printf("%s was created", planPath)
+
+				} else if errors.Is(err, os.ErrNotExist) {
+
+					// Apparently the binary exists, tf.Plan shit the bed and didn't tell us
+					log.Fatalf("%s was not created", planPath)
+
+				} else {
+
+					// I'm only human. NFC how you got here. I hope to never have to find out
+					log.Printf("If you see this error message, please open a bug. Error Code: TPE002. Error: %s", err)
 				}
-			} else if errors.Is(err, os.ErrNotExist) {
-				// Apparently the binary exists, tf.Plan shit the bed and didn't tell us
-				log.Fatalf("%s was not created", planPath)
+
 			} else {
-				// I'm only human. NFC how you got here. I hope to never have to find out
-				log.Println("No F'n Clue How you got here.")
+				log.Fatalf("No Terraform files found. Please run this in a directory with Terraform files present.")
 			}
+
 		} else if args[0] == "-" {
 			out = cmd.InOrStdin()
 			content, err := io.ReadAll(out)
@@ -184,26 +228,31 @@ var rootCmd = &cobra.Command{
 			if Verbose {
 				fmt.Printf("plan output: %s", planStr)
 			}
-			planmd := viper.GetString("mdfile")
+
+			planmd := viper.GetString("mdFile")
+
 			plmd, err := os.Create(planmd)
 			if err != nil {
 				log.Fatalf("failed to create Markdown: %s", err)
 			}
 			// Close the file when we're done with it
 			defer plmd.Close()
+
 			// This has the plan wrapped in a code block in Markdown
 			plbody := md.NewMarkdown(os.Stdout).CodeBlocks(md.SyntaxHighlight(SyntaxHighlightTerraform), planStr)
 			if err != nil {
 				log.Fatalf("error generating plan Markdown: %s", err)
 			}
+
 			// NewMarkdown returns io.Writer
 			fmt.Fprintf(&sb, "\n%s\n", plbody)
+
 			// This turns NewMarkdown io.Writer into a String, which .Details expects
 			sbplan := sb.String()
+
 			// This is what creates the final document (`mdoutfile`) plmd here could possibly be os.Stdout one day
 			md.NewMarkdown(plmd).Details("Terraform Plan", sbplan).Build()
 		}
-		//fmt.Println("If you got here, W.T.F")
 	},
 }
 
@@ -223,7 +272,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.tp)")
+	rootCmd.Flags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.tp.toml)")
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
@@ -239,9 +288,9 @@ func initConfig() {
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
-		// Search config in home directory with name ".gh-tp" (without extension).
-		viper.SetConfigName(".tp")
-		viper.SetConfigType("yaml")
+		// Search config in home directory with name ".tp.toml"
+		viper.SetConfigName(".tp.toml")
+		viper.SetConfigType("toml")
 		viper.AddConfigPath(home)
 		viper.AddConfigPath(".")
 	}
@@ -249,7 +298,34 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			log.Fatal(bold(red("Attention! Missing Config File: "), "Config file should be named .tp.toml and exist in your home directory or in your project's root.\n"))
+			os.Exit(1)
+		} else if _, ok := err.(viper.UnsupportedConfigError); ok {
+			log.Fatalf("Unsupported Format. Config file should be named .tp %s", err)
+		}
+		if Verbose {
+			fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+		}
+	}
+	flagNoColor = viper.GetBool("no-color")
+	if flagNoColor {
+		color.NoColor = true // disables colorized output
+	}
+	// Validate that required 'binary' parameter is set
+	b := viper.IsSet("binary")
+	if !b {
+		log.Fatal(bold(red("Attention! Missing Parameter: "), bold("'binary':"), " (type: string) is not defined in the config file. The value of the binary parameter should be either 'tofu' or 'terraform'. This binary is expected to exist on your $PATH.\n"))
+	}
+	// Check to see if required 'planFile' is set
+	o := viper.IsSet("planFile")
+	if !o {
+		log.Fatal(bold(red("Attention! Missing Parameter: "), bold("'planFile':"), " (type: string) is not defined in the config file. This is the name of the plan's output file that will be created by `gh tp`.\n"))
+	}
+	// Check to see if required 'mdFile' is set
+	m := viper.IsSet("mdFile")
+	if !m {
+		log.Fatal(bold(red("Attention! Missing Parameter: "), bold("'mdFile':"), " (type: string) is not defined in the config file. This is the name of the Markdown file that will be created by `gh tp`.\n"))
 	}
 }
