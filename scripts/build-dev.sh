@@ -48,6 +48,7 @@ version() {
 
 VERSION="$(version)"
 
-go build -v -ldflags "-X github.com/esacteksab/gh-tp/cmd.Version=${VERSION}"
+# build local binary
+go build -v -ldflags "-X github.com/esacteksab/gh-tp/cmd.Version=${VERSION} -X github.com/esacteksab/gh-tp/cmd.BuiltBy=yoMomma!"
 
 # vim: tabstop=2 shiftwidth=2 softtabstop=2 expandtab:
