@@ -44,11 +44,15 @@ import (
 )
 
 var (
+	bin         string
+	binary      string
+	binaries    []string
 	cfgFile     string
 	out         io.Reader
 	flagNoColor bool
 	mdParam     string
-	planMd      string
+	planBody    *md.Markdown
+	planMd      *os.File
 	planPath    string
 	planStr     string
 	sb          strings.Builder
@@ -99,7 +103,30 @@ var rootCmd = &cobra.Command{
 	Long:    `tp is a GitHub CLI extension to submit a pull request with Terraform or Tofu plan output formatted in GitHub Flavored Markdown.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		binary := viper.GetString("binary")
+		b := viper.IsSet("binary")
+		if b {
+			binary = viper.GetString("binary")
+		} else {
+			exists := []string{}
+			binaries = []string{"tofu", "terraform"}
+			for _, v := range binaries {
+				bin, err := safeexec.LookPath(v)
+				if err != nil {
+					if Verbose {
+						log.Printf("%s", err)
+					}
+				}
+				// It's possible for both `tofu` and `terraform` to exist on $PATH and we need to handle that.
+				if len(bin) > 0 {
+					exists = append(exists, bin)
+				}
+			}
+			if len(exists) == len(binaries) {
+				log.Fatal(bold(red("Ooops! ")), "Seems both `tofu` and `terraform` exist in your $PATH. We're not sure which one to use. Please set the 'binary' parameter in your .tp.toml config file to whichever binary you want to use.")
+			}
+			//cmd.Help()
+			//fmt.Println("foo")
+		}
 
 		// the arg received looks like a file, we try to open it
 		if len(args) == 0 {
@@ -134,15 +161,17 @@ var rootCmd = &cobra.Command{
 			files := checkFilesByExtension(workingDir, exts)
 			// we check to see if there are tf or tofu files in the current working directory. If not, we don't call tf.plan
 			if files {
-				// terraform plan -out plan.out -no-color
+				// terraform plan -out plan.out -noColor
 				_, err := tf.Plan(context.Background(), planOpts...)
 				if err != nil {
 					// binary defined. .tf or .tofu files exist. Still errors. Show me the error
 					log.Println(bold(red("Terraform returned the following error: ")), err)
 					// Edge case exists where we detect .tofu file but terraform was called, which doesn't support .tofu files. tf.Plan returns error.
-					if binary == "terraform" {
-						log.Printf("Detected `*.tofu` files, but you've defined %s as your binary in your .tp.toml config file.", binary)
-					}
+					// BUG: There is a condition that exists where .tofu files exist, but terraform is the binary, this error will occur. But we're not checking _explicitly_ for either .tf or .tofu in files above.
+					// So .tf files _could_ exist, but tf.Plan could fail for some reason not related to Terraform not finding any .tf files, making this error inaccurate. Could be nice to identify and handle this edge case, but Terraform/Tofu do it good enough for now.
+					// if binary == "terraform" {
+					// 	log.Printf("Detected `*.tofu` files, but you've defined %s as the binary to use in your .tp.toml config file. Terraform does not support `.tofu` files.", binary)
+					// }
 					// We need to exit on this error. tf.Plan actually returns status 1 -- maybe some day we can intercept it or have awareness that it was returned.
 					os.Exit(1)
 				}
@@ -157,9 +186,9 @@ var rootCmd = &cobra.Command{
 				}
 
 				//fmt.Printf("plan output: %s", planStr)
-				mdParam := viper.GetString("mdFile")
+				mdParam = viper.GetString("mdFile")
 
-				planMd, err := os.Create(mdParam)
+				planMd, err = os.Create(mdParam)
 				if err != nil {
 					log.Fatalf("failed to create Markdown: %s", err)
 				}
@@ -167,7 +196,7 @@ var rootCmd = &cobra.Command{
 				defer planMd.Close()
 
 				// This has the plan wrapped in a code block in Markdown
-				planBody := md.NewMarkdown(os.Stdout).CodeBlocks(md.SyntaxHighlight(SyntaxHighlightTerraform), planStr)
+				planBody = md.NewMarkdown(os.Stdout).CodeBlocks(md.SyntaxHighlight(SyntaxHighlightTerraform), planStr)
 				if err != nil {
 					log.Fatalf("error generating plan Markdown: %s", err)
 				}
@@ -317,29 +346,36 @@ func initConfig() {
 			os.Exit(1)
 		} else if _, ok := err.(viper.UnsupportedConfigError); ok {
 			log.Fatalf("Unsupported Format. Config file should be named .tp %s", err)
+			// This handles the situation where a duplicate key exists.
+		} else if _, ok := err.(viper.ConfigParseError); ok {
+			log.Fatalf("There is an issue with parsing your config file, the error is error: %s", err)
 		}
-		if Verbose {
-			fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
-		}
+		//if Verbose {
+		//fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+		//}
+		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
-	flagNoColor = viper.GetBool("no-color")
+	flagNoColor = viper.GetBool("noColor")
 	if flagNoColor {
 		color.NoColor = true // disables colorized output
 	}
-
+	if Verbose {
+		keys := viper.AllKeys()
+		log.Println(keys)
+	}
 	// Validate that required 'binary' parameter is set
 	b := viper.IsSet("binary")
 	if !b {
-		log.Fatal(bold(red("Attention! Missing Parameter: "), bold("'binary':"), " (type: string) is not defined in the config file. The value of the binary parameter should be either 'tofu' or 'terraform'. This binary is expected to exist on your $PATH.\n"))
+		log.Print(bold(red("Attention! Missing Parameter: "), bold("'binary':"), " (type: string) is not defined in the config file. The value of the binary parameter should be either 'tofu' or 'terraform'. This binary is expected to exist on your $PATH.\n"))
 	}
 
-	// Check to see if required 'planFile' parameter is set
+	// // Check to see if required 'planFile' parameter is set
 	o := viper.IsSet("planFile")
 	if !o {
 		log.Fatal(bold(red("Attention! Missing Parameter: "), bold("'planFile':"), " (type: string) is not defined in the config file. This is the name of the plan's output file that will be created by `gh tp`.\n"))
 	}
 
-	// Check to see if required 'mdFile' parameter is set
+	// // Check to see if required 'mdFile' parameter is set
 	m := viper.IsSet("mdFile")
 	if !m {
 		log.Fatal(bold(red("Attention! Missing Parameter: "), bold("'mdFile':"), " (type: string) is not defined in the config file. This is the name of the Markdown file that will be created by `gh tp`.\n"))

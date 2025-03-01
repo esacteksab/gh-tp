@@ -11,14 +11,14 @@ gh ext install esacteksab/gh-tp
 
 ### `.tp.toml` config file
 
-I didn't want to make assumptions about your system, so `tp` does not define any default values today. `tp` uses a config file named `.tp.toml`. This config file is written in [TOML](https://toml.io/). TOML is case-sensitive and keys are [mixedCase or camelCase](https://en.wikipedia.org/wiki/Camel_case). It has 3 required parameters with one optional parameter. It can exist in your home directory or in the root of your project from where you will execute `gh tp` from. A annotated copy exists in the [example](./example) directory. **_The config file, the parameters and possibly the presence of default values is actively being worked on. This behavior may change in a future release._**
+I wanted to make as few assumptions about your environment as possible, so `tp` does not define any default values today. `tp` uses a config file named `.tp.toml`. This config file is written in [TOML](https://toml.io/). TOML is case-sensitive and keys are [mixedCase or camelCase](https://en.wikipedia.org/wiki/Camel_case) where applicable. It has 2 required parameters with two optional parameters. The config file is expected to exist in either your home directory or in the root of your project from where you will execute `gh tp` from. A annotated copy exists in the [example](./example) directory. **_The config file, the parameters and possibly the presence of default values is actively being worked on. This behavior may change in a future release._**
 
 | Parameter | Type   | Required | Description                                                                                                            |
 | --------- | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------- |
-| binary    | string | Y        | Expected to either be `tofu` or `terraform`. It is expected to be in your $PATH. _Default: `""`_ |
+| binary    | string | N        | We look on your `$PATH` for `tofu` or `terraform`, if both exist, you _must_ define _one_ in your config. _Default: `undefined`_ |
 | planFile  | string | Y        | The name of the plan's output file created by `gh tp`. _Default: `""`_                                                                      |
 | mdFile    | string | Y        | The name of the Markdown file created by `gh tp`. _Default: `""`_                                                                         |
-| no-color  | bool   | N        | If `true`, `gh tp` will emit no color on the terminal. _Default: `undefined`_                                                 |
+| noColor  | bool   | N        | If `true`, `gh tp` will emit no color on the terminal. _Default: `undefined`_                                                 |
 
 ### Using `tp`
 
@@ -29,7 +29,7 @@ gh tp
 Using config file: /Users/tempuser/.tp.toml
 ```
 
-Two files will be created, the first an output file named, what you defined for the value of `planfile` in `.tp` config and a Markdown file named what you defined for the value of the parameter `mdfile` in the `.tp` config file. 
+Two files will be created, the first an output file named, what you defined for the value of `planFile` in `.tp` config and a Markdown file named what you defined for the value of the parameter `mdFile` in the `.tp` config file. 
 
 ```bash
 ls |grep plan
@@ -70,7 +70,7 @@ If you're targeting a resource, you can still create markdown from that plan's o
 terraform plan -out plan.out -no-color  | gh tp -
 ```
 
-Like with `gh tp` two files will exist. The first being whatever you passed to `-out` for the file name in the above example (`plan.out` in the example above) and the Markdown file named whatever you defined as the value for the `mdfile` parameter in the `.tp` config file. `tp` does not create an additional plan having been passed the plan from `stdin`.
+Like with `gh tp` two files will exist. The first being whatever you passed to `-out` for the file name in the above example (`plan.out` in the example above) and the Markdown file named whatever you defined as the value for the `mdFile` parameter in the `.tp` config file. `tp` does not create an additional plan having been passed the plan from `stdin`.
 
 <!--`tp` also supports command-line flags as well as source environment variables. More [below](#disclaimer)-->
 
