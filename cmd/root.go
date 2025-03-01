@@ -39,6 +39,8 @@ import (
 	md "github.com/nao1215/markdown"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 var (
@@ -137,7 +139,11 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					// binary defined. .tf or .tofu files exist. Still errors. Show me the error
 					log.Println(bold(red("Terraform returned the following error: ")), err)
-					// We need to exist on this error. tf.Plan actually returns status 1 -- maybe some day we can intercept it or have awareness that it was returned.
+					// Edge case exists where we detect .tofu file but terraform was called, which doesn't support .tofu files. tf.Plan returns error.
+					if binary == "terraform" {
+						log.Printf("Detected `*.tofu` files, but you've defined %s as your binary in your .tp.toml config file.", binary)
+					}
+					// We need to exit on this error. tf.Plan actually returns status 1 -- maybe some day we can intercept it or have awareness that it was returned.
 					os.Exit(1)
 				}
 
@@ -175,6 +181,22 @@ var rootCmd = &cobra.Command{
 				// This is what creates the final document (`mdoutfile`) plmd here could possibly be os.Stdout one day
 				md.NewMarkdown(planMd).Details("Terraform Plan", sbPlan).Build()
 
+				// Checking to see if plan file was created.
+				if _, err := os.Stat(planPath); err == nil {
+					log.Printf("Plan file %s was created.", planPath)
+
+				} else if errors.Is(err, os.ErrNotExist) {
+
+					// Apparently the binary exists, tf.Plan shit the bed and didn't tell us.
+					log.Fatalf("Plan file %s was not created.", planPath)
+
+				} else {
+
+					// I'm only human. NFC how you got here. I hope to never have to find out.
+					log.Printf("If you see this error message, please open a bug. Error Code: TPE002. Error: %s", err)
+				}
+
+				// Checking to see if Markdown file was created.
 				if _, err := os.Stat(mdParam); err == nil {
 					log.Printf("Markdown file %s was created.", mdParam)
 
@@ -188,21 +210,8 @@ var rootCmd = &cobra.Command{
 					// I'm only human. NFC how you got here. I hope to never have to find out.
 					log.Printf("If you see this error message, please open a bug. Error Code: TPE003. Error: %s", err)
 				}
-			}
-
-			// Checking to see if plan file was created.
-			if _, err := os.Stat(planPath); err == nil {
-				log.Printf("Plan file %s was created.", planPath)
-
-			} else if errors.Is(err, os.ErrNotExist) {
-
-				// Apparently the binary exists, tf.Plan shit the bed and didn't tell us.
-				log.Fatalf("Plan file %s was not created.", planPath)
-
 			} else {
-
-				// I'm only human. NFC how you got here. I hope to never have to find out.
-				log.Printf("If you see this error message, please open a bug. Error Code: TPE002. Error: %s", err)
+				log.Fatalf("No %s files found. Please run this in a directory with %s files present.", cases.Title(language.English).String(binary), cases.Title(language.English).String(binary))
 			}
 
 		} else if args[0] == "-" {
