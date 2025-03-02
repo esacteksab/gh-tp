@@ -1,0 +1,35 @@
+{
+    "cSpell.words": [
+        "charmbracelet",
+        "CODEOWNERS",
+        "Debugf",
+        "dupl",
+        "errcheck",
+        "esacteksab",
+        "funlen",
+        "gocyclo",
+        "godox",
+        "gofumpt",
+        "goheader",
+        "goimports",
+        "gosec",
+        "gosimple",
+        "ineffassign",
+        "Infof",
+        "makezero",
+        "mderr",
+        "mdoutfile",
+        "nolintlint",
+        "perfsprint",
+        "plmd",
+        "safeexec",
+        "staticcheck",
+        "stylecheck",
+        "tfexec"
+    ],
+    "cSpell.enabledFileTypes": {
+        "makefile": false,
+        "yaml": false,
+        "mod": false
+    }
+}
