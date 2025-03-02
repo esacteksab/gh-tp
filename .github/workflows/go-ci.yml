@@ -1,9 +1,11 @@
-name: Tools - Check
+name: Go - Audit
 
 on:
   pull_request:
     branches:
         - "main"
+  push:
+    branches: ["*"]
 
 permissions:
     contents: read
@@ -21,11 +23,9 @@ jobs:
           go-version-file: "go.mod"
           cache: true
 
-      - name: Install GoReleaser
-        uses: goreleaser/goreleaser-action@90a3faa9d0182683851fbfa97ca1a2cb983bfca3 #v6.2.1
-        with:
-          distribution: goreleaser
-          install-only: true
-
-      - name: Check GoReleaser
-        run: goreleaser check
+      - name: Go Audit
+        run: |
+          go get -modfile=go.tool.mod tool
+          go vet ./...
+          go tool -modfile=go.tool.mod staticcheck ./...
+          go tool -modfile=go.tool.mod govulncheck ./...
