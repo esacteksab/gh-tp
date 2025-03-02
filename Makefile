@@ -5,6 +5,14 @@ SHELL := bash
 .DELETE_ON_ERROR:
 .SUFFIXES:
 
+.PHONY: audit
+audit:
+	go vet ./...
+	go tool -modfile=go.tool.mod staticcheck ./...
+	go tool -modfile=go.tool.mod govulncheck ./...
+	golangci-lint run -v
+# docker run -t --rm -v $(pwd):/app -w /app golangci/golangci-lint:v1.64.5 golangci-lint run -v
+
 .PHONY: clean
 clean:
 ifneq (,$(wildcard ./plan.md))
@@ -23,6 +31,12 @@ ifneq (,$(wildcard ./*.tofu))
 	rm *.tofu
 endif
 
+	rm -rf dist
+	rm -f coverage.*
+	# rm -f '"$(shell go env GOCACHE)/../golangci-lint"'
+	# go clean -i -cache -testcache -modcache -fuzzcache -x
+
+
 .PHONY: build
 build:
 
@@ -34,10 +48,18 @@ ifneq (,$(wildcard ./plan.out))
 	rm plan.out
 endif
 
-	scripts/build-dev.sh
+	# scripts/build-dev.sh
+	goreleaser build --clean --single-target --snapshot
+	cp dist/gh-tp_linux_amd64_v1/gh-tp .
 
 	gh ext remove tp
 
 	gh ext install .
 
 	-gh tp
+
+
+
+.PHONY: mod
+mod:
+	go mod tidy
