@@ -61,7 +61,7 @@ repository:
 labels:
   - name: 'topic: UX'
     color: '#99cc99'
-  - name: 'topic: UI' 
+  - name: 'topic: UI'
     color: '#FFC0CB'
     description: 'Aesthetics 💅'
   - name: question
