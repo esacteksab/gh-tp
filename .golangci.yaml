@@ -15,11 +15,9 @@ linters:
     - grouper
     - ineffassign
     - makezero
-    - misspell
     - mnd
     - nolintlint
     - perfsprint
-    - staticcheck
     - stylecheck
     - unused
     - whitespace
@@ -39,5 +37,3 @@ linters-settings:
     template: "SPDX-License-Identifier: MIT"
   goimports:
     local-prefixes: github.com/esacteksab/gh-tp
-  misspell:
-    locale: US
