@@ -4,12 +4,17 @@ on:
   pull_request:
     branches:
         - "main"
+    paths:
+      - '*.go'
+      - '*.mod'
+      - '*.sum'
+      - '.goreleaser.yaml'
 
 permissions:
     contents: read
 
 jobs:
-  goreleaser:
+  tools:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
