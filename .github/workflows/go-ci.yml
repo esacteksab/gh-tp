@@ -4,8 +4,16 @@ on:
   pull_request:
     branches:
         - "main"
+    paths:
+      - '*.go'
+      - '*.mod'
+      - '*.sum'
   push:
     branches: ["*"]
+    paths:
+      - '*.go'
+      - '*.mod'
+      - '*.sum'
 
 permissions:
     contents: read
