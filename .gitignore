@@ -36,7 +36,7 @@ go.work.sum
 # sometimes there is other stuff in here
 .vscode/*
 # But this file could be helpful to others
-!.vscode/settings.json 
+!.vscode/settings.json
 
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test

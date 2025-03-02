@@ -21,7 +21,7 @@ changelog:
         - "type: fix"
         - "type: bug"
         - "type: refactor"
-        
+
     - title: ":nail_polish: Style, UI, UX"
       labels:
         - "type: UX"

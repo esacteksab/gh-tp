@@ -1,9 +1,12 @@
- ## First time running `gh tp`
- 
- ```bash
+<!-- markdownlint-disable MD033 -->
+
+## First time running `gh tp`
+
+```bash
 gh tp
 2025/03/01 12:35:20 Attention! Missing Config File: Config file should be named .tp.toml and exist in your home directory or in your project's root.
 ```
+
 Let's grab our example config file and run `gh tp` again:
 
 ```bash
@@ -12,18 +15,16 @@ gh tp
 2025/03/01 12:36:26 Plan file plan.out was created.
 2025/03/01 12:36:26 Markdown file plan.md was created.
 ```
+
 > [!NOTE]
->
 > On projects with a large amount of resources, creating the plan can take some time. Currently `tp` does not provided feedback that it's doing anything. This might create the situation where you're wondering if it is doing anything, and contemplate pressing `CTRL-C`. Providing this awareness that things are happening is being tracked in this issue [Feat: Is it Doing Anything?](https://github.com/esacteksab/gh-tp/issues/20).
 
+### We can view the plan like so
 
-### We can view the plan like so:
-
-
-  
 ```bash
 terraform show plan.out
 ```
+
 <details>
 
 ```terraform
@@ -93,6 +94,7 @@ Terraform will perform the following actions:
 
 Plan: 5 to add, 0 to change, 0 to destroy.
 ```
+
 </details>
 
 And we can verify the `plan.md` matches our output above :
@@ -101,7 +103,7 @@ And we can verify the `plan.md` matches our output above :
 cat plan.md
 ```
 
-```md
+````md
 <details><summary>Terraform Plan</summary>
 
   ```terraform
@@ -175,9 +177,9 @@ cat plan.md
   \```
 
   </details>
-```
+````
 
-### We can then apply our Terraform:
+### We can then apply our Terraform
 
 ```terraform
 terraform apply plan.out
@@ -209,19 +211,19 @@ We can verify that our Markdown contains as much:
 cat plan.md
 ```
 
-```md
- 
+````md
+
    <details><summary>Terraform Plan</summary>
 
    ```terraform
-   
+
    No Changes. Your Infrastructure matches the configuration.
-   
+
    \```
 
    </details>
 
-```
+````
 
 > [!NOTE]
 > The `\` above exists to escape the code fences. That _does not_ exist in `gh tp` output. It purely exists for this presentation. If you haven't already seen it, view the sample markdown [example PR](./EXAMPLE-PR.md) to see a file created by `gh tp`.

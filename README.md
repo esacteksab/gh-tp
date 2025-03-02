@@ -13,11 +13,11 @@ gh ext install esacteksab/gh-tp
 
 I wanted to make as few assumptions about your environment as possible, so `tp` does not define any default values today. `tp` uses a config file named `.tp.toml`. This config file is written in [TOML](https://toml.io/). TOML is case-sensitive and keys are [mixedCase or camelCase](https://en.wikipedia.org/wiki/Camel_case) where applicable. It has 2 required parameters with one optional parameters. The config file is expected to exist in either your home directory or in the root of your project from where you will execute `gh tp` from. A annotated copy exists in the [example](./example) directory. **_The config file, the parameters and possibly the presence of default values is actively being worked on. This behavior may change in a future release._**
 
-| Parameter | Type   | Required | Description                                                                                                            |
-| --------- | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Parameter | Type   | Required | Description                                                                                                                      |
+| --------- | ------ | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | binary    | string | N        | We look on your `$PATH` for `tofu` or `terraform`, if both exist, you _must_ define _one_ in your config. _Default: `undefined`_ |
-| planFile  | string | Y        | The name of the plan's output file created by `gh tp`. _Default: `""`_                                                                      |
-| mdFile    | string | Y        | The name of the Markdown file created by `gh tp`. _Default: `""`_                                                                         |
+| planFile  | string | Y        | The name of the plan's output file created by `gh tp`. _Default: `""`_                                                           |
+| mdFile    | string | Y        | The name of the Markdown file created by `gh tp`. _Default: `""`_                                                                |
 
 ### Using `tp`
 
@@ -28,7 +28,7 @@ gh tp
 Using config file: /Users/tempuser/.tp.toml
 ```
 
-Two files will be created, the first an output file named, what you defined for the value of `planFile` in `.tp` config and a Markdown file named what you defined for the value of the parameter `mdFile` in the `.tp` config file. 
+Two files will be created, the first an output file named, what you defined for the value of `planFile` in `.tp` config and a Markdown file named what you defined for the value of the parameter `mdFile` in the `.tp` config file.
 
 ```bash
 ls |grep plan
@@ -55,7 +55,6 @@ https://github.com/org/repo/pull/42
 
 ### View Pull Request in Browser with `gh`
 
-
 ```bash
 gh pr view -w
 Opening https://github.com/org/repo/pull/42 in your browser.
@@ -71,7 +70,6 @@ terraform plan -out plan.out -no-color  | gh tp -
 
 Like with `gh tp` two files will exist. The first being whatever you passed to `-out` for the file name in the above example (`plan.out` in the example above) and the Markdown file named whatever you defined as the value for the `mdFile` parameter in the `.tp` config file. `tp` does not create an additional plan having been passed the plan from `stdin`.
 
-
 ### Extended Example
 
 The above example is intended to be just enough to get you started. If you'd like to see an example representative of a more real-world use case, one exists in the [example](./example/) directory. A note though, I've been unable to figure out how to put Markdown with code fences inside Markdown code fences. So the formatting on that example exists purely out of a need to handle the situation where I output Markdown and I'm trying to put it inside code fences. I hope you understand and I hope I can come up with a solution long-term to better display the output of `tp`.
@@ -79,9 +77,9 @@ The above example is intended to be just enough to get you started. If you'd lik
 ### Disable Terminal Colors
 
 > [!TIP]
->
 > To disable color output in the terminal, set the environment variable `NO_COLOR` to `true`
 
+<!-- markdownlint-disable-line MD028 -->
 
 > [!WARNING]
 > **_Pre 1.0.0 Alert_**. This is a new extension and as a result, the API isn't set yet. There have been two prototypes so far. The experiences from both have shaped what exists today, but there is still quite a bit left to do. So as I continue down the path of figuring things out, things are almost certainly going to change. **_Expect_** breaking changes in the early releases. I will _strive_ not to publish broken builds and will lean into Semver to identify `alpha`, `beta` and pre-releases.
@@ -94,7 +92,7 @@ I write _a lot_ of Terraform daily and a part of that process includes submittin
 
 ## What tp isn't
 
-I feel like I'm in this _weird_ space. I programmatically run a `terraform plan -out plan.out --no-color` but Terraform _already_ does that. And it's not my intent to create a wrapper around an existing tool, especially one like Terraform. I also programmatically do a `gh pr create -t $title -F file.md`, but `gh` _already_ does that. So while I find my fit in the space, I felt it was important to call out what I'm not going to do. Today, it's not uncommon for me to have to do a `-target` to plan/apply around something. `tp` doesn't natively support passing arguements to Terraform. And I don't think I want it to. So in the example of not being able to pass the `-target` argument, but still desiring to create the formatted Markdown and the subsequent pull request, `tp` can read from `stdin` so today you can run `terraform plan -target resource.name -out plan.out | gh tp -` and `tp` will create the Markdown with your plan's output.
+I feel like I'm in this _weird_ space. I programmatically run a `terraform plan -out plan.out --no-color` but Terraform _already_ does that. And it's not my intent to create a wrapper around an existing tool, especially one like Terraform. I also programmatically do a `gh pr create -t $title -F file.md`, but `gh` _already_ does that. So while I find my fit in the space, I felt it was important to call out what I'm not going to do. Today, it's not uncommon for me to have to do a `-target` to plan/apply around something. `tp` doesn't natively support passing arguments to Terraform. And I don't think I want it to. So in the example of not being able to pass the `-target` argument, but still desiring to create the formatted Markdown and the subsequent pull request, `tp` can read from `stdin` so today you can run `terraform plan -target resource.name -out plan.out | gh tp -` and `tp` will create the Markdown with your plan's output.
 
 <!--## Contribute
 

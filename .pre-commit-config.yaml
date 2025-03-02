@@ -1,0 +1,80 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        name: "Trailing Whitespace"
+        args:
+          - --markdown-linebreak-ext=md
+      - id: end-of-file-fixer
+        name: "EOF Fixer"
+      - id: check-json
+        name: "Check JSON"
+      - id: check-yaml
+        name: "Check YAML"
+      - id: check-merge-conflict
+        name: "Check Merge Conflicts"
+
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.31.1
+    hooks:
+      - id: check-github-workflows
+      - id: check-jsonschema
+        name: "Validate Pre-Commit"
+        files: ^\.pre-commit-config.yaml+$
+        types:
+          - yaml
+        args: ["--schemafile", "https://json.schemastore.org/pre-commit-config.json"]
+      - id: check-jsonschema
+        name: "Validate MarkdownLint"
+        files: ^\.markdownlint.yml+$
+        types:
+          - yaml
+        args: ["--schemafile", "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json"]
+      - id: check-jsonschema
+        names: "Validate golangci-lint config"
+        files: ^\.golangci.yaml+$
+        types:
+          - yaml
+        args: ["--schemafile", "https://golangci-lint.run/jsonschema/golangci.jsonschema.json"]
+      - id: check-jsonschema
+        names: "Validate goreleaser config"
+        files: ^\.goreleaser.yaml+$
+        types:
+          - yaml
+        args: ["--schemafile", "https://goreleaser.com/static/schema.json"]
+
+  - repo: https://github.com/golangci/golangci-lint
+    rev: v1.64.5
+    hooks:
+      - id: golangci-lint-full
+        name: "GolangCI Lint Full"
+
+  - repo: https://github.com/hukkin/mdformat
+    rev: 0.7.22
+    hooks:
+      - id: mdformat
+        name: "Markdown Formatter"
+        additional_dependencies:
+          - mdformat-gfm
+          - mdformat-toc
+          - mdformat-gfm-alerts
+          - mdformat-tables
+          - mdformat-footnote
+  
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.4
+    hooks:
+      - id: codespell
+
+  -   repo: https://github.com/shellcheck-py/shellcheck-py
+      rev: v0.10.0.1
+      hooks:
+      - id: shellcheck
+        name: "Shell Check"
+
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.17.2
+    hooks:
+      - id: markdownlint-cli2
+        name: "Markdown Lint"
