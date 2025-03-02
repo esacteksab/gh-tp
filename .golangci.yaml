@@ -1,0 +1,43 @@
+# Influenced from https://github.com/golang-templates/seed/blob/main/.golangci.yml
+# Along with official docs https://golangci-lint.run/usage/linters/
+linters:
+  enable:
+    - dupl
+    - errcheck
+    - gocyclo
+    - godox
+    - gofumpt
+    - goheader
+    - goimports
+    - gosimple
+    - govet
+    - gosec
+    - grouper
+    - ineffassign
+    - makezero
+    - misspell
+    - mnd
+    - nolintlint
+    - perfsprint
+    - staticcheck
+    - stylecheck
+    - unused
+    - whitespace
+  
+linters-settings:
+  dupl:
+    threshold: 100
+  funlen:
+    lines: 100
+    statements: 50
+    ignore-comments: true
+  gocyclo:
+    min-complexity: 15
+  gofumpt:
+    extra-rules: true
+  goheader:
+    template: "SPDX-License-Identifier: MIT"
+  goimports:
+    local-prefixes: github.com/esacteksab/gh-tp
+  misspell:
+    locale: US
