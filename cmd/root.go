@@ -43,25 +43,24 @@ import (
 )
 
 var (
-	binary      string
-	binaries    []string
-	cfgFile     string
-	out         io.Reader
-	flagNoColor bool
-	mdParam     string
-	planBody    *md.Markdown
-	planMd      *os.File
-	planPath    string
-	planStr     string
-	sb          strings.Builder
-	sbPlan      string
-	Verbose     bool
-	Version     string
-	Date        string
-	Commit      string
-	BuiltBy     string
-	exts        []string
-	workingDir  string
+	binary     string
+	binaries   []string
+	cfgFile    string
+	out        io.Reader
+	mdParam    string
+	planBody   *md.Markdown
+	planMd     *os.File
+	planPath   string
+	planStr    string
+	sb         strings.Builder
+	sbPlan     string
+	Verbose    bool
+	Version    string
+	Date       string
+	Commit     string
+	BuiltBy    string
+	exts       []string
+	workingDir string
 )
 
 type SyntaxHighlight string
@@ -299,9 +298,6 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().BoolVar(&flagNoColor, "no-color", false, "If true, colorized output will be disabled.")
-	viper.BindPFlag("no-color", rootCmd.PersistentFlags().Lookup("no-color"))
-
 	rootCmd.Flags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.tp.toml, can also exist in your project's root directory.)")
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -344,12 +340,6 @@ func initConfig() {
 
 	keys := viper.AllKeys()
 	log.Debug(keys)
-	// Validate that required 'binary' parameter is set
-	b := viper.IsSet("binary")
-	if !b {
-		log.Error("Missing Parameter: 'binary' (type: string) is not defined in the config file. The value of the binary parameter should be either 'tofu' or 'terraform'. This binary is expected to exist on your $PATH.\n")
-		os.Exit(1)
-	}
 
 	// // Check to see if required 'planFile' parameter is set
 	o := viper.IsSet("planFile")
