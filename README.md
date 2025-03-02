@@ -11,11 +11,11 @@ gh ext install esacteksab/gh-tp
 
 ### `.tp.toml` config file
 
-I wanted to make as few assumptions about your environment as possible, so `tp` does not define any default values today. `tp` uses a config file named `.tp.toml`. This config file is written in [TOML](https://toml.io/). TOML is case-sensitive and keys are [mixedCase or camelCase](https://en.wikipedia.org/wiki/Camel_case) where applicable. It has 2 required parameters with one optional parameters. The config file is expected to exist in either your home directory or in the root of your project from where you will execute `gh tp` from. A annotated copy exists in the [example](./example) directory. **_The config file, the parameters and possibly the presence of default values is actively being worked on. This behavior may change in a future release._**
+I wanted to make as few assumptions about your environment as possible, so `tp` does not define any default values today. `tp` uses a config file named `.tp.toml`. This config file is written in [TOML](https://toml.io/). TOML is case-sensitive and keys are [mixedCase or camelCase](https://en.wikipedia.org/wiki/Camel_case) where applicable. It has 2 required parameters with one optional parameter. The config file is expected to exist in either your home directory or in the root of your project from where you will execute `gh tp` from. A annotated copy exists in the [example](./example) directory. **_The config file, the parameters and possibly the presence of default values is actively being worked on. This behavior may change in a future release._**
 
 | Parameter | Type   | Required | Description                                                                                                                      |
 | --------- | ------ | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| binary    | string | N        | We look on your `$PATH` for `tofu` or `terraform`, if both exist, you _must_ define _one_ in your config. _Default: `undefined`_ |
+| binary    | string | N[^3]    | We look on your `$PATH` for `tofu` or `terraform`, if both exist, you _must_ define _one_ in your config. _Default: `undefined`_ |
 | planFile  | string | Y        | The name of the plan's output file created by `gh tp`. _Default: `""`_                                                           |
 | mdFile    | string | Y        | The name of the Markdown file created by `gh tp`. _Default: `""`_                                                                |
 
@@ -106,3 +106,5 @@ I feel like I'm in this _weird_ space. I programmatically run a `terraform plan 
 [^1]: https://opentofu.org/docs/cli/commands/plan/#other-options <!-- markdownlint-disable-line MD034 -->
 
 [^2]: https://developer.hashicorp.com/terraform/cli/commands/plan#out-filename <!-- markdownlint-disable-line MD034 -->
+
+[^3]: This isn't a required parameter, but if both `tofu` and `terraform` exist on your `$PATH`, then it is required and you must specify one.
