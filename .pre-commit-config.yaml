@@ -32,23 +32,44 @@ repos:
           - yaml
         args: ["--schemafile", "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json"]
       - id: check-jsonschema
-        names: "Validate golangci-lint config"
+        name: "Validate golangci-lint config"
         files: ^\.golangci.yaml+$
         types:
           - yaml
         args: ["--schemafile", "https://golangci-lint.run/jsonschema/golangci.jsonschema.json"]
       - id: check-jsonschema
-        names: "Validate goreleaser config"
+        name: "Validate goreleaser config"
         files: ^\.goreleaser.yaml+$
         types:
           - yaml
         args: ["--schemafile", "https://goreleaser.com/static/schema.json"]
 
-  - repo: https://github.com/golangci/golangci-lint
-    rev: v1.64.5
+  - repo: local
     hooks:
       - id: golangci-lint-full
-        name: "GolangCI Lint Full"
+        name: "Golanglint Full"
+        description: Fast linters runner for Go. Runs on all files in the repo. Use this hook if you use pre-commit in CI.
+        entry: golangci-lint run -v
+        types: [go]
+        language: golang
+        require_serial: true
+        pass_filenames: false
+
+  - repo: local
+    hooks:
+      - id: make-tidy
+        name: "Make Tidy"
+        entry: "make mod"
+        language: system
+        pass_filenames: false
+
+  - repo: local
+    hooks:
+      - id: make-audit
+        name: "Make Audit"
+        entry: "make audit"
+        language: system
+        pass_filenames: false
 
   - repo: https://github.com/hukkin/mdformat
     rev: 0.7.22
@@ -61,11 +82,12 @@ repos:
           - mdformat-gfm-alerts
           - mdformat-tables
           - mdformat-footnote
-  
+
   - repo: https://github.com/codespell-project/codespell
     rev: v2.2.4
     hooks:
       - id: codespell
+        name: "Code Spell"
 
   -   repo: https://github.com/shellcheck-py/shellcheck-py
       rev: v0.10.0.1
