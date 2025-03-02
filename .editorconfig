@@ -38,6 +38,10 @@ indent_style = space
 indent_style = space
 indent_size = 2
 
+[*.yml]
+indent_style = space
+indent_size = 2
+
 # https://google.github.io/styleguide/shellguide.html#formatting
 [*.sh]
 indent_style = space
