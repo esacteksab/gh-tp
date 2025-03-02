@@ -11,14 +11,13 @@ gh ext install esacteksab/gh-tp
 
 ### `.tp.toml` config file
 
-I wanted to make as few assumptions about your environment as possible, so `tp` does not define any default values today. `tp` uses a config file named `.tp.toml`. This config file is written in [TOML](https://toml.io/). TOML is case-sensitive and keys are [mixedCase or camelCase](https://en.wikipedia.org/wiki/Camel_case) where applicable. It has 2 required parameters with two optional parameters. The config file is expected to exist in either your home directory or in the root of your project from where you will execute `gh tp` from. A annotated copy exists in the [example](./example) directory. **_The config file, the parameters and possibly the presence of default values is actively being worked on. This behavior may change in a future release._**
+I wanted to make as few assumptions about your environment as possible, so `tp` does not define any default values today. `tp` uses a config file named `.tp.toml`. This config file is written in [TOML](https://toml.io/). TOML is case-sensitive and keys are [mixedCase or camelCase](https://en.wikipedia.org/wiki/Camel_case) where applicable. It has 2 required parameters with one optional parameters. The config file is expected to exist in either your home directory or in the root of your project from where you will execute `gh tp` from. A annotated copy exists in the [example](./example) directory. **_The config file, the parameters and possibly the presence of default values is actively being worked on. This behavior may change in a future release._**
 
 | Parameter | Type   | Required | Description                                                                                                            |
 | --------- | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------- |
 | binary    | string | N        | We look on your `$PATH` for `tofu` or `terraform`, if both exist, you _must_ define _one_ in your config. _Default: `undefined`_ |
 | planFile  | string | Y        | The name of the plan's output file created by `gh tp`. _Default: `""`_                                                                      |
 | mdFile    | string | Y        | The name of the Markdown file created by `gh tp`. _Default: `""`_                                                                         |
-| noColor  | bool   | N        | If `true`, `gh tp` will emit no color on the terminal. _Default: `undefined`_                                                 |
 
 ### Using `tp`
 
@@ -77,7 +76,12 @@ Like with `gh tp` two files will exist. The first being whatever you passed to `
 
 The above example is intended to be just enough to get you started. If you'd like to see an example representative of a more real-world use case, one exists in the [example](./example/) directory. A note though, I've been unable to figure out how to put Markdown with code fences inside Markdown code fences. So the formatting on that example exists purely out of a need to handle the situation where I output Markdown and I'm trying to put it inside code fences. I hope you understand and I hope I can come up with a solution long-term to better display the output of `tp`.
 
-<!--`tp` also supports command-line flags as well as source environment variables. More [below](#disclaimer)-->
+### Disable Terminal Colors
+
+> [!TIP]
+>
+> To disable color output in the terminal, set the environment variable `NO_COLOR` to `true`
+
 
 > [!WARNING]
 > **_Pre 1.0.0 Alert_**. This is a new extension and as a result, the API isn't set yet. There have been two prototypes so far. The experiences from both have shaped what exists today, but there is still quite a bit left to do. So as I continue down the path of figuring things out, things are almost certainly going to change. **_Expect_** breaking changes in the early releases. I will _strive_ not to publish broken builds and will lean into Semver to identify `alpha`, `beta` and pre-releases.
@@ -100,8 +104,6 @@ I feel like I'm in this _weird_ space. I programmatically run a `terraform plan 
 
 > [!NOTE]
 > This is a personal project that was born out of need and want to automate the repetitive task out of my life. `tp` is in no way affiliated with or associated with Terraform, HashiCorp, OpenTofu or any entities official or unofficial. The views expressed here are my own and don't reflect any past, current or future employer.
-
-<!--I'm left feeling like "Create the targeted plan with Terraform and let `tp` do the rest! While doing early prototyping, leaning into HashiCorp's example of how to use the `terraform-exec` library, I had in a `tf.Init` and while iterating, I kept doing an init and it kept downloading providers. I'm pretty certain I got rate-limited by the registry. So do I allow a `-i --init` to be passed so folks can do it when they need to or do I jump back on the side of "Have Terraform do the init, come back to `tp` when you're ready!"?-->
 
 [^1]: https://opentofu.org/docs/cli/commands/plan/#other-options <!-- markdownlint-disable-line MD034 -->
 

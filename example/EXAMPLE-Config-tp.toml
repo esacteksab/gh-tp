@@ -12,6 +12,3 @@ planFile = ""
 
 # Type: String. The name of the Markdown file that will be created with `gh tp``
 mdFile = ""
-
-# Type: Bool. Uncomment and set to true to disable colors in the terminal
-# noColor = 
