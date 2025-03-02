@@ -26,15 +26,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"runtime"
 	"runtime/debug"
 	"strings"
 
+	"github.com/charmbracelet/log"
 	"github.com/cli/safeexec"
-	"github.com/fatih/color"
 	"github.com/hashicorp/terraform-exec/tfexec"
 	md "github.com/nao1215/markdown"
 	"github.com/spf13/cobra"
@@ -44,7 +43,6 @@ import (
 )
 
 var (
-	bin         string
 	binary      string
 	binaries    []string
 	cfgFile     string
@@ -62,11 +60,6 @@ var (
 	Date        string
 	Commit      string
 	BuiltBy     string
-	bold        = color.New(color.Bold).SprintFunc()
-	hiBlack     = color.New(color.FgHiBlack).SprintFunc()
-	green       = color.New(color.FgHiGreen).SprintFunc()
-	yellow      = color.New(color.FgHiYellow).SprintFunc()
-	red         = color.New(color.FgHiRed).SprintFunc()
 	exts        []string
 	workingDir  string
 )
@@ -102,7 +95,6 @@ var rootCmd = &cobra.Command{
 	Short:   "A GitHub CLI extension to submit a pull request with Terraform or Tofu plan output.",
 	Long:    `tp is a GitHub CLI extension to submit a pull request with Terraform or Tofu plan output formatted in GitHub Flavored Markdown.`,
 	Run: func(cmd *cobra.Command, args []string) {
-
 		b := viper.IsSet("binary")
 		if b {
 			binary = viper.GetString("binary")
@@ -112,9 +104,7 @@ var rootCmd = &cobra.Command{
 			for _, v := range binaries {
 				bin, err := safeexec.LookPath(v)
 				if err != nil {
-					if Verbose {
-						log.Printf("%s", err)
-					}
+					log.Debugf("%s", err)
 				}
 				// It's possible for both `tofu` and `terraform` to exist on $PATH and we need to handle that.
 				if len(bin) > 0 {
@@ -122,17 +112,15 @@ var rootCmd = &cobra.Command{
 				}
 			}
 			if len(exists) == len(binaries) {
-				log.Fatal(bold(red("Ooops! ")), "Seems both `tofu` and `terraform` exist in your $PATH. We're not sure which one to use. Please set the 'binary' parameter in your .tp.toml config file to whichever binary you want to use.")
+				log.Fatal("Seems both `tofu` and `terraform` exist in your $PATH. We're not sure which one to use. Please set the 'binary' parameter in your .tp.toml config file to whichever binary you want to use.")
 			}
-			//cmd.Help()
-			//fmt.Println("foo")
 		}
 
 		// the arg received looks like a file, we try to open it
 		if len(args) == 0 {
 			execPath, err := safeexec.LookPath(binary)
 			if err != nil {
-				log.Fatal(bold(red("Attention! ")), "Please ensure either `tofu` or `terraform` are installed and on your $PATH.")
+				log.Fatal("Please ensure either `tofu` or `terraform` are installed and on your $PATH.")
 				//os.Exit(1)
 			}
 
@@ -161,16 +149,17 @@ var rootCmd = &cobra.Command{
 			files := checkFilesByExtension(workingDir, exts)
 			// we check to see if there are tf or tofu files in the current working directory. If not, we don't call tf.plan
 			if files {
-				// terraform plan -out plan.out -noColor
+				log.Infof("Creating %s plan file %s...", binary, planPath)
+				// terraform plan -out plan.out -no-color
 				_, err := tf.Plan(context.Background(), planOpts...)
 				if err != nil {
 					// binary defined. .tf or .tofu files exist. Still errors. Show me the error
-					log.Println(bold(red("Terraform returned the following error: ")), err)
+					log.With("err", err).Errorf("%s returned the follow error", binary)
 					// Edge case exists where we detect .tofu file but terraform was called, which doesn't support .tofu files. tf.Plan returns error.
 					// BUG: There is a condition that exists where .tofu files exist, but terraform is the binary, this error will occur. But we're not checking _explicitly_ for either .tf or .tofu in files above.
 					// So .tf files _could_ exist, but tf.Plan could fail for some reason not related to Terraform not finding any .tf files, making this error inaccurate. Could be nice to identify and handle this edge case, but Terraform/Tofu do it good enough for now.
 					// if binary == "terraform" {
-					// 	log.Printf("Detected `*.tofu` files, but you've defined %s as the binary to use in your .tp.toml config file. Terraform does not support `.tofu` files.", binary)
+					// 	log.Infof("Detected `*.tofu` files, but you've defined %s as the binary to use in your .tp.toml config file. Terraform does not support `.tofu` files.", binary)
 					// }
 					// We need to exit on this error. tf.Plan actually returns status 1 -- maybe some day we can intercept it or have awareness that it was returned.
 					os.Exit(1)
@@ -178,27 +167,26 @@ var rootCmd = &cobra.Command{
 
 				planStr, err = tf.ShowPlanFileRaw(context.Background(), planPath)
 				if err != nil {
-					log.Fatal("error internally attempting to create the human-readable Plan: ", err)
+					log.Error("error internally attempting to create the human-readable Plan: ", err)
 				}
 
-				if Verbose {
-					log.Println((planStr))
-				}
+				log.Debug((planStr))
 
 				//fmt.Printf("plan output: %s", planStr)
 				mdParam = viper.GetString("mdFile")
 
 				planMd, err = os.Create(mdParam)
 				if err != nil {
-					log.Fatalf("failed to create Markdown: %s", err)
+					log.Errorf("failed to create Markdown: %s", err)
 				}
 				// Close the file when we're done with it
 				defer planMd.Close()
 
 				// This has the plan wrapped in a code block in Markdown
+
 				planBody = md.NewMarkdown(os.Stdout).CodeBlocks(md.SyntaxHighlight(SyntaxHighlightTerraform), planStr)
 				if err != nil {
-					log.Fatalf("error generating plan Markdown: %s", err)
+					log.Errorf("error generating plan Markdown: %s", err)
 				}
 
 				// NewMarkdown returns io.Writer
@@ -212,35 +200,35 @@ var rootCmd = &cobra.Command{
 
 				// Checking to see if plan file was created.
 				if _, err := os.Stat(planPath); err == nil {
-					log.Printf("Plan file %s was created.", planPath)
+					log.Infof("Plan file %s was created.", planPath)
 
 				} else if errors.Is(err, os.ErrNotExist) {
 
 					// Apparently the binary exists, tf.Plan shit the bed and didn't tell us.
-					log.Fatalf("Plan file %s was not created.", planPath)
+					log.Errorf("Plan file %s was not created.", planPath)
 
 				} else {
 
 					// I'm only human. NFC how you got here. I hope to never have to find out.
-					log.Printf("If you see this error message, please open a bug. Error Code: TPE002. Error: %s", err)
+					log.Infof("If you see this error message, please open a bug. Error Code: TPE002. Error: %s", err)
 				}
 
 				// Checking to see if Markdown file was created.
 				if _, err := os.Stat(mdParam); err == nil {
-					log.Printf("Markdown file %s was created.", mdParam)
+					log.Infof("Markdown file %s was created.", mdParam)
 
 				} else if errors.Is(err, os.ErrNotExist) {
 
 					//
-					log.Fatalf("Markdown file %s was not created.", mdParam)
+					log.Errorf("Markdown file %s was not created.", mdParam)
 
 				} else {
 
 					// I'm only human. NFC how you got here. I hope to never have to find out.
-					log.Printf("If you see this error message, please open a bug. Error Code: TPE003. Error: %s", err)
+					log.Infof("If you see this error message, please open a bug. Error Code: TPE003. Error: %s", err)
 				}
 			} else {
-				log.Fatalf("No %s files found. Please run this in a directory with %s files present.", cases.Title(language.English).String(binary), cases.Title(language.English).String(binary))
+				log.Errorf("No %s files found. Please run this in a directory with %s files present.", cases.Title(language.English).String(binary), cases.Title(language.English).String(binary))
 			}
 
 		} else if args[0] == "-" {
@@ -251,10 +239,7 @@ var rootCmd = &cobra.Command{
 			}
 
 			planStr := string(content)
-			if Verbose {
-				fmt.Printf("plan output: %s", planStr)
-			}
-			fmt.Printf("Plan output: %s", planStr)
+			log.Debugf("plan output: %s", planStr)
 
 			mdParam = viper.GetString("mdFile")
 
@@ -282,7 +267,7 @@ var rootCmd = &cobra.Command{
 
 			// Checking to see if Markdown file was created.
 			if _, err := os.Stat(mdParam); err == nil {
-				log.Printf("Markdown file %s was created.", mdParam)
+				log.Infof("Markdown file %s was created.", mdParam)
 
 			} else if errors.Is(err, os.ErrNotExist) {
 
@@ -292,7 +277,7 @@ var rootCmd = &cobra.Command{
 			} else {
 
 				// I'm only human. NFC how you got here. I hope to never have to find out.
-				log.Printf("If you see this error message, please open a bug. Error Code: TPE003. Error: %s", err)
+				log.Fatalf("If you see this error message, please open a bug. Error Code: TPE003. Error: %s", err)
 			}
 		}
 	},
@@ -313,6 +298,9 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
+
+	rootCmd.PersistentFlags().BoolVar(&flagNoColor, "no-color", false, "If true, colorized output will be disabled.")
+	viper.BindPFlag("no-color", rootCmd.PersistentFlags().Lookup("no-color"))
 
 	rootCmd.Flags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.tp.toml, can also exist in your project's root directory.)")
 	// Cobra also supports local flags, which will only run
@@ -342,42 +330,39 @@ func initConfig() {
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			log.Fatal(bold(red("Attention! Missing Config File: "), "Config file should be named .tp.toml and exist in your home directory or in your project's root.\n"))
+			log.Error("Missing Config File: Config file should be named .tp.toml and exist in your home directory or in your project's root.\n")
 			os.Exit(1)
 		} else if _, ok := err.(viper.UnsupportedConfigError); ok {
-			log.Fatalf("Unsupported Format. Config file should be named .tp %s", err)
+			log.Errorf("Unsupported Format. Config file should be named .tp %s.", err)
+			os.Exit(1)
 			// This handles the situation where a duplicate key exists.
 		} else if _, ok := err.(viper.ConfigParseError); ok {
-			log.Fatalf("There is an issue with parsing your config file, the error is error: %s", err)
+			log.Errorf("There is an issue %s.", err)
+			os.Exit(1)
 		}
-		//if Verbose {
-		//fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
-		//}
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
-	flagNoColor = viper.GetBool("noColor")
-	if flagNoColor {
-		color.NoColor = true // disables colorized output
-	}
-	if Verbose {
-		keys := viper.AllKeys()
-		log.Println(keys)
-	}
+
+	keys := viper.AllKeys()
+	log.Debug(keys)
 	// Validate that required 'binary' parameter is set
 	b := viper.IsSet("binary")
 	if !b {
-		log.Print(bold(red("Attention! Missing Parameter: "), bold("'binary':"), " (type: string) is not defined in the config file. The value of the binary parameter should be either 'tofu' or 'terraform'. This binary is expected to exist on your $PATH.\n"))
+		log.Error("Missing Parameter: 'binary' (type: string) is not defined in the config file. The value of the binary parameter should be either 'tofu' or 'terraform'. This binary is expected to exist on your $PATH.\n")
+		os.Exit(1)
 	}
 
 	// // Check to see if required 'planFile' parameter is set
 	o := viper.IsSet("planFile")
 	if !o {
-		log.Fatal(bold(red("Attention! Missing Parameter: "), bold("'planFile':"), " (type: string) is not defined in the config file. This is the name of the plan's output file that will be created by `gh tp`.\n"))
+		log.Error("Missing Parameter: 'planFile' (type: string) is not defined in the config file. This is the name of the plan's output file that will be created by `gh tp`.\n")
+		os.Exit(1)
 	}
 
 	// // Check to see if required 'mdFile' parameter is set
 	m := viper.IsSet("mdFile")
 	if !m {
-		log.Fatal(bold(red("Attention! Missing Parameter: "), bold("'mdFile':"), " (type: string) is not defined in the config file. This is the name of the Markdown file that will be created by `gh tp`.\n"))
+		log.Error("Missing Parameter: 'mdFile' (type: string) is not defined in the config file. This is the name of the Markdown file that will be created by `gh tp`.\n")
+		os.Exit(1)
 	}
+	log.Infof("Using config file: %s", viper.ConfigFileUsed())
 }
