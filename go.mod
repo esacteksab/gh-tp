@@ -5,6 +5,7 @@ go 1.24
 require (
 	github.com/briandowns/spinner v1.23.2
 	github.com/charmbracelet/log v0.4.0
+	github.com/fatih/color v1.14.1
 	github.com/nao1215/markdown v0.7.0
 )
 
@@ -12,7 +13,6 @@ require (
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/lipgloss v0.10.0 // indirect
-	github.com/fatih/color v1.14.1 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
 	github.com/hashicorp/go-version v1.7.0 // indirect
 	github.com/hashicorp/terraform-json v0.24.0 // indirect
