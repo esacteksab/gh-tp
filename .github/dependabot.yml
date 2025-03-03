@@ -7,10 +7,6 @@ updates:
     labels:
       - "type: dependencies"
       - "type: chore"
-    commit-message:
-      include: scope
-      prefix: "chore"
-    target-branch: "develop"
   - package-ecosystem: "github-actions"
     # Workflow files stored in the default location of `.github/workflows`
     # You don't need to specify `/.github/workflows` for `directory`. You can use `directory: "/"`.
