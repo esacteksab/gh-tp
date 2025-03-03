@@ -33,7 +33,7 @@ require (
 )
 
 require (
-	github.com/cli/safeexec v1.0.0
+	github.com/cli/safeexec v1.0.1
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/terraform-exec v0.22.0
