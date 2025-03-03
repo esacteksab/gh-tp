@@ -19,6 +19,7 @@ repos:
     rev: 0.31.2
     hooks:
       - id: check-github-workflows
+      - id: check-dependabot
       - id: check-jsonschema
         name: "Validate Pre-Commit"
         files: ^\.pre-commit-config.yaml+$
