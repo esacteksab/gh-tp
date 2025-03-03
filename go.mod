@@ -6,7 +6,7 @@ require (
 	github.com/briandowns/spinner v1.23.2
 	github.com/charmbracelet/log v0.4.0
 	github.com/fatih/color v1.14.1
-	github.com/nao1215/markdown v0.7.0
+	github.com/nao1215/markdown v0.7.1
 )
 
 require (
