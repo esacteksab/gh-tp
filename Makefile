@@ -33,8 +33,6 @@ endif
 
 	rm -rf dist
 	rm -f coverage.*
-	# rm -f '"$(shell go env GOCACHE)/../golangci-lint"'
-	# go clean -i -cache -testcache -modcache -fuzzcache -x
 
 
 .PHONY: build

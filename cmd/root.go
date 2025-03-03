@@ -17,6 +17,7 @@ import (
 	"github.com/briandowns/spinner"
 	"github.com/charmbracelet/log"
 	"github.com/cli/safeexec"
+	"github.com/fatih/color"
 	"github.com/hashicorp/terraform-exec/tfexec"
 	md "github.com/nao1215/markdown"
 	"github.com/spf13/cobra"
@@ -45,6 +46,9 @@ var (
 	BuiltBy         string
 	exts            []string
 	workingDir      string
+	bold            = color.New(color.Bold).SprintFunc()
+	green           = color.New(color.FgGreen).SprintFunc()
+	red             = color.New(color.FgRed).SprintFunc()
 )
 
 type SyntaxHighlight string
@@ -211,9 +215,11 @@ var rootCmd = &cobra.Command{
 
 				// Checking to see if plan file was created.
 				if _, err := os.Stat(planPath); err == nil {
+					fmt.Fprintf(color.Output, "%s%s\n", bold(green("✔")), "  Plan Created...")
 					log.Debugf("Plan file %s was created.", planPath)
 				} else if errors.Is(err, os.ErrNotExist) {
 					// Apparently the binary exists, tf.Plan shit the bed and didn't tell us.
+					fmt.Fprintf(color.Output, "%s%s\n", bold(red("✕")), "  Failed to Create Plan...")
 					log.Errorf("Plan file %s was not created.", planPath)
 				} else {
 					// I'm only human. NFC how you got here. I hope to never have to find out.
@@ -223,9 +229,11 @@ var rootCmd = &cobra.Command{
 				// Checking to see if Markdown file was created.
 				if _, err := os.Stat(mdParam); err == nil {
 					log.Debugf("Markdown file %s was created.", mdParam)
+					fmt.Fprintf(color.Output, "%s%s\n", bold(green("✔")), "  Markdown Created...")
 				} else if errors.Is(err, os.ErrNotExist) {
 					//
 					log.Errorf("Markdown file %s was not created.", mdParam)
+					fmt.Fprintf(color.Output, "%s%s\n", bold(red("✕")), "  Failed to Create Markdown...")
 				} else {
 					// I'm only human. NFC how you got here. I hope to never have to find out.
 					log.Errorf("If you see this error message, please open a bug. Error Code: TPE003. Error: %s", err)
@@ -256,7 +264,7 @@ var rootCmd = &cobra.Command{
 			// This has the plan wrapped in a code block in Markdown
 			planBody := md.NewMarkdown(os.Stdout).CodeBlocks(md.SyntaxHighlight(SyntaxHighlightTerraform), planStr)
 			if err != nil {
-				log.Fatalf("error generating plan Markdown: %s", err)
+				log.Errorf("error generating plan Markdown: %s", err)
 			}
 
 			// NewMarkdown returns io.Writer
@@ -272,13 +280,14 @@ var rootCmd = &cobra.Command{
 			}
 			// Checking to see if Markdown file was created.
 			if _, err := os.Stat(mdParam); err == nil {
-				log.Infof("Markdown file %s was created.", mdParam)
+				fmt.Fprintf(color.Output, "%s%s\n", green("✔"), "  Markdown Created...")
+				log.Debugf("Markdown file %s was created.", mdParam)
 			} else if errors.Is(err, os.ErrNotExist) {
-				//
-				log.Fatalf("Markdown file %s was not created.", mdParam)
+				fmt.Fprintf(color.Output, "%s%s\n", red("✕"), "  Failed to Create Plan...")
+				log.Errorf("Markdown file %s was not created.", mdParam)
 			} else {
 				// I'm only human. NFC how you got here. I hope to never have to find out.
-				log.Fatalf("If you see this error message, please open a bug. Error Code: TPE003. Error: %s", err)
+				log.Errorf("If you see this error message, please open a bug. Error Code: TPE003. Error: %s", err)
 			}
 		}
 	},
