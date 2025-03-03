@@ -12,7 +12,9 @@ import (
 	"runtime"
 	"runtime/debug"
 	"strings"
+	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/charmbracelet/log"
 	"github.com/cli/safeexec"
 	"github.com/hashicorp/terraform-exec/tfexec"
@@ -24,24 +26,25 @@ import (
 )
 
 var (
-	binary     string
-	binaries   []string
-	cfgFile    string
-	out        io.Reader
-	mdParam    string
-	planBody   *md.Markdown
-	planMd     *os.File
-	planPath   string
-	planStr    string
-	sb         strings.Builder
-	sbPlan     string
-	Verbose    bool
-	Version    string
-	Date       string
-	Commit     string
-	BuiltBy    string
-	exts       []string
-	workingDir string
+	binary          string
+	binaries        []string
+	cfgFile         string
+	out             io.Reader
+	mdParam         string
+	planBody        *md.Markdown
+	planMd          *os.File
+	planPath        string
+	planStr         string
+	sb              strings.Builder
+	sbPlan          string
+	spinnerDuration time.Duration
+	Verbose         bool
+	Version         string
+	Date            string
+	Commit          string
+	BuiltBy         string
+	exts            []string
+	workingDir      string
 )
 
 type SyntaxHighlight string
@@ -118,12 +121,12 @@ var rootCmd = &cobra.Command{
 				log.Fatalf("error calling binary: %s\n", err)
 			}
 
-			//Check for .terraform.lock.hcl -- do not need to do this every time
-			//terraform init | installs providers, etc.
-			//err = tf.Init(context.Background())
-			//if err != nil {
+			// Check for .terraform.lock.hcl -- do not need to do this every time
+			// terraform init | installs providers, etc.
+			// err = tf.Init(context.Background())
+			// if err != nil {
 			//	log.Fatalf("error running Init: %s", err)
-			//}
+			// }
 
 			// the plan file
 			planPath = viper.GetString("planFile")
@@ -136,8 +139,12 @@ var rootCmd = &cobra.Command{
 			files := checkFilesByExtension(workingDir, exts)
 			// we check to see if there are tf or tofu files in the current working directory. If not, we don't call tf.plan
 			if files {
-				log.Infof("Creating %s plan file %s...", binary, planPath)
+				log.Debugf("Creating %s plan file %s...", binary, planPath)
 				// terraform plan -out plan.out -no-color
+				spinnerDuration = 100
+				s := spinner.New(spinner.CharSets[14], spinnerDuration*time.Millisecond)
+				s.Suffix = "  Creating the Plan...\n"
+				s.Start()
 				_, err := tf.Plan(context.Background(), planOpts...)
 				if err != nil {
 					// binary defined. .tf or .tofu files exist. Still errors. Show me the error
@@ -160,6 +167,7 @@ var rootCmd = &cobra.Command{
 					log.Infof("Check the output of `%s plan` locally. If you believe this is a bug, please report the issue. TPE001.", binary)
 					os.Exit(1)
 				}
+				s.Stop()
 
 				planStr, err = tf.ShowPlanFileRaw(context.Background(), planPath)
 				if err != nil {
@@ -203,24 +211,24 @@ var rootCmd = &cobra.Command{
 
 				// Checking to see if plan file was created.
 				if _, err := os.Stat(planPath); err == nil {
-					log.Infof("Plan file %s was created.", planPath)
+					log.Debugf("Plan file %s was created.", planPath)
 				} else if errors.Is(err, os.ErrNotExist) {
 					// Apparently the binary exists, tf.Plan shit the bed and didn't tell us.
 					log.Errorf("Plan file %s was not created.", planPath)
 				} else {
 					// I'm only human. NFC how you got here. I hope to never have to find out.
-					log.Infof("If you see this error message, please open a bug. Error Code: TPE002. Error: %s", err)
+					log.Errorf("If you see this error message, please open a bug. Error Code: TPE002. Error: %s", err)
 				}
 
 				// Checking to see if Markdown file was created.
 				if _, err := os.Stat(mdParam); err == nil {
-					log.Infof("Markdown file %s was created.", mdParam)
+					log.Debugf("Markdown file %s was created.", mdParam)
 				} else if errors.Is(err, os.ErrNotExist) {
 					//
 					log.Errorf("Markdown file %s was not created.", mdParam)
 				} else {
 					// I'm only human. NFC how you got here. I hope to never have to find out.
-					log.Infof("If you see this error message, please open a bug. Error Code: TPE003. Error: %s", err)
+					log.Errorf("If you see this error message, please open a bug. Error Code: TPE003. Error: %s", err)
 				}
 			} else {
 				log.Errorf("No %s files found. Please run this in a directory with %s files present.", cases.Title(language.English).String(binary), cases.Title(language.English).String(binary))
@@ -356,5 +364,5 @@ func initConfig() {
 		)
 		os.Exit(1)
 	}
-	log.Infof("Using config file: %s", viper.ConfigFileUsed())
+	log.Debugf("Using config file: %s", viper.ConfigFileUsed())
 }

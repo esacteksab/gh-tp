@@ -3,6 +3,7 @@ module github.com/esacteksab/gh-tp
 go 1.24
 
 require (
+	github.com/briandowns/spinner v1.23.2
 	github.com/charmbracelet/log v0.4.0
 	github.com/nao1215/markdown v0.7.0
 )
@@ -11,11 +12,13 @@ require (
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/lipgloss v0.10.0 // indirect
+	github.com/fatih/color v1.14.1 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
 	github.com/hashicorp/go-version v1.7.0 // indirect
 	github.com/hashicorp/terraform-json v0.24.0 // indirect
 	github.com/karrick/godirwalk v1.17.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
@@ -25,6 +28,7 @@ require (
 	golang.org/x/crypto v0.33.0 // indirect
 	golang.org/x/mod v0.23.0 // indirect
 	golang.org/x/net v0.35.0 // indirect
+	golang.org/x/term v0.29.0 // indirect
 	golang.org/x/tools v0.30.0 // indirect
 )
 
