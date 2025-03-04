@@ -139,6 +139,20 @@ var rootCmd = &cobra.Command{
 			}
 		} else {
 			log.Errorf("No %s files found. Please run this in a directory with %s files present.", cases.Title(language.English).String(binary), cases.Title(language.English).String(binary))
+			os.Exit(1)
+		}
+
+		// Checking to see if Markdown file was created.
+		if _, err := os.Stat(mdParam); err == nil {
+			log.Debugf("Markdown file %s was created.", mdParam)
+			fmt.Fprintf(color.Output, "%s%s\n", bold(green("✔")), "  Markdown Created...")
+		} else if errors.Is(err, os.ErrNotExist) {
+			//
+			log.Errorf("Markdown file %s was not created.", mdParam)
+			fmt.Fprintf(color.Output, "%s%s\n", bold(red("✕")), "  Failed to Create Markdown...")
+		} else {
+			// I'm only human. NFC how you got here. I hope to never have to find out.
+			log.Errorf("If you see this error message, please open a bug. Error Code: TPE003. Error: %s", err)
 		}
 	},
 }
