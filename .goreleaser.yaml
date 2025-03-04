@@ -27,7 +27,7 @@ archives:
     name_template: >-
       {{ .ProjectName }}_
       {{- .Tag }}_
-      {{- title .Os }}-
+      {{- .Os }}-
       {{- .Arch }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
     # use zip for windows archives
@@ -39,7 +39,7 @@ changelog:
   use: github
   sort: asc
 
-# https://gist.github.com/parmentf/359667bf23e08a1bd8241fbf47ecdef0
+  # https://gist.github.com/parmentf/359667bf23e08a1bd8241fbf47ecdef0
   groups:
     - title: ":sparkles: Features"
       regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
