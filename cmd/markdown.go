@@ -3,13 +3,11 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strings"
 
 	"github.com/charmbracelet/log"
-	"github.com/fatih/color"
 	md "github.com/nao1215/markdown"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -66,19 +64,5 @@ func createMarkdown(mdParam, planStr string) (*os.File, string, error) {
 	if mderr != nil {
 		log.Errorf("error generating %s markdown file, error: %s", mdParam, err)
 	}
-
-	// Checking to see if Markdown file was created.
-	if _, err := os.Stat(mdParam); err == nil {
-		log.Debugf("Markdown file %s was created.", mdParam)
-		fmt.Fprintf(color.Output, "%s%s\n", bold(green("✔")), "  Markdown Created...")
-	} else if errors.Is(err, os.ErrNotExist) {
-		//
-		log.Errorf("Markdown file %s was not created.", mdParam)
-		fmt.Fprintf(color.Output, "%s%s\n", bold(red("✕")), "  Failed to Create Markdown...")
-	} else {
-		// I'm only human. NFC how you got here. I hope to never have to find out.
-		log.Errorf("If you see this error message, please open a bug. Error Code: TPE003. Error: %s", err)
-	}
-
 	return planMd, mdParam, mderr
 }

@@ -4,16 +4,16 @@
 
 ```bash
 gh tp
-2025/03/01 12:35:20 Attention! Missing Config File: Config file should be named .tp.toml and exist in your home directory or in your project's root.
+2025/03/04 02:08:12 ERRO Missing Config File: Config file should be named .tp.toml and exist in your home directory or in your project's root.
 ```
 
 Let's grab our example config file and run `gh tp` again:
 
 ```bash
 cp ../gh-tp/.tp.toml .
- gh tp
-✔  Markdown Created...
+gh tp
 ✔  Plan Created...
+✔  Markdown Created...
 ```
 
 > [!NOTE]
@@ -206,8 +206,8 @@ Run `gh tp` again, and there are no changes as expected.
 
 ```bash
 gh tp
-✔  Markdown Created...
 ✔  Plan Created...
+✔  Markdown Created...
 ```
 
 We can verify that our Markdown contains as much:
