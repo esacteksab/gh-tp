@@ -77,13 +77,13 @@ The above example is intended to be just enough to get you started. If you'd lik
 <!-- markdownlint-disable-line MD028 -->
 
 > [!WARNING]
-> > **_Pre 1.0.0 Alert_**. This is a new extension and as a result, the API isn't set yet. There have been two prototypes so far. The experiences from both have shaped what exists today, but there is still quite a bit left to do. So as I continue down the path of figuring things out, things are almost certainly going to change. **_Expect_** breaking changes in the early releases. I will _strive_ not to publish broken builds and will lean into Semver to identify `alpha`, `beta` and pre-releases.
+> **_Pre 1.0.0 Alert_**. This is a new extension and as a result, the API isn't set yet. There have been two prototypes so far. The experiences from both have shaped what exists today, but there is still quite a bit left to do. So as I continue down the path of figuring things out, things are almost certainly going to change. **_Expect_** breaking changes in the early releases. I will _strive_ not to publish broken builds and will lean into Semver to identify `alpha`, `beta` and pre-releases.
 
 ## Motivation
 
 I write _a lot_ of Terraform daily and a part of that process includes submitting pull requests for review by peers prior to applying the plan and merging the pull request. It can be tedious, sometimes cumbersome to run a `terraform plan -out plan.out`, copy the output from the terminal, do Git "things", open a pull request, paste the contents of the plan's output into the body of the pull request, wrap it in a code block, then wrap _that_ in a `<details></details>` block because some Terraform output can be quite lengthy and in an effort to provide a better experience and quicker access to the pull request's comments, we use the `<details></details>` mechanism to collapse the plan's output. You can use [pull request Templates](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests) to short-circuit some of this workflow with the template already containing a pre-formatted code block wrapped in a `<details></details>` so all you have to do is paste your plan in the WYSIWYG editor and hit submit.
 
-~~But I'm _lazy_~~, I mean, I'm _intentional_ with the things that take my time and attention, so I dug into letting the robots do what they do best and `tp` was born! The first prototype of this was a shell script and some `sed` and `awk` leveraging existing functionality present in `gh`. I decided to continue to iterate and extend it further by writing this extension in Go.
+But ~~I'm _lazy_~~, I mean, I'm _intentional_ with the things that take my time and attention, so I dug into letting the robots do what they do best and `tp` was born! The first prototype of this was a shell script and some `sed` and `awk` leveraging existing functionality present in `gh`. I decided to continue to iterate and extend it further by writing this extension in Go.
 
 ## What tp isn't
 
