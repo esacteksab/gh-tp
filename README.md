@@ -25,16 +25,11 @@ To create a plan and the markdown from that plan, run
 
 ```bash
 gh tp
-Using config file: /Users/tempuser/.tp.toml
+✔  Markdown Created...
+✔  Plan Created...
 ```
 
-Two files will be created, the first an output file named, what you defined for the value of `planFile` in `.tp` config and a Markdown file named what you defined for the value of the parameter `mdFile` in the `.tp` config file.
-
-```bash
-ls |grep plan
-plan.md
-plan.out
-```
+Two files will be created, the first an output file named, what you defined for the value of `planFile` in `.tp.toml` config and a Markdown file named what you defined for the value of the parameter `mdFile` in the `.tp.toml` config file.
 
 ### Create Commit
 
@@ -68,7 +63,7 @@ If you're targeting a resource, you can still create markdown from that plan's o
 terraform plan -out plan.out -no-color  | gh tp -
 ```
 
-Like with `gh tp` two files will exist. The first being whatever you passed to `-out` for the file name in the above example (`plan.out` in the example above) and the Markdown file named whatever you defined as the value for the `mdFile` parameter in the `.tp` config file. `tp` does not create an additional plan having been passed the plan from `stdin`.
+Like with `gh tp` two files will exist. The first being whatever you passed to `-out` for the file name in the above example (`plan.out` in the example above) and the Markdown file named whatever you defined as the value for the `mdFile` parameter in the `.tp.toml` config file. `tp` does not create an additional plan having been passed the plan from `stdin`.
 
 ### Extended Example
 
@@ -82,7 +77,7 @@ The above example is intended to be just enough to get you started. If you'd lik
 <!-- markdownlint-disable-line MD028 -->
 
 > [!WARNING]
-> **_Pre 1.0.0 Alert_**. This is a new extension and as a result, the API isn't set yet. There have been two prototypes so far. The experiences from both have shaped what exists today, but there is still quite a bit left to do. So as I continue down the path of figuring things out, things are almost certainly going to change. **_Expect_** breaking changes in the early releases. I will _strive_ not to publish broken builds and will lean into Semver to identify `alpha`, `beta` and pre-releases.
+> > **_Pre 1.0.0 Alert_**. This is a new extension and as a result, the API isn't set yet. There have been two prototypes so far. The experiences from both have shaped what exists today, but there is still quite a bit left to do. So as I continue down the path of figuring things out, things are almost certainly going to change. **_Expect_** breaking changes in the early releases. I will _strive_ not to publish broken builds and will lean into Semver to identify `alpha`, `beta` and pre-releases.
 
 ## Motivation
 
