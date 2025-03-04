@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"runtime/debug"
-	"strings"
 	"time"
 
 	"github.com/briandowns/spinner"
@@ -19,7 +18,6 @@ import (
 	"github.com/cli/safeexec"
 	"github.com/fatih/color"
 	"github.com/hashicorp/terraform-exec/tfexec"
-	md "github.com/nao1215/markdown"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/text/cases"
@@ -27,34 +25,23 @@ import (
 )
 
 var (
-	binary          string
-	binaries        []string
-	cfgFile         string
-	out             io.Reader
-	mdParam         string
-	planBody        *md.Markdown
-	planMd          *os.File
-	planPath        string
-	planStr         string
-	sb              strings.Builder
-	sbPlan          string
-	spinnerDuration time.Duration
-	Verbose         bool
-	Version         string
-	Date            string
-	Commit          string
-	BuiltBy         string
-	exts            []string
-	workingDir      string
-	bold            = color.New(color.Bold).SprintFunc()
-	green           = color.New(color.FgGreen).SprintFunc()
-	red             = color.New(color.FgRed).SprintFunc()
-)
-
-type SyntaxHighlight string
-
-const (
-	SyntaxHighlightTerraform SyntaxHighlight = "terraform"
+	binary             string
+	binaries           []string
+	cfgFile            string
+	out                io.Reader
+	mdParam            string
+	spinnerDuration    time.Duration
+	titleCaseConverter cases.Caser
+	Verbose            bool
+	Version            string
+	Date               string
+	Commit             string
+	BuiltBy            string
+	exts               []string
+	workingDir         string
+	bold               = color.New(color.Bold).SprintFunc()
+	green              = color.New(color.FgGreen).SprintFunc()
+	red                = color.New(color.FgRed).SprintFunc()
 )
 
 func buildVersion(version, commit, date, builtBy string) string {
@@ -84,8 +71,8 @@ func buildVersion(version, commit, date, builtBy string) string {
 var rootCmd = &cobra.Command{
 	Version: buildVersion(Version, Commit, Date, BuiltBy),
 	Use:     "tp",
-	Short:   "A GitHub CLI extension to submit a pull request with Terraform or Tofu plan output.",
-	Long:    `tp is a GitHub CLI extension to submit a pull request with Terraform or Tofu plan output formatted in GitHub Flavored Markdown.`,
+	Short:   "A GitHub CLI extension to submit a pull request with Terraform or OpenTofu plan output.",
+	Long:    `tp is a GitHub CLI extension to submit a pull request with Terraform or OpenTofu plan output formatted in GitHub Flavored Markdown.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		b := viper.IsSet("binary")
 		if b {
@@ -139,6 +126,9 @@ var rootCmd = &cobra.Command{
 				tfexec.Out(planPath),
 			}
 
+			// fmt.Printf("plan output: %s", planStr)
+			mdParam = viper.GetString("mdFile")
+
 			exts = []string{".tf", ".tofu"}
 			files := checkFilesByExtension(workingDir, exts)
 			// we check to see if there are tf or tofu files in the current working directory. If not, we don't call tf.plan
@@ -183,34 +173,10 @@ var rootCmd = &cobra.Command{
 
 				log.Debug((planStr))
 
-				// fmt.Printf("plan output: %s", planStr)
-				mdParam = viper.GetString("mdFile")
-
-				planMd, err = os.Create(mdParam)
+				// Create the Markdown from the Plan.
+				planMd, mdParam, err = createMarkdown(mdParam, planStr)
 				if err != nil {
-					log.Errorf("failed to create Markdown: %s", err)
-				}
-				// Close the file when we're done with it
-				defer planMd.Close()
-
-				// This has the plan wrapped in a code block in Markdown
-
-				planBody = md.NewMarkdown(os.Stdout).
-					CodeBlocks(md.SyntaxHighlight(SyntaxHighlightTerraform), planStr)
-				if err != nil {
-					log.Errorf("error generating plan Markdown: %s", err)
-				}
-
-				// NewMarkdown returns io.Writer
-				fmt.Fprintf(&sb, "\n%s\n", planBody)
-
-				// This turns NewMarkdown io.Writer into a String, which .Details expects
-				sbPlan = sb.String()
-
-				// This is what creates the final document (`mdoutfile`) plmd here could possibly be os.Stdout one day
-				mderr := md.NewMarkdown(planMd).Details("Terraform Plan", sbPlan).Build()
-				if mderr != nil {
-					log.Errorf("error generating %s markdown file, error: %s", mdParam, err)
+					log.Errorf("Something is not right, %s", err)
 				}
 
 				// Checking to see if plan file was created.
@@ -225,19 +191,6 @@ var rootCmd = &cobra.Command{
 					// I'm only human. NFC how you got here. I hope to never have to find out.
 					log.Errorf("If you see this error message, please open a bug. Error Code: TPE002. Error: %s", err)
 				}
-
-				// Checking to see if Markdown file was created.
-				if _, err := os.Stat(mdParam); err == nil {
-					log.Debugf("Markdown file %s was created.", mdParam)
-					fmt.Fprintf(color.Output, "%s%s\n", bold(green("✔")), "  Markdown Created...")
-				} else if errors.Is(err, os.ErrNotExist) {
-					//
-					log.Errorf("Markdown file %s was not created.", mdParam)
-					fmt.Fprintf(color.Output, "%s%s\n", bold(red("✕")), "  Failed to Create Markdown...")
-				} else {
-					// I'm only human. NFC how you got here. I hope to never have to find out.
-					log.Errorf("If you see this error message, please open a bug. Error Code: TPE003. Error: %s", err)
-				}
 			} else {
 				log.Errorf("No %s files found. Please run this in a directory with %s files present.", cases.Title(language.English).String(binary), cases.Title(language.English).String(binary))
 			}
@@ -246,49 +199,22 @@ var rootCmd = &cobra.Command{
 			out = cmd.InOrStdin()
 			content, err := io.ReadAll(out)
 			if err != nil {
-				log.Fatalf("unable to read stdIn: %s", err)
+				log.Errorf("unable to read stdIn: %s", err)
 			}
 
-			planStr := string(content)
-			log.Debugf("plan output: %s", planStr)
-
+			// fmt.Printf("plan output: %s", planStr)
 			mdParam = viper.GetString("mdFile")
 
-			planMd, err := os.Create(mdParam)
+			planStr := string(content)
+
+			log.Debug(planStr)
+			fmt.Println("I made it to here.")
+			// Create the plan from Stdin.
+			planMd, mdParam, err = createMarkdown(mdParam, planStr)
 			if err != nil {
-				log.Fatalf("failed to create Markdown: %s", err)
-			}
-			// Close the file when we're done with it
-			defer planMd.Close()
-
-			// This has the plan wrapped in a code block in Markdown
-			planBody := md.NewMarkdown(os.Stdout).CodeBlocks(md.SyntaxHighlight(SyntaxHighlightTerraform), planStr)
-			if err != nil {
-				log.Errorf("error generating plan Markdown: %s", err)
+				log.Errorf("Something is not right, %s", err)
 			}
 
-			// NewMarkdown returns io.Writer
-			fmt.Fprintf(&sb, "\n%s\n", planBody)
-
-			// This turns NewMarkdown io.Writer into a String, which .Details expects
-			sbPlan := sb.String()
-
-			// This is what creates the final document (`mdoutfile`) plmd here could possibly be os.Stdout one day
-			mderr := md.NewMarkdown(planMd).Details("Terraform Plan", sbPlan).Build()
-			if mderr != nil {
-				log.Errorf("error generating %s markdown file, error: %s", mdParam, err)
-			}
-			// Checking to see if Markdown file was created.
-			if _, err := os.Stat(mdParam); err == nil {
-				fmt.Fprintf(color.Output, "%s%s\n", green("✔"), "  Markdown Created...")
-				log.Debugf("Markdown file %s was created.", mdParam)
-			} else if errors.Is(err, os.ErrNotExist) {
-				fmt.Fprintf(color.Output, "%s%s\n", red("✕"), "  Failed to Create Plan...")
-				log.Errorf("Markdown file %s was not created.", mdParam)
-			} else {
-				// I'm only human. NFC how you got here. I hope to never have to find out.
-				log.Errorf("If you see this error message, please open a bug. Error Code: TPE003. Error: %s", err)
-			}
 		}
 	},
 }
