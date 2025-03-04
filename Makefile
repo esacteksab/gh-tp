@@ -30,6 +30,9 @@ endif
 ifneq (,$(wildcard ./*.tofu))
 	rm *.tofu
 endif
+ifneq (,$(wildcard ./gh-tp))
+	rm gh-tp
+endif
 
 	rm -rf dist
 	rm -f coverage.*
