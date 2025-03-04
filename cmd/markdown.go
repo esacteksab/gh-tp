@@ -34,7 +34,6 @@ const (
 )
 
 func createMarkdown(mdParam, planStr string) (*os.File, string, error) {
-	fmt.Printf("mdParam inside createMarkdown is %s\n", mdParam)
 	planMd, err = os.Create(mdParam)
 	if err != nil {
 		log.Errorf("failed to create Markdown: %s\n", err)

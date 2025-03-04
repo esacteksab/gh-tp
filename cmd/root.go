@@ -3,21 +3,17 @@
 package cmd
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	"runtime"
 	"runtime/debug"
 	"time"
 
-	"github.com/briandowns/spinner"
 	"github.com/charmbracelet/log"
 	"github.com/cli/safeexec"
 	"github.com/fatih/color"
-	"github.com/hashicorp/terraform-exec/tfexec"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/text/cases"
@@ -98,101 +94,11 @@ var rootCmd = &cobra.Command{
 		files := checkFilesByExtension(workingDir, exts)
 		// we check to see if there are tf or tofu files in the current working directory. If not, we don't call tf.plan
 		if files {
-			if args[0] == "-" {
-				fmt.Println("I'm here!")
-				out = cmd.InOrStdin()
-				content, err := io.ReadAll(out)
+			if len(args) == 0 {
+				planStr, err = createPlan()
 				if err != nil {
-					log.Errorf("unable to read stdIn: %s", err)
+					log.Errorf("Unable to create plan: %s", err)
 				}
-
-				// fmt.Printf("plan output: %s", planStr)
-				mdParam = viper.GetString("mdFile")
-
-				planStr := string(content)
-
-				log.Debug(planStr)
-				fmt.Println("I made it to here.")
-				// Create the plan from Stdin.
-				planMd, mdParam, err = createMarkdown(mdParam, planStr)
-				if err != nil {
-					log.Errorf("Something is not right, %s", err)
-				}
-				// the arg received looks like a file, we try to open it
-			} else if len(args) == 0 {
-				execPath, err := safeexec.LookPath(binary)
-				if err != nil {
-					log.Fatal(
-						"Please ensure either `tofu` or `terraform` are installed and on your $PATH.",
-					)
-					// os.Exit(1)
-				}
-
-				workingDir = filepath.Base(".")
-				// Initialize tf -- NOT terraform init
-				tf, err := tfexec.NewTerraform(workingDir, execPath)
-				if err != nil {
-					log.Fatalf("error calling binary: %s\n", err)
-				}
-
-				// Check for .terraform.lock.hcl -- do not need to do this every time
-				// terraform init | installs providers, etc.
-				// err = tf.Init(context.Background())
-				// if err != nil {
-				//	log.Fatalf("error running Init: %s", err)
-				// }
-
-				// the plan file
-				planPath = viper.GetString("planFile")
-				planOpts := []tfexec.PlanOption{
-					// terraform plan --out planPath (plan.out)
-					tfexec.Out(planPath),
-				}
-
-				// fmt.Printf("plan output: %s", planStr)
-				mdParam = viper.GetString("mdFile")
-
-				log.Debugf("Creating %s plan file %s...", binary, planPath)
-				// terraform plan -out plan.out -no-color
-				spinnerDuration = 100
-				s := spinner.New(spinner.CharSets[14], spinnerDuration*time.Millisecond)
-				s.Suffix = "  Creating the Plan...\n"
-				s.Start()
-
-				_, err = tf.Plan(context.Background(), planOpts...)
-				if err != nil {
-					// binary defined. .tf or .tofu files exist. Still errors. Show me the error
-					log.With("err", err).Errorf("%s returned the follow error", binary)
-					// Edge case exists where we detect .tofu file but terraform was called,
-					// which doesn't support .tofu files. tf.Plan returns error.
-					// There is a condition that exists where .tofu files exist, but terraform
-					// is the binary, this error will occur. But we're not checking _explicitly_
-					// for either .tf or .tofu in files above.
-					// So .tf files _could_ exist, but tf.Plan could fail for
-					// some reason not related to Terraform not finding any .tf files,
-					// making this error inaccurate. Could be nice to identify and
-					// handle this edge case, but Terraform/Tofu do it good enough for now.
-					// if binary == "terraform" {
-					// 	log.Infof("Detected `*.tofu` files, but you've defined %s
-					// as the binary to use in your .tp.toml config file. Terraform does not support `.tofu` files.", binary)
-					// }
-					// We need to exit on this error. tf.Plan actually returns status 1
-					// -- maybe some day we can intercept it or have awareness that it was returned.
-					log.Infof("Check the output of `%s plan` locally. If you believe this is a bug, please report the issue. TPE001.", binary)
-					os.Exit(1)
-				}
-				s.Stop()
-
-				planStr, err = tf.ShowPlanFileRaw(context.Background(), planPath)
-				if err != nil {
-					log.Error(
-						"error internally attempting to create the human-readable Plan: ",
-						err,
-					)
-				}
-
-				log.Debug((planStr))
-
 				// Create the Markdown from the Plan.
 				planMd, mdParam, err = createMarkdown(mdParam, planStr)
 				if err != nil {
@@ -211,6 +117,25 @@ var rootCmd = &cobra.Command{
 					// I'm only human. NFC how you got here. I hope to never have to find out.
 					log.Errorf("If you see this error message, please open a bug. Error Code: TPE002. Error: %s", err)
 				}
+			} else if args[0] == "-" {
+				out = cmd.InOrStdin()
+				content, err := io.ReadAll(out)
+				if err != nil {
+					log.Errorf("unable to read stdIn: %s", err)
+				}
+
+				log.Debugf("plan output: %s", planStr)
+				mdParam = viper.GetString("mdFile")
+
+				planStr := string(content)
+
+				log.Debug(planStr)
+				// Create the plan from Stdin.
+				planMd, mdParam, err = createMarkdown(mdParam, planStr)
+				if err != nil {
+					log.Errorf("Something is not right, %s", err)
+				}
+				// the arg received looks like a file, we try to open it
 			}
 		} else {
 			log.Errorf("No %s files found. Please run this in a directory with %s files present.", cases.Title(language.English).String(binary), cases.Title(language.English).String(binary))
