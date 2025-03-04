@@ -94,52 +94,72 @@ var rootCmd = &cobra.Command{
 				log.Fatal("Seems both `tofu` and `terraform` exist in your $PATH. We're not sure which one to use. Please set the 'binary' parameter in your .tp.toml config file to whichever binary you want to use.")
 			}
 		}
+		exts = []string{".tf", ".tofu"}
+		files := checkFilesByExtension(workingDir, exts)
+		// we check to see if there are tf or tofu files in the current working directory. If not, we don't call tf.plan
+		if files {
+			if args[0] == "-" {
+				fmt.Println("I'm here!")
+				out = cmd.InOrStdin()
+				content, err := io.ReadAll(out)
+				if err != nil {
+					log.Errorf("unable to read stdIn: %s", err)
+				}
 
-		// the arg received looks like a file, we try to open it
-		if len(args) == 0 {
-			execPath, err := safeexec.LookPath(binary)
-			if err != nil {
-				log.Fatal(
-					"Please ensure either `tofu` or `terraform` are installed and on your $PATH.",
-				)
-				// os.Exit(1)
-			}
+				// fmt.Printf("plan output: %s", planStr)
+				mdParam = viper.GetString("mdFile")
 
-			workingDir = filepath.Base(".")
-			// Initialize tf -- NOT terraform init
-			tf, err := tfexec.NewTerraform(workingDir, execPath)
-			if err != nil {
-				log.Fatalf("error calling binary: %s\n", err)
-			}
+				planStr := string(content)
 
-			// Check for .terraform.lock.hcl -- do not need to do this every time
-			// terraform init | installs providers, etc.
-			// err = tf.Init(context.Background())
-			// if err != nil {
-			//	log.Fatalf("error running Init: %s", err)
-			// }
+				log.Debug(planStr)
+				fmt.Println("I made it to here.")
+				// Create the plan from Stdin.
+				planMd, mdParam, err = createMarkdown(mdParam, planStr)
+				if err != nil {
+					log.Errorf("Something is not right, %s", err)
+				}
+				// the arg received looks like a file, we try to open it
+			} else if len(args) == 0 {
+				execPath, err := safeexec.LookPath(binary)
+				if err != nil {
+					log.Fatal(
+						"Please ensure either `tofu` or `terraform` are installed and on your $PATH.",
+					)
+					// os.Exit(1)
+				}
 
-			// the plan file
-			planPath = viper.GetString("planFile")
-			planOpts := []tfexec.PlanOption{
-				// terraform plan --out planPath (plan.out)
-				tfexec.Out(planPath),
-			}
+				workingDir = filepath.Base(".")
+				// Initialize tf -- NOT terraform init
+				tf, err := tfexec.NewTerraform(workingDir, execPath)
+				if err != nil {
+					log.Fatalf("error calling binary: %s\n", err)
+				}
 
-			// fmt.Printf("plan output: %s", planStr)
-			mdParam = viper.GetString("mdFile")
+				// Check for .terraform.lock.hcl -- do not need to do this every time
+				// terraform init | installs providers, etc.
+				// err = tf.Init(context.Background())
+				// if err != nil {
+				//	log.Fatalf("error running Init: %s", err)
+				// }
 
-			exts = []string{".tf", ".tofu"}
-			files := checkFilesByExtension(workingDir, exts)
-			// we check to see if there are tf or tofu files in the current working directory. If not, we don't call tf.plan
-			if files {
+				// the plan file
+				planPath = viper.GetString("planFile")
+				planOpts := []tfexec.PlanOption{
+					// terraform plan --out planPath (plan.out)
+					tfexec.Out(planPath),
+				}
+
+				// fmt.Printf("plan output: %s", planStr)
+				mdParam = viper.GetString("mdFile")
+
 				log.Debugf("Creating %s plan file %s...", binary, planPath)
 				// terraform plan -out plan.out -no-color
 				spinnerDuration = 100
 				s := spinner.New(spinner.CharSets[14], spinnerDuration*time.Millisecond)
 				s.Suffix = "  Creating the Plan...\n"
 				s.Start()
-				_, err := tf.Plan(context.Background(), planOpts...)
+
+				_, err = tf.Plan(context.Background(), planOpts...)
 				if err != nil {
 					// binary defined. .tf or .tofu files exist. Still errors. Show me the error
 					log.With("err", err).Errorf("%s returned the follow error", binary)
@@ -191,30 +211,9 @@ var rootCmd = &cobra.Command{
 					// I'm only human. NFC how you got here. I hope to never have to find out.
 					log.Errorf("If you see this error message, please open a bug. Error Code: TPE002. Error: %s", err)
 				}
-			} else {
-				log.Errorf("No %s files found. Please run this in a directory with %s files present.", cases.Title(language.English).String(binary), cases.Title(language.English).String(binary))
 			}
-
-		} else if args[0] == "-" {
-			out = cmd.InOrStdin()
-			content, err := io.ReadAll(out)
-			if err != nil {
-				log.Errorf("unable to read stdIn: %s", err)
-			}
-
-			// fmt.Printf("plan output: %s", planStr)
-			mdParam = viper.GetString("mdFile")
-
-			planStr := string(content)
-
-			log.Debug(planStr)
-			fmt.Println("I made it to here.")
-			// Create the plan from Stdin.
-			planMd, mdParam, err = createMarkdown(mdParam, planStr)
-			if err != nil {
-				log.Errorf("Something is not right, %s", err)
-			}
-
+		} else {
+			log.Errorf("No %s files found. Please run this in a directory with %s files present.", cases.Title(language.English).String(binary), cases.Title(language.English).String(binary))
 		}
 	},
 }
