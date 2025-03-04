@@ -25,8 +25,8 @@ To create a plan and the markdown from that plan, run
 
 ```bash
 gh tp
-✔  Markdown Created...
 ✔  Plan Created...
+✔  Markdown Created...
 ```
 
 Two files will be created, the first an output file named, what you defined for the value of `planFile` in `.tp.toml` config and a Markdown file named what you defined for the value of the parameter `mdFile` in the `.tp.toml` config file.
