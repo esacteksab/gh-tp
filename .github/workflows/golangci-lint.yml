@@ -5,14 +5,18 @@ on:
     branches:
       - main
     paths:
-      - '*.go'
-      - '*.mod'
-      - '*.sum'
+      - "**.go"
+      - "**.mod"
+      - "**.sum"
   pull_request:
     paths:
-      - '*.go'
-      - '*.mod'
-      - '*.sum'
+      - "**.go"
+      - "**.mod"
+      - "**.sum"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read

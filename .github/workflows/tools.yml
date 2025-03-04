@@ -3,15 +3,19 @@ name: Tools - Check
 on:
   pull_request:
     branches:
-        - "main"
+      - "main"
     paths:
-      - '*.go'
-      - '*.mod'
-      - '*.sum'
-      - '.goreleaser.yaml'
+      - "**.go"
+      - "**.mod"
+      - "**.sum"
+      - ".goreleaser.yaml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
-    contents: read
+  contents: read
 
 jobs:
   tools:
