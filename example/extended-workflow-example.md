@@ -11,9 +11,9 @@ Let's grab our example config file and run `gh tp` again:
 
 ```bash
 cp ../gh-tp/.tp.toml .
-gh tp
-2025/03/01 12:36:26 Plan file plan.out was created.
-2025/03/01 12:36:26 Markdown file plan.md was created.
+ gh tp
+✔  Markdown Created...
+✔  Plan Created...
 ```
 
 > [!NOTE]
@@ -97,7 +97,7 @@ Plan: 5 to add, 0 to change, 0 to destroy.
 
 </details>
 
-And we can verify the `plan.md` matches our output above :
+And we can verify the `plan.md` matches our output above:
 
 ```bash
 cat plan.md
@@ -106,77 +106,82 @@ cat plan.md
 ````md
 <details><summary>Terraform Plan</summary>
 
-  ```terraform
+\```terraform
 
-  Terraform used the selected providers to generate the following execution
-  plan. Resource actions are indicated with the following symbols:
-    + create
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
 
-  Terraform will perform the following actions:
+- create
 
-    # archive_file.tf_pr will be created
-    + resource "archive_file" "tf_pr" {
-        + id                  = (known after apply)
-        + output_base64sha256 = (known after apply)
-        + output_base64sha512 = (known after apply)
-        + output_md5          = (known after apply)
-        + output_path         = "./tf-pr.tar.gz"
-        + output_sha          = (known after apply)
-        + output_sha256       = (known after apply)
-        + output_sha512       = (known after apply)
-        + output_size         = (known after apply)
-        + source_file         = "./.tf-pr"
-        + type                = "tar.gz"
-      }
+Terraform will perform the following actions:
 
-    # local_file.pet will be created
-    + resource "local_file" "pet" {
-        + content              = (known after apply)
-        + content_base64sha256 = (known after apply)
-        + content_base64sha512 = (known after apply)
-        + content_md5          = (known after apply)
-        + content_sha1         = (known after apply)
-        + content_sha256       = (known after apply)
-        + content_sha512       = (known after apply)
-        + directory_permission = "0777"
-        + file_permission      = "0777"
-        + filename             = "./pet.out"
-        + id                   = (known after apply)
-      }
+# archive_file.tf_pr will be created
 
-    # local_file.uuid will be created
-    + resource "local_file" "uuid" {
-        + content              = (known after apply)
-        + content_base64sha256 = (known after apply)
-        + content_base64sha512 = (known after apply)
-        + content_md5          = (known after apply)
-        + content_sha1         = (known after apply)
-        + content_sha256       = (known after apply)
-        + content_sha512       = (known after apply)
-        + directory_permission = "0777"
-        + file_permission      = "0777"
-        + filename             = "./uuid.out"
-        + id                   = (known after apply)
-      }
+- resource "archive_file" "tf_pr" {
+  - id = (known after apply)
+  - output_base64sha256 = (known after apply)
+  - output_base64sha512 = (known after apply)
+  - output_md5 = (known after apply)
+  - output_path = "./tf-pr.tar.gz"
+  - output_sha = (known after apply)
+  - output_sha256 = (known after apply)
+  - output_sha512 = (known after apply)
+  - output_size = (known after apply)
+  - source_file = "./.tf-pr"
+  - type = "tar.gz"
+    }
 
-    # random_pet.pet will be created
-    + resource "random_pet" "pet" {
-        + id        = (known after apply)
-        + length    = 2
-        + separator = "-"
-      }
+# local_file.pet will be created
 
-    # random_uuid.uuid will be created
-    + resource "random_uuid" "uuid" {
-        + id     = (known after apply)
-        + result = (known after apply)
-      }
+- resource "local_file" "pet" {
+  - content = (known after apply)
+  - content_base64sha256 = (known after apply)
+  - content_base64sha512 = (known after apply)
+  - content_md5 = (known after apply)
+  - content_sha1 = (known after apply)
+  - content_sha256 = (known after apply)
+  - content_sha512 = (known after apply)
+  - directory_permission = "0777"
+  - file_permission = "0777"
+  - filename = "./pet.out"
+  - id = (known after apply)
+    }
 
-  Plan: 5 to add, 0 to change, 0 to destroy.
+# local_file.uuid will be created
 
-  \```
+- resource "local_file" "uuid" {
+  - content = (known after apply)
+  - content_base64sha256 = (known after apply)
+  - content_base64sha512 = (known after apply)
+  - content_md5 = (known after apply)
+  - content_sha1 = (known after apply)
+  - content_sha256 = (known after apply)
+  - content_sha512 = (known after apply)
+  - directory_permission = "0777"
+  - file_permission = "0777"
+  - filename = "./uuid.out"
+  - id = (known after apply)
+    }
 
-  </details>
+# random_pet.pet will be created
+
+- resource "random_pet" "pet" {
+  - id = (known after apply)
+  - length = 2
+  - separator = "-"
+    }
+
+# random_uuid.uuid will be created
+
+- resource "random_uuid" "uuid" {
+  - id = (known after apply)
+  - result = (known after apply)
+    }
+
+Plan: 5 to add, 0 to change, 0 to destroy.
+\```
+
+</details>
 ````
 
 ### We can then apply our Terraform
@@ -201,8 +206,8 @@ Run `gh tp` again, and there are no changes as expected.
 
 ```bash
 gh tp
-2025/02/28 22:58:27 No changes.Your infrastructure matches the configuration.
-2025/02/28 22:58:27 plan.out was created
+✔  Markdown Created...
+✔  Plan Created...
 ```
 
 We can verify that our Markdown contains as much:
@@ -212,17 +217,18 @@ cat plan.md
 ```
 
 ````md
+<details><summary>Terraform Plan</summary>
 
-   <details><summary>Terraform Plan</summary>
+\```terraform
 
-   ```terraform
+No changes. Your infrastructure matches the configuration.
 
-   No Changes. Your Infrastructure matches the configuration.
+Terraform has compared your real infrastructure against your configuration
+and found no differences, so no changes are needed.
 
-   \```
+\```
 
-   </details>
-
+</details>
 ````
 
 > [!NOTE]
