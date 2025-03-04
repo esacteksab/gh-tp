@@ -3,20 +3,20 @@ name: Go - Audit
 on:
   pull_request:
     branches:
-        - "main"
+      - "main"
     paths:
-      - '*.go'
-      - '*.mod'
-      - '*.sum'
+      - "**.go"
+      - "**.mod"
+      - "**.sum"
   push:
     branches: ["*"]
     paths:
-      - '*.go'
-      - '*.mod'
-      - '*.sum'
+      - "**.go"
+      - "**.mod"
+      - "**.sum"
 
 permissions:
-    contents: read
+  contents: read
 
 jobs:
   goreleaser:

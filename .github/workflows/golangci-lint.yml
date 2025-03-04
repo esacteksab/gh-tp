@@ -5,14 +5,14 @@ on:
     branches:
       - main
     paths:
-      - '*.go'
-      - '*.mod'
-      - '*.sum'
+      - "**.go"
+      - "**.mod"
+      - "**.sum"
   pull_request:
     paths:
-      - '*.go'
-      - '*.mod'
-      - '*.sum'
+      - "**.go"
+      - "**.mod"
+      - "**.sum"
 
 permissions:
   contents: read
