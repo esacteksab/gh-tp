@@ -40,21 +40,21 @@ var (
 	red                = color.New(color.FgRed).SprintFunc()
 )
 
-func buildVersion(version, commit, date, builtBy string) string {
-	result := version
-	if commit != "" {
-		result = fmt.Sprintf("%s\ncommit: %s", result, commit)
+func buildVersion(Version, Commit, Date, BuiltBy string) string {
+	result := Version
+	if Commit != "" {
+		result = fmt.Sprintf("%s\nCommit: %s", result, Commit)
 	}
-	if date != "" {
-		result = fmt.Sprintf("%s\nbuilt at: %s", result, date)
+	if Date != "" {
+		result = fmt.Sprintf("%s\nBuilt at: %s", result, Date)
 	}
-	if builtBy != "" {
-		result = fmt.Sprintf("%s\nbuilt by: %s", result, builtBy)
+	if BuiltBy != "" {
+		result = fmt.Sprintf("%s\nBuilt by: %s", result, BuiltBy)
 	}
-	result = fmt.Sprintf("%s\ngoos: %s\ngoarch: %s", result, runtime.GOOS, runtime.GOARCH)
+	result = fmt.Sprintf("%s\nGOOS: %s\nGOARCH: %s", result, runtime.GOOS, runtime.GOARCH)
 	if info, ok := debug.ReadBuildInfo(); ok && info.Main.Sum != "" {
 		result = fmt.Sprintf(
-			"%s\nmodule version: %s, checksum: %s",
+			"%s\nmodule Version: %s, checksum: %s",
 			result,
 			info.Main.Version,
 			info.Main.Sum,
@@ -65,10 +65,9 @@ func buildVersion(version, commit, date, builtBy string) string {
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Version: buildVersion(Version, Commit, Date, BuiltBy),
-	Use:     "tp",
-	Short:   "A GitHub CLI extension to submit a pull request with Terraform or OpenTofu plan output.",
-	Long:    `tp is a GitHub CLI extension to submit a pull request with Terraform or OpenTofu plan output formatted in GitHub Flavored Markdown.`,
+	Use:   "tp",
+	Short: "A GitHub CLI extension to submit a pull request with Terraform or OpenTofu plan output.",
+	Long:  `tp is a GitHub CLI extension to submit a pull request with Terraform or OpenTofu plan output formatted in GitHub Flavored Markdown.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		b := viper.IsSet("binary")
 		if b {
@@ -138,7 +137,8 @@ var rootCmd = &cobra.Command{
 				// the arg received looks like a file, we try to open it
 			}
 		} else {
-			log.Errorf("No %s files found. Please run this in a directory with %s files present.", cases.Title(language.English).String(binary), cases.Title(language.English).String(binary))
+			log.Errorf("No %s files found. Please run this in a directory with %s files present.",
+				cases.Title(language.English).String(binary), cases.Title(language.English).String(binary))
 			os.Exit(1)
 		}
 
@@ -172,13 +172,17 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
-
 	rootCmd.Flags().
-		StringVar(&cfgFile, "config", "", "config file (default is $HOME/.tp.toml, can also exist in your project's root directory.)")
+		StringVar(&cfgFile,
+			"config",
+			"",
+			"config file (default is $HOME/.tp.toml, can also exist in your project's root directory.)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.Version = buildVersion(Version, Commit, Date, BuiltBy)
+	rootCmd.SetVersionTemplate(`{{printf "Version %s\n" .Version}}`)
 }
 
 // initConfig reads in config file and ENV variables if set.
