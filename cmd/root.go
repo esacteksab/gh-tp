@@ -79,19 +79,19 @@ var rootCmd = &cobra.Command{
 		if v {
 			logger.Debug("verbose is defined in .tp.toml")
 			Verbose = viper.GetBool("verbose")
-			logger.Debug("I'm inside runCmd 'if v' and verbose is: %t\n", Verbose)
+			logger.Debugf("I'm inside runCmd 'if v' and verbose is: %t", Verbose)
 		} else {
 			logger.Debug("I'm inside runCmd and v is not defined in .tp.toml")
 		}
 
 		Verbose, err := cmd.Flags().GetBool("verbose")
-		logger.Debug("I'm inside runCmd(), and Verbose is %t\n", Verbose)
+		logger.Debugf("I'm inside runCmd(), and Verbose is %t", Verbose)
 		if err != nil {
 			logger.Errorf("Unable to get verbose flag: %s", err)
 		}
 		if Verbose {
 			logger.SetLevel(log.DebugLevel)
-			logger.Debug("I'm inside runCmd Verbose and my value is %t\n", Verbose)
+			logger.Debugf("I'm inside runCmd Verbose and my value is %t", Verbose)
 		}
 
 		b := viper.IsSet("binary")
@@ -111,7 +111,8 @@ var rootCmd = &cobra.Command{
 				}
 			}
 			if len(exists) == len(binaries) {
-				logger.Fatal("Seems both `tofu` and `terraform` exist in your $PATH. We're not sure which one to use. Please set the 'binary' parameter in your .tp.toml config file to whichever binary you want to use.")
+				logger.Error("Seems both `tofu` and `terraform` exist in your $PATH. We're not sure which one to use. Please set the 'binary' parameter in your .tp.toml config file to whichever binary you want to use.")
+				os.Exit(1)
 			}
 		}
 
@@ -189,8 +190,6 @@ func init() {
 	if err != nil {
 		logger.Debug("Unable to bind to verbose flag: ", err)
 	}
-	// Register 'debug' to the defined flag 'verbose' above
-	viper.RegisterAlias("verbose", "debug")
 	Verbose, err := rootCmd.Flags().GetBool("verbose")
 	logger.Debug("I'm inside init, Verbose is %t\n", Verbose)
 	if err != nil {
@@ -246,8 +245,7 @@ func initConfig() {
 			os.Exit(1)
 		}
 	}
-	// Verbose = viper.GetBool("verbose")
-	logger.Debug("I'm inside initConfig() and Verbose is %t:\n", Verbose)
+	logger.Debugf("I'm inside initConfig() and Verbose is %t:\n", Verbose)
 	v := viper.IsSet("verbose")
 	if v {
 		logger.Debugf("Verbose is %t:\n", v)
