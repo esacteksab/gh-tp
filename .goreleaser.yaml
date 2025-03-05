@@ -18,7 +18,7 @@ builds:
     ldflags:
       - -s -w
       - -X github.com/esacteksab/gh-tp/cmd.Version={{.Tag}}
-      - -X github.com/esacteksab/gh-tp/cmd.Date={{time "2006-01-02"}}
+      - -X github.com/esacteksab/gh-tp/cmd.Date={{.Now.Format "2006-01-02-15:04:05-MST"}}
       - -X github.com/esacteksab/gh-tp/cmd.Commit={{.ShortCommit}}
       - -X github.com/esacteksab/gh-tp/cmd.BuiltBy=goreleaser
 archives:
@@ -86,3 +86,5 @@ release:
 
 snapshot:
   version_template: "{{ incpatch .Version }}-devel"
+
+report_sizes: true

@@ -57,7 +57,7 @@ endif
 
 	gh ext install .
 
-	-gh tp
+	-gh tp --version
 
 
 
