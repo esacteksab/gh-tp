@@ -8,8 +8,10 @@ import (
 	"os"
 	"runtime"
 	"runtime/debug"
+	"strings"
 	"time"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/log"
 	"github.com/cli/safeexec"
 	"github.com/fatih/color"
@@ -24,6 +26,8 @@ var (
 	binaries           []string
 	cfgFile            string
 	out                io.Reader
+	logger             *log.Logger
+	MaxWidth           int
 	mdParam            string
 	spinnerDuration    time.Duration
 	titleCaseConverter cases.Caser
@@ -38,7 +42,6 @@ var (
 	bold               = color.New(color.Bold).SprintFunc()
 	green              = color.New(color.FgGreen).SprintFunc()
 	red                = color.New(color.FgRed).SprintFunc()
-	logger             = log.New(os.Stderr)
 )
 
 type tpFile struct {
@@ -179,6 +182,19 @@ func Execute() {
 }
 
 func init() {
+	logger = log.NewWithOptions(os.Stderr, log.Options{
+		ReportCaller:    false,
+		ReportTimestamp: true,
+		TimeFormat:      time.Kitchen,
+	})
+	MaxWidth = 4
+	styles := log.DefaultStyles()
+	styles.Levels[log.DebugLevel] = lipgloss.NewStyle().
+		SetString(strings.ToUpper(log.DebugLevel.String())).
+		Bold(true).MaxWidth(MaxWidth).Foreground(lipgloss.Color("12"))
+	logger.SetStyles(styles)
+	logger.Debug("Testing new Debug")
+	logger.Debugf("I'm inside initConfig() and Verbose is %t:\n", Verbose)
 	cobra.OnInitialize(initConfig)
 
 	// Here you will define your flags and configuration settings.
@@ -245,7 +261,7 @@ func initConfig() {
 			os.Exit(1)
 		}
 	}
-	logger.Debugf("I'm inside initConfig() and Verbose is %t:\n", Verbose)
+
 	v := viper.IsSet("verbose")
 	if v {
 		logger.Debugf("Verbose is %t:\n", v)
