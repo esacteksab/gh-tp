@@ -17,7 +17,6 @@ var (
 	planMd      *os.File
 	planBody    *md.Markdown
 	planDetails string
-	planPath    string
 	planStr     string
 	sb          strings.Builder
 	sbDetails   strings.Builder
