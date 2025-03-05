@@ -200,11 +200,9 @@ func init() {
 		logger.SetLevel(log.DebugLevel)
 		logger.Debug("I'm inside !Verbose init() and my value is %t\n", Verbose)
 	}
+
 	rootCmd.Flags().
-		StringVar(&cfgFile,
-			"config",
-			"",
-			"config file (Config file is named .tp.toml. We look in your $HOME first, then your project directory's root.)")
+		StringVar(&cfgFile, "config", "", "config file (Config file is named .tp.toml. We look in $HOME first, then your project directory's root.)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
