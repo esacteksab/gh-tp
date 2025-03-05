@@ -23,7 +23,7 @@ permissions:
   contents: read
 
 jobs:
-  goreleaser:
+  audit:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
