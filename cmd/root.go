@@ -189,7 +189,8 @@ func init() {
 	if err != nil {
 		logger.Debug("Unable to bind to verbose flag: ", err)
 	}
-	viper.RegisterAlias("debug", "verbose")
+	// Register 'debug' to the defined flag 'verbose' above
+	viper.RegisterAlias("verbose", "debug")
 	Verbose, err := rootCmd.Flags().GetBool("verbose")
 	logger.Debug("I'm inside init, Verbose is %t\n", Verbose)
 	if err != nil {
@@ -201,7 +202,7 @@ func init() {
 	}
 
 	rootCmd.Flags().
-		StringVar(&cfgFile, "config", "", "config file (default is $HOME/.tp.toml, can also exist in your project's root directory.)")
+		StringVar(&cfgFile, "config", "", "config file (Config file is named .tp.toml. We look in $HOME first, then your project directory's root.)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
