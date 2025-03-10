@@ -22,9 +22,7 @@ import (
 )
 
 var (
-	binary             string
 	binaries           []string
-	cfgFile            string
 	out                io.Reader
 	logger             *log.Logger
 	MaxWidth           int
@@ -217,7 +215,7 @@ func init() {
 	}
 
 	rootCmd.Flags().
-		StringVar(&cfgFile, "config", "", "config file (Config file is named .tp.toml. We look in $HOME first, then your project directory's root.)")
+		StringVar(&cfgFile, "config", "", "config file named .tp.toml. We look in your project's root, then $HOME/.config/ lastly your $HOME directory.)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -232,15 +230,15 @@ func initConfig() {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
-		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
+		// Find home directory and home config directory.
+		homeDir, configDir, _, _ = getDirectories()
 
 		// Search config in home directory with name ".tp.toml"
 		viper.SetConfigName(".tp.toml")
 		viper.SetConfigType("toml")
-		viper.AddConfigPath(home)
 		viper.AddConfigPath(".")
+		viper.AddConfigPath(configDir)
+		viper.AddConfigPath(homeDir)
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
