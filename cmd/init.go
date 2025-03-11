@@ -98,7 +98,7 @@ in the location selected. Order of lookups is:
 					}),
 
 				huh.NewConfirm().
-					Title("Create file[Y], or write to stdout[N]?").
+					Title("Create file [Y], Write to stdout [N]?").
 					Value(&createFile),
 			),
 		).WithTheme(huh.ThemeBase16()).
@@ -161,6 +161,7 @@ in the location selected. Order of lookups is:
 			if err != nil {
 				log.Fatalf("Error writing Config file: %s", err)
 			}
+			logger.Infof("Config file %s/.tp.toml created", cfgFile)
 		} else {
 			fmt.Println(string(config))
 		}
