@@ -153,7 +153,7 @@ var rootCmd = &cobra.Command{
 				// the arg received looks like a file, we try to open it
 			}
 		} else {
-			log.Errorf("No %s files found. Please run this in a directory with %s files present.",
+			logger.Errorf("No %s files found. Please run this in a directory with %s files present.",
 				cases.Title(language.English).String(binary), cases.Title(language.English).String(binary))
 			os.Exit(1)
 		}
