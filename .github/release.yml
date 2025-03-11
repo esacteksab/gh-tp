@@ -20,7 +20,6 @@ changelog:
       labels:
         - "type: fix"
         - "type: bug"
-        - "type: refactor"
 
     - title: ":nail_polish: Style, UI, UX"
       labels:
@@ -42,4 +41,4 @@ changelog:
 
     - title: ":question: What's Changed"
       labels:
-        - "*"
+        - "type: refactor"
