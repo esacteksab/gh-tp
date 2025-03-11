@@ -272,3 +272,6 @@ dist/
 .tp.toml
 .tp
 .tp.yml
+.tp.hold
+tp*.md
+tp*.out
