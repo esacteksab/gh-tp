@@ -60,7 +60,7 @@ repos:
     hooks:
       - id: make-tidy
         name: "Make Tidy"
-        entry: "make mod"
+        entry: "make tidy"
         language: system
         pass_filenames: false
 
