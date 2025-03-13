@@ -18,16 +18,8 @@ ifneq (,$(wildcard ./*plan.md))
 	rm *plan.md
 endif
 
-ifneq (,$(wildcard ./tpplan.md))
-	rm tpplan.md
-endif
-
 ifneq (,$(wildcard ./*plan.out))
 	rm *plan.out
-endif
-
-ifneq (,$(wildcard ./tpplan.out))
-	rm tpplan.out
 endif
 
 ifneq (,$(wildcard ./*.tf))
