@@ -25,9 +25,9 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/zclconf/go-cty v1.16.1 // indirect
-	golang.org/x/crypto v0.33.0 // indirect
+	golang.org/x/crypto v0.35.0 // indirect
 	golang.org/x/mod v0.23.0 // indirect
-	golang.org/x/net v0.35.0 // indirect
+	golang.org/x/net v0.36.0 // indirect
 	golang.org/x/term v0.29.0 // indirect
 	golang.org/x/tools v0.30.0 // indirect
 )
