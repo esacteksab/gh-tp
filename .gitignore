@@ -275,3 +275,9 @@ dist/
 .tp.hold
 tp*.md
 tp*.out
+
+#
+# Mise Things
+#
+
+.mise*
