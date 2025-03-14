@@ -182,7 +182,7 @@ func Execute() {
 func init() {
 	logger = log.NewWithOptions(os.Stderr, log.Options{
 		ReportCaller:    false,
-		ReportTimestamp: true,
+		ReportTimestamp: false,
 		TimeFormat:      time.Kitchen,
 	})
 	MaxWidth = 4

@@ -1,0 +1,4 @@
+# Passing it a bad config file -- this fails TODO Fix #64
+! exec /home/bmorriso/local-repo/projects/tp/gh-tp/gh-tp --config /tmp/foo/.tp.toml
+! stdout .
+stderr 'ERRO Missing Config File: Config file should be named .tp.toml and exist in your home directory or in your project''s root.'
