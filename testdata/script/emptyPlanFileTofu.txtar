@@ -28,4 +28,4 @@ found no differences, so no changes are needed.
 </details>
 
 -- formatters --
-# Thie exists because the formatters try and remove more than one line and it breaks golden.md
+# This exists because the formatters try and remove more than one line and it breaks golden.mdFile
