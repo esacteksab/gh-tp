@@ -16,7 +16,7 @@ repos:
         name: "Check Merge Conflicts"
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.31.2
+    rev: 0.31.3
     hooks:
       - id: check-github-workflows
       - id: check-dependabot
@@ -25,19 +25,31 @@ repos:
         files: ^\.pre-commit-config.yaml+$
         types:
           - yaml
-        args: ["--schemafile", "https://json.schemastore.org/pre-commit-config.json"]
+        args:
+          [
+            "--schemafile",
+            "https://json.schemastore.org/pre-commit-config.json",
+          ]
       - id: check-jsonschema
         name: "Validate MarkdownLint"
         files: ^\.markdownlint.yml+$
         types:
           - yaml
-        args: ["--schemafile", "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json"]
+        args:
+          [
+            "--schemafile",
+            "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json",
+          ]
       - id: check-jsonschema
         name: "Validate golangci-lint config"
         files: ^\.golangci.yaml+$
         types:
           - yaml
-        args: ["--schemafile", "https://golangci-lint.run/jsonschema/golangci.jsonschema.json"]
+        args:
+          [
+            "--schemafile",
+            "https://golangci-lint.run/jsonschema/golangci.jsonschema.json",
+          ]
       - id: check-jsonschema
         name: "Validate goreleaser config"
         files: ^\.goreleaser.yaml+$
@@ -90,9 +102,16 @@ repos:
       - id: codespell
         name: "Code Spell"
 
-  -   repo: https://github.com/shellcheck-py/shellcheck-py
-      rev: v0.10.0.1
-      hooks:
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.30.2
+    hooks:
+      - id: typos
+        args: [--force-exclude]
+        name: "Typos"
+
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
       - id: shellcheck
         name: "Shell Check"
 
