@@ -274,20 +274,27 @@ func initConfig() {
 	keys := viper.AllKeys()
 	logger.Debugf("Defined keys: %s in %s", keys, viper.ConfigFileUsed())
 
-	// // Check to see if required 'planFile' parameter is set
-	o := viper.IsSet("planFile")
-	if !o {
-		logger.Errorf(
-			"Missing Parameter: 'planFile' (type: string) is not defined in %s. This is the name of the plan's output file that will be created by `gh tp`.\n", viper.ConfigFileUsed())
+	if doesNotExist(viper.ConfigFileUsed()) {
+		fmt.Println(viper.ConfigFileUsed())
+		logger.Error("Config file not found.")
 		os.Exit(1)
-	}
+		// May want to put cmd.Help() or something about expectations with config parameters.
+	} else {
+		// Check to see if required 'planFile' parameter is set
+		o := viper.IsSet("planFile")
+		if !o {
+			logger.Errorf(
+				"Missing Parameter: 'planFile' (type: string) is not defined in %s. This is the name of the plan's output file that will be created by `gh tp`.\n", viper.ConfigFileUsed())
+			os.Exit(1)
+		}
 
-	// // Check to see if required 'mdFile' parameter is set
-	m := viper.IsSet("mdFile")
-	if !m {
-		logger.Errorf(
-			"Missing Parameter: 'mdFile' (type: string) is not defined in %s. This is the name of the Markdown file that will be created by `gh tp`.\n", viper.ConfigFileUsed())
-		os.Exit(1)
+		// Check to see if required 'mdFile' parameter is set
+		m := viper.IsSet("mdFile")
+		if !m {
+			logger.Errorf(
+				"Missing Parameter: 'mdFile' (type: string) is not defined in %s. This is the name of the Markdown file that will be created by `gh tp`.\n", viper.ConfigFileUsed())
+			os.Exit(1)
+		}
+		logger.Debugf("Using config file: %s", viper.ConfigFileUsed())
 	}
-	logger.Debugf("Using config file: %s", viper.ConfigFileUsed())
 }

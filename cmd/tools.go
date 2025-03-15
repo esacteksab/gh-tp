@@ -47,6 +47,15 @@ func existsOrCreated(files []tpFile) error {
 	return err
 }
 
+// Feels like a bit of a duplicate to the above function, this takes a path string an returns a bool
+// on whether or not the path exists -- TODO #66 probably worth deduping this eventually
+func doesNotExist(path string) bool {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return true
+	}
+	return false
+}
+
 func getDirectories() (homeDir, configDir, cwd string, err error) {
 	homeDir = xdg.Home
 
