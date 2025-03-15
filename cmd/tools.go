@@ -8,7 +8,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/adrg/xdg"
+	"github.com/charmbracelet/log"
 	"github.com/fatih/color"
+	"github.com/pelletier/go-toml/v2"
 )
 
 func checkFilesByExtension(dir string, exts []string) bool {
@@ -42,4 +45,33 @@ func existsOrCreated(files []tpFile) error {
 		}
 	}
 	return err
+}
+
+// Feels like a bit of a duplicate to the above function, this takes a path string an returns a bool
+// on whether or not the path exists -- TODO #66 probably worth deduping this eventually
+func doesNotExist(path string) bool {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return true
+	}
+	return false
+}
+
+func getDirectories() (homeDir, configDir, cwd string, err error) {
+	homeDir = xdg.Home
+
+	configDir = xdg.ConfigHome
+
+	cwd, cwderr := os.Getwd()
+	if cwderr != nil {
+		log.Errorf("Error: %s", err)
+	}
+	return homeDir, configDir, cwd, err
+}
+
+func genConfig(conf ConfigParams) (data []byte, err error) {
+	data, err = toml.Marshal(conf)
+	if err != nil {
+		log.Fatalf("Failed marshalling TOML: %s", err)
+	}
+	return data, err
 }

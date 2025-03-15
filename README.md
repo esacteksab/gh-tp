@@ -91,7 +91,32 @@ I feel like I'm in this _weird_ space. I programmatically run a `terraform plan 
 
 <!--## Contribute
 
-### Local Development Setup-->
+### Local Development Setup
+
+Go 1.24 # Using 1.24.1 on March 10, 2025
+Python >=3.10,<3.13 # for Pre-commit
+
+Leveraging a `Makefile`, targets include
+
+- `audit`
+- `build`
+- `clean`
+- `format`
+- `tidy`
+
+Typical workflow locally is `make tidy format audit clean build`, `build` calls `gh tp --version` which is defined in `.goreleaser.yaml`.
+
+```bash
+$ gh tp --version
+Version 0.2.4-devel
+Commit: bd4029f
+Built at: 2025-03-11-00:39:19-UTC
+Built by: goreleaser
+GOOS: linux
+GOARCH: amd64
+```
+
+-->
 
 #### Disclaimer
 

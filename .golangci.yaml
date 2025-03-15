@@ -19,6 +19,7 @@ linters:
     - nolintlint
     - perfsprint
     - stylecheck
+    - testifylint
     - unused
     - whitespace
 

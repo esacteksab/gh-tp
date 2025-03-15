@@ -1,0 +1,3 @@
+# Passing it a non-existent config file
+! exec /home/bmorriso/local-repo/projects/tp/gh-tp/gh-tp --config /tmp/foo/.tp.toml
+stderr 'ERRO Config file not found.'
