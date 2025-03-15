@@ -1,0 +1,31 @@
+# Passing it a config file, .tf file exits, plan.out and plan.md should be created
+exec /home/bmorriso/local-repo/projects/tp/gh-tp/gh-tp
+stdout '✔  Plan Created...'\n'✔  Markdown Created...'
+exists plan.out
+exists plan.md
+cmp plan.md golden.md
+
+-- .tp.toml --
+binary = 'terraform'
+planFile = 'plan.out'
+mdFile = 'plan.md'
+verbose = false
+
+-- foo.tf --
+
+-- golden.md --
+<details><summary>Terraform Plan</summary>
+
+```terraform
+
+No changes. Your infrastructure matches the configuration.
+
+Terraform has compared your real infrastructure against your configuration
+and found no differences, so no changes are needed.
+
+```
+
+</details>
+
+-- formatters --
+# This exists because the formatters try and remove more than one line and it breaks golden.md

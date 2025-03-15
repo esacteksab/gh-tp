@@ -1,0 +1,13 @@
+# Both tofu and terraform exist in $PATH
+# I can't get this to work so this is done in cmd/root_test.go TestDuplicateBinaries()
+! exec /home/bmorriso/local-repo/projects/tp/gh-tp/gh-tp
+cmp stderr want
+
+
+-- want --
+ERRO Found both tofu and terraform in your $PATH. We are not sure which one to use. Please set the binary parameter in your $WORK/.tp.toml config file to the binary you want to use.
+
+-- .tp.toml --
+planFile = 'plan.out'
+mdFile = 'plan.md'
+verbose = false

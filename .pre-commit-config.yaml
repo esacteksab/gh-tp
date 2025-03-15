@@ -8,6 +8,7 @@ repos:
           - --markdown-linebreak-ext=md
       - id: end-of-file-fixer
         name: "EOF Fixer"
+        exclude: ^testdata/
       - id: check-json
         name: "Check JSON"
       - id: check-yaml
@@ -25,19 +26,31 @@ repos:
         files: ^\.pre-commit-config.yaml+$
         types:
           - yaml
-        args: ["--schemafile", "https://json.schemastore.org/pre-commit-config.json"]
+        args:
+          [
+            "--schemafile",
+            "https://json.schemastore.org/pre-commit-config.json",
+          ]
       - id: check-jsonschema
         name: "Validate MarkdownLint"
         files: ^\.markdownlint.yml+$
         types:
           - yaml
-        args: ["--schemafile", "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json"]
+        args:
+          [
+            "--schemafile",
+            "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json",
+          ]
       - id: check-jsonschema
         name: "Validate golangci-lint config"
         files: ^\.golangci.yaml+$
         types:
           - yaml
-        args: ["--schemafile", "https://golangci-lint.run/jsonschema/golangci.jsonschema.json"]
+        args:
+          [
+            "--schemafile",
+            "https://golangci-lint.run/jsonschema/golangci.jsonschema.json",
+          ]
       - id: check-jsonschema
         name: "Validate goreleaser config"
         files: ^\.goreleaser.yaml+$
@@ -76,6 +89,7 @@ repos:
     rev: 0.7.22
     hooks:
       - id: mdformat
+        exclude: ^testdata/
         name: "Markdown Formatter"
         additional_dependencies:
           - mdformat-gfm
@@ -90,9 +104,9 @@ repos:
       - id: codespell
         name: "Code Spell"
 
-  -   repo: https://github.com/shellcheck-py/shellcheck-py
-      rev: v0.10.0.1
-      hooks:
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
       - id: shellcheck
         name: "Shell Check"
 
