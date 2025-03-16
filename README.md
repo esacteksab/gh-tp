@@ -11,13 +11,30 @@ gh ext install esacteksab/gh-tp
 
 ### `.tp.toml` config file
 
-I wanted to make as few assumptions about your environment as possible, so `tp` does not define any default values today. `tp` uses a config file named `.tp.toml`. This config file is written in [TOML](https://toml.io/). TOML is case-sensitive and keys are [mixedCase or camelCase](https://en.wikipedia.org/wiki/Camel_case) where applicable. It has 2 required parameters with one optional parameter. The config file is expected to exist in either your home directory or in the root of your project from where you will execute `gh tp` from. A annotated copy exists in the [example](./example) directory. **_The config file, the parameters and possibly the presence of default values is actively being worked on. This behavior may change in a future release._**
+I wanted to make as few assumptions about your environment as possible, so `tp` defines one default value `verbose = false` today. `tp` uses a config file named `.tp.toml`. This config file is written in [TOML](https://toml.io/). TOML is case-sensitive and keys are [mixedCase or camelCase](https://en.wikipedia.org/wiki/Camel_case) where applicable. It has 2 required parameters with two optional parameters. The lookup order for locating the config file is, your project's root (.e.g '.tp.toml'), `$XDG_CONFIG_HOME/.tp.toml`, on \*nix this is `~/.config`, on MacOS this is `~/Library/Application Support`, on Windows this is `LocalAppData` falling back to `%LOCALAPPDATA%` and finally, we look in `$HOME/.tp.toml`.
 
-| Parameter | Type   | Required | Description                                                                                                                      |
-| --------- | ------ | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| binary    | string | N[^3]    | We look on your `$PATH` for `tofu` or `terraform`, if both exist, you _must_ define _one_ in your config. _Default: `undefined`_ |
-| planFile  | string | Y        | The name of the plan's output file created by `gh tp`. _Default: `""`_                                                           |
-| mdFile    | string | Y        | The name of the Markdown file created by `gh tp`. _Default: `""`_                                                                |
+A annotated copy exists in the [example](./example) directory. **_The config file, the parameters and possibly the presence of default values is actively being worked on. This behavior may change in a future release._**
+
+| Parameter | Type   | Flag              | Required | Description                                                                                                                                                          |
+| --------- | ------ | ----------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| binary    | string | `-b`, `--binary`  | N [^3]   | We look on your `$PATH` for `tofu` or `terraform`, if both exist, you _must_ define _one_ in your config or pass the flag `-b` or `--binary`. _Default: `undefined`_ |
+| planFile  | string | `-o`, `--outFile` | Y        | The name of the plan's output file created by `gh tp`. _Default: `""`_                                                                                               |
+| mdFile    | string | `-m`, `--mdFile`  | Y        | The name of the Markdown file created by `gh tp`. _Default: `""`_                                                                                                    |
+| verbose   | bool   | `-v`, `--verbose` | N        | Enable verbose logging. _Default: `false`_                                                                                                                           |
+
+#### `gh tp init`
+
+You can generate a config file with `gh tp init` which is an interactive prompt with a few questions giving you the opportunity to create the file or printing to stdout so you can create the file some other way.
+
+#### `gh tp --config`
+
+If you'd rather not create a config file or use one of the supported paths, you can create a file anywhere you'd like named `.tp.toml` and pass `-c` or `--config` to `gh tp` with the path to that file.
+
+```bash
+gh tp --config /var/tmp/.tp.toml
+✔  Plan Created...
+✔  Markdown Created...
+```
 
 ### Using `tp`
 
@@ -29,7 +46,7 @@ gh tp
 ✔  Markdown Created...
 ```
 
-Two files will be created, the first an output file named, what you defined for the value of `planFile` in `.tp.toml` config and a Markdown file named what you defined for the value of the parameter `mdFile` in the `.tp.toml` config file.
+Two files will be created, the first an output file named, what you defined for the value of `planFile` in `.tp.toml` config or passed with the `-o` or `--outFile` flag and a Markdown file named what you defined for the value of the parameter `mdFile` in the `.tp.toml` config file or passed to `-m` or `--mdFile` flag.
 
 ### Create Commit
 
