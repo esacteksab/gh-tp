@@ -65,7 +65,20 @@ format:
 tidy:
 	go mod tidy
 
-.PHONY: format
+
+.PHONY: realbuild
+realbuild: tidy format audit
+
+	goreleaser build --clean --single-target --snapshot
+	cp dist/gh-tp_linux_amd64_v1/gh-tp .
+
+	gh ext remove tp
+
+	gh ext install .
+
+	-gh tp --version
+
+.PHONY: reallyclean
 reallyclean: clean
 
 ifneq (,$(wildcard ./.tp.toml*))
@@ -83,3 +96,7 @@ endif
 ifneq (,$(wildcard /var/tmp/tp.toml*))
 	rm /var/tmp/tp.toml*
 endif
+
+.PHONY: test
+test: realbuild
+	go test ./...
