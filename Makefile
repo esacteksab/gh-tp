@@ -11,16 +11,15 @@ audit:
 	go tool -modfile=go.tool.mod staticcheck ./...
 	go tool -modfile=go.tool.mod govulncheck ./...
 	golangci-lint run -v
-# docker run -t --rm -v $(pwd):/app -w /app golangci/golangci-lint:v1.64.5 golangci-lint run -v
 
 .PHONY: clean
 clean:
-ifneq (,$(wildcard ./plan.md))
-	rm plan.md
+ifneq (,$(wildcard ./*plan.md))
+	rm *plan.md
 endif
 
-ifneq (,$(wildcard ./plan.out))
-	rm plan.out
+ifneq (,$(wildcard ./*plan.out))
+	rm *plan.out
 endif
 
 ifneq (,$(wildcard ./*.tf))
@@ -34,22 +33,20 @@ ifneq (,$(wildcard ./gh-tp))
 	rm gh-tp
 endif
 
+ifneq (,$(wildcard ./dist))
 	rm -rf dist
+
+endif
+
+ifneq (,$(wildcard ./coverage))
 	rm -f coverage.*
+
+endif
 
 
 .PHONY: build
 build:
 
-ifneq (,$(wildcard ./plan.md))
-	rm plan.md
-endif
-
-ifneq (,$(wildcard ./plan.out))
-	rm plan.out
-endif
-
-	# scripts/build-dev.sh
 	goreleaser build --clean --single-target --snapshot
 	cp dist/gh-tp_linux_amd64_v1/gh-tp .
 
@@ -60,7 +57,29 @@ endif
 	-gh tp --version
 
 
+.PHONY: format
+format:
+	gofumpt -l -w .
 
-.PHONY: mod
-mod:
+.PHONY: tidy
+tidy:
 	go mod tidy
+
+.PHONY: format
+reallyclean: clean
+
+ifneq (,$(wildcard ./.tp.toml*))
+	rm .tp.toml*
+endif
+
+ifneq (,$(wildcard ~/.tp.toml*))
+	rm ~/.tp.toml*
+endif
+
+ifneq (,$(wildcard ~/.config/tp.toml*))
+	rm ~/.config/tp.toml*
+endif
+
+ifneq (,$(wildcard /var/tmp/tp.toml*))
+	rm /var/tmp/tp.toml*
+endif

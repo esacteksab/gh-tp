@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/briandowns/spinner"
-	"github.com/charmbracelet/log"
 	"github.com/cli/safeexec"
 	"github.com/hashicorp/terraform-exec/tfexec"
 	"github.com/spf13/viper"
@@ -18,7 +17,7 @@ import (
 func createPlan() (planStr string, err error) {
 	execPath, err := safeexec.LookPath(binary)
 	if err != nil {
-		log.Fatal(
+		logger.Fatal(
 			"Please ensure either `tofu` or `terraform` are installed and on your $PATH.",
 		)
 		// os.Exit(1)
@@ -28,14 +27,14 @@ func createPlan() (planStr string, err error) {
 	// Initialize tf -- NOT terraform init
 	tf, err := tfexec.NewTerraform(workingDir, execPath)
 	if err != nil {
-		log.Fatalf("error calling binary: %s\n", err)
+		logger.Fatalf("error calling binary: %s\n", err)
 	}
 
 	// Check for .terraform.lock.hcl -- do not need to do this every time
 	// terraform init | installs providers, etc.
 	// err = tf.Init(context.Background())
 	// if err != nil {
-	//	log.Fatalf("error running Init: %s", err)
+	//	logger.Fatalf("error running Init: %s", err)
 	// }
 
 	// the plan file
@@ -45,10 +44,10 @@ func createPlan() (planStr string, err error) {
 		tfexec.Out(planPath),
 	}
 
-	log.Debugf("plan output: %s", planStr)
+	logger.Debugf("plan output: %s", planStr)
 	mdParam = viper.GetString("mdFile")
 
-	log.Debugf("Creating %s plan file %s...", binary, planPath)
+	logger.Debugf("Creating %s plan file %s...", binary, planPath)
 	// terraform plan -out plan.out -no-color
 	spinnerDuration = 100
 	s := spinner.New(spinner.CharSets[14], spinnerDuration*time.Millisecond)
@@ -58,7 +57,7 @@ func createPlan() (planStr string, err error) {
 	_, err = tf.Plan(context.Background(), planOpts...)
 	if err != nil {
 		// binary defined. .tf or .tofu files exist. Still errors. Show me the error
-		log.With("err", err).Errorf("%s returned the follow error", binary)
+		logger.With("err", err).Errorf("%s returned the follow error", binary)
 		// Edge case exists where we detect .tofu file but terraform was called,
 		// which doesn't support .tofu files. tf.Plan returns error.
 		// There is a condition that exists where .tofu files exist, but terraform
@@ -69,25 +68,25 @@ func createPlan() (planStr string, err error) {
 		// making this error inaccurate. Could be nice to identify and
 		// handle this edge case, but Terraform/Tofu do it good enough for now.
 		// if binary == "terraform" {
-		// 	log.Infof("Detected `*.tofu` files, but you've defined %s
+		// 	logger.Infof("Detected `*.tofu` files, but you've defined %s
 		// as the binary to use in your .tp.toml config file. Terraform does not support `.tofu` files.", binary)
 		// }
 		// We need to exit on this error. tf.Plan actually returns status 1
 		// -- maybe some day we can intercept it or have awareness that it was returned.
-		log.Infof("Check the output of `%s plan` locally. If you believe this is a bug, please report the issue. TPE001.", binary)
+		logger.Infof("Check the output of `%s plan` locally. If you believe this is a bug, please report the issue. TPE001.", binary)
 		os.Exit(1)
 	}
 	s.Stop()
 
 	planStr, err = tf.ShowPlanFileRaw(context.Background(), planPath)
 	if err != nil {
-		log.Error(
+		logger.Error(
 			"error internally attempting to create the human-readable Plan: ",
 			err,
 		)
 	}
 
-	log.Debug((planStr))
+	logger.Debug((planStr))
 
 	return planStr, err
 }

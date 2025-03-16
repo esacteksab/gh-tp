@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/log"
 	"github.com/cli/safeexec"
@@ -22,9 +23,7 @@ import (
 )
 
 var (
-	binary             string
 	binaries           []string
-	cfgFile            string
 	out                io.Reader
 	logger             *log.Logger
 	MaxWidth           int
@@ -76,25 +75,53 @@ func buildVersion(Version, Commit, Date, BuiltBy string) string {
 var rootCmd = &cobra.Command{
 	Use:   "tp",
 	Short: "A GitHub CLI extension to submit a pull request with Terraform or OpenTofu plan output.",
-	Long:  `tp is a GitHub CLI extension to submit a pull request with Terraform or OpenTofu plan output formatted in GitHub Flavored Markdown.`,
+	Long: heredoc.Doc(`
+		'tp' is a GitHub CLI extension to create GitHub pull requests with GitHub Flavored Markdown
+		containing the output from an OpenTofu or Terraform plan output, wrapped around
+		'<details></details>' element so the plan output is collapsed for easier reading on longer outputs.
+		The body of your pull request will look like this https://github.com/esacteksab/gh-tp/example/EXAMPLE-PR.md
+
+		View the README at https://github.com/esacteksab/gh-tp or run 'gh tp init'
+		to use a prompt-based form with suggested values to create your .tp.toml config file now.`),
+
 	Run: func(cmd *cobra.Command, args []string) {
 		v := viper.IsSet("verbose")
 		if v {
-			logger.Debug("verbose is defined in .tp.toml")
 			Verbose = viper.GetBool("verbose")
-			logger.Debugf("I'm inside runCmd 'if v' and verbose is: %t", Verbose)
-		} else {
-			logger.Debug("I'm inside runCmd and v is not defined in .tp.toml")
 		}
-
-		Verbose, err := cmd.Flags().GetBool("verbose")
-		logger.Debugf("I'm inside runCmd(), and Verbose is %t", Verbose)
 		if err != nil {
-			logger.Errorf("Unable to get verbose flag: %s", err)
+			logger.Fatal("Unable to enable verbose output:", err)
 		}
 		if Verbose {
 			logger.SetLevel(log.DebugLevel)
-			logger.Debugf("I'm inside runCmd Verbose and my value is %t", Verbose)
+			logger.Debug("I'm a Debug statement in initConfig().")
+		}
+
+		keys := viper.AllKeys()
+		logger.Debugf("Defined keys: %s in %s", keys, viper.ConfigFileUsed())
+
+		if doesNotExist(viper.ConfigFileUsed()) {
+			logger.Debug(viper.ConfigFileUsed())
+			logger.Error("Config file not found. Please run 'gh tp init' or run 'gh tp help' or refer to the documentation on how to create a config file. https://github.com/esacteksab/gh-tp")
+			os.Exit(1)
+			// May want to put cmd.Help() or something about expectations with config parameters.
+		} else {
+			// Check to see if required 'planFile' parameter is set
+			o := viper.IsSet("planFile")
+			if !o {
+				logger.Errorf(
+					"Missing Parameter: 'planFile' (type: string) is not defined in %s. This is the name of the plan's output file that will be created by `gh tp`.\n", viper.ConfigFileUsed())
+				os.Exit(1)
+			}
+
+			// Check to see if required 'mdFile' parameter is set
+			m := viper.IsSet("mdFile")
+			if !m {
+				logger.Errorf(
+					"Missing Parameter: 'mdFile' (type: string) is not defined in %s. This is the name of the Markdown file that will be created by `gh tp`.\n", viper.ConfigFileUsed())
+				os.Exit(1)
+			}
+			logger.Debugf("Using config file: %s", viper.ConfigFileUsed())
 		}
 
 		b := viper.IsSet("binary")
@@ -114,7 +141,7 @@ var rootCmd = &cobra.Command{
 				}
 			}
 			if len(exists) == len(binaries) {
-				logger.Error("Seems both `tofu` and `terraform` exist in your $PATH. We're not sure which one to use. Please set the 'binary' parameter in your .tp.toml config file to whichever binary you want to use.")
+				logger.Errorf("Found both `tofu` and `terraform` in your $PATH. We're not sure which one to use. Please set the 'binary' parameter in your %s config file to the binary you want to use.", viper.ConfigFileUsed())
 				os.Exit(1)
 			}
 		}
@@ -184,7 +211,7 @@ func Execute() {
 func init() {
 	logger = log.NewWithOptions(os.Stderr, log.Options{
 		ReportCaller:    false,
-		ReportTimestamp: true,
+		ReportTimestamp: false,
 		TimeFormat:      time.Kitchen,
 	})
 	MaxWidth = 4
@@ -195,29 +222,54 @@ func init() {
 	logger.SetStyles(styles)
 	logger.Debug("Testing new Debug")
 	logger.Debugf("I'm inside initConfig() and Verbose is %t:\n", Verbose)
+
 	cobra.OnInitialize(initConfig)
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
-	rootCmd.Flags().BoolVarP(&Verbose, "verbose", "", false, "verbose output")
+	rootCmd.Flags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
+	rootCmd.Flags().StringP("binary", "b", "", "The name of the binary to use. Expect either `tofu` or `terraform`. Must exist on your $PATH.")
+	rootCmd.Flags().StringP("outFile", "o", "", "The name of the plan output file created by tp.")
+	rootCmd.Flags().StringP("mdFile", "m", "", "The name of the Markdown file created by tp.")
 
-	err := viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
+	err := viper.BindPFlag("verbose", rootCmd.Flags().Lookup("verbose"))
 	if err != nil {
-		logger.Debug("Unable to bind to verbose flag: ", err)
+		logger.Error("Unable to bind to verbose flag: ", err)
 	}
+	err = viper.BindPFlag("binary", rootCmd.Flags().Lookup("binary"))
+	if err != nil {
+		logger.Error("Unable to bind to binary flag: ", err)
+	}
+	err = viper.BindPFlag("planFile", rootCmd.Flags().Lookup("outFile"))
+	if err != nil {
+		logger.Error("Unable to bind to planFile flag: ", err)
+	}
+	err = viper.BindPFlag("mdFile", rootCmd.Flags().Lookup("mdFile"))
+	if err != nil {
+		logger.Error("Unable to bind to mdFile flag: ", err)
+	}
+
 	Verbose, err := rootCmd.Flags().GetBool("verbose")
 	logger.Debug("I'm inside init, Verbose is %t\n", Verbose)
 	if err != nil {
 		logger.Errorf("Unable to get verbose flag: %s", err)
 	}
+
 	if Verbose {
 		logger.SetLevel(log.DebugLevel)
-		logger.Debug("I'm inside !Verbose init() and my value is %t\n", Verbose)
+		logger.Errorf("I'm inside !Verbose init() and my value is %t\n", Verbose)
 	}
 
 	rootCmd.Flags().
-		StringVar(&cfgFile, "config", "", "config file (Config file is named .tp.toml. We look in $HOME first, then your project directory's root.)")
+		StringVarP(&cfgFile,
+			"config",
+			"c",
+			"",
+			`use this configuration file (default lookup:
+			1. a .tp.toml file in your project's root
+			2. $XDG_CONFIG_HOME/.tp.toml
+			3. $HOME/.tp.toml)`)
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -232,28 +284,23 @@ func initConfig() {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
-		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
+		// Find home directory and home config directory.
+		homeDir, configDir, _, _ = getDirectories()
 
 		// Search config in home directory with name ".tp.toml"
 		viper.SetConfigName(".tp.toml")
 		viper.SetConfigType("toml")
-		viper.AddConfigPath(home)
 		viper.AddConfigPath(".")
+		viper.AddConfigPath(configDir)
+		viper.AddConfigPath(homeDir)
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			logger.Error(
-				"Missing Config File: Config file should be named .tp.toml and exist in your home directory or in your project's root.\n",
-			)
-			os.Exit(1)
-		} else if _, ok := err.(viper.UnsupportedConfigError); ok {
-			logger.Errorf("Unsupported Format. Config file should be named .tp %s.", err)
+		if _, ok := err.(viper.UnsupportedConfigError); ok {
+			logger.Errorf("Unsupported Format. Config file should be named .tp.toml %s.", err)
 			os.Exit(1)
 			// This handles the situation where a duplicate key exists.
 		} else if _, ok := err.(viper.ConfigParseError); ok {
@@ -261,38 +308,4 @@ func initConfig() {
 			os.Exit(1)
 		}
 	}
-
-	v := viper.IsSet("verbose")
-	if v {
-		logger.Debugf("Verbose is %t:\n", v)
-		Verbose = viper.GetBool("verbose")
-	}
-	if err != nil {
-		logger.Fatal("Unable to enable verbose output:", err)
-	}
-	if Verbose {
-		logger.SetLevel(log.DebugLevel)
-		logger.Debug("I'm a Debug statement in initConfig().")
-	}
-	keys := viper.AllKeys()
-	logger.Debugf("Defined keys in .tp.toml: %s", keys)
-
-	// // Check to see if required 'planFile' parameter is set
-	o := viper.IsSet("planFile")
-	if !o {
-		logger.Error(
-			"Missing Parameter: 'planFile' (type: string) is not defined in the config file. This is the name of the plan's output file that will be created by `gh tp`.\n",
-		)
-		os.Exit(1)
-	}
-
-	// // Check to see if required 'mdFile' parameter is set
-	m := viper.IsSet("mdFile")
-	if !m {
-		logger.Error(
-			"Missing Parameter: 'mdFile' (type: string) is not defined in the config file. This is the name of the Markdown file that will be created by `gh tp`.\n",
-		)
-		os.Exit(1)
-	}
-	logger.Debugf("Using config file: %s", viper.ConfigFileUsed())
 }

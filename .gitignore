@@ -271,4 +271,14 @@ dist/
 #
 .tp.toml
 .tp
+.tp.toml*
 .tp.yml
+.tp.hold
+tp*.md
+tp*.out
+
+#
+# Mise Things
+#
+
+.mise*

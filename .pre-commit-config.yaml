@@ -8,6 +8,7 @@ repos:
           - --markdown-linebreak-ext=md
       - id: end-of-file-fixer
         name: "EOF Fixer"
+        exclude: ^testdata/
       - id: check-json
         name: "Check JSON"
       - id: check-yaml
@@ -72,7 +73,7 @@ repos:
     hooks:
       - id: make-tidy
         name: "Make Tidy"
-        entry: "make mod"
+        entry: "make tidy"
         language: system
         pass_filenames: false
 
@@ -88,6 +89,7 @@ repos:
     rev: 0.7.22
     hooks:
       - id: mdformat
+        exclude: ^testdata/
         name: "Markdown Formatter"
         additional_dependencies:
           - mdformat-gfm
