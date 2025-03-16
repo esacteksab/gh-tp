@@ -90,7 +90,7 @@ var initCmd = &cobra.Command{
 					Validate(func(pf string) error {
 						if pf == "" {
 							//lint:ignore ST1005 It's a user-facing error message. I want pretty!
-							return errors.New("This field is requiured. Please enter what your plan's output file should be named.") //nolint:stylecheck
+							return errors.New("This field is required. Please enter what your plan's output file should be named.") //nolint:stylecheck
 						}
 						return nil
 					}),
@@ -103,7 +103,7 @@ var initCmd = &cobra.Command{
 					Validate(func(md string) error {
 						if md == "" {
 							//lint:ignore ST1005 It's a user-facing error message. I want pretty!
-							return errors.New("This field is requiured. Please enter what your Markdown file should be named.") //nolint:stylecheck
+							return errors.New("This field is required. Please enter what your Markdown file should be named.") //nolint:stylecheck
 						}
 						return nil
 					}),
