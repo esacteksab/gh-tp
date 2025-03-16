@@ -7,7 +7,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/charmbracelet/log"
 	md "github.com/nao1215/markdown"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -33,7 +32,7 @@ const (
 func createMarkdown(mdParam, planStr string) (*os.File, string, error) {
 	planMd, err = os.Create(mdParam)
 	if err != nil {
-		log.Errorf("failed to create Markdown: %s\n", err)
+		logger.Errorf("failed to create Markdown: %s\n", err)
 	}
 
 	// Close the file when we're done with it
@@ -43,7 +42,7 @@ func createMarkdown(mdParam, planStr string) (*os.File, string, error) {
 	planBody = md.NewMarkdown(os.Stdout).
 		CodeBlocks(md.SyntaxHighlight(SyntaxHighlightTerraform), planStr)
 	if err != nil {
-		log.Errorf("error generating plan Markdown: %s\n", err)
+		logger.Errorf("error generating plan Markdown: %s\n", err)
 	}
 
 	// NewMarkdown returns io.Writer
@@ -61,18 +60,15 @@ func createMarkdown(mdParam, planStr string) (*os.File, string, error) {
 	// This is what creates the final document (`mdoutfile`) plmd here could possibly be os.Stdout one day
 	mderr := md.NewMarkdown(planMd).Details(planDetails, sbPlan).Build()
 	if mderr != nil {
-		log.Errorf("error generating %s markdown file, error: %s", mdParam, err)
+		logger.Errorf("error generating %s markdown file, error: %s", mdParam, err)
 	}
 
 	// planMd doesn't have a new line at eof, we need to give it one because Markdown
 	// Open the file
-	fmt.Println(mdParam)
-	fmt.Println(planMd)
 	file, err := os.OpenFile("./"+mdParam, os.O_APPEND|os.O_WRONLY, 0o644) //nolint:mnd
 	if err != nil {
 		logger.Error(err)
 	}
-	fmt.Println(file)
 
 	// Add new line
 	_, err = file.WriteString("\n\n")
