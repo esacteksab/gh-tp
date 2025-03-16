@@ -100,7 +100,7 @@ var rootCmd = &cobra.Command{
 		keys := viper.AllKeys()
 		logger.Debugf("Defined keys: %s in %s", keys, viper.ConfigFileUsed())
 
-		if doesNotExist(viper.ConfigFileUsed()) {
+		if !doesExist(viper.ConfigFileUsed()) {
 			logger.Debug(viper.ConfigFileUsed())
 			logger.Error("Config file not found. Please run 'gh tp init' or run 'gh tp help' or refer to the documentation on how to create a config file. https://github.com/esacteksab/gh-tp")
 			os.Exit(1)

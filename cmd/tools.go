@@ -3,16 +3,13 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 
-	"github.com/adrg/xdg"
-	"github.com/charmbracelet/huh"
 	"github.com/fatih/color"
-	"github.com/pelletier/go-toml/v2"
 )
 
 func checkFilesByExtension(dir string, exts []string) bool {
@@ -31,12 +28,15 @@ func checkFilesByExtension(dir string, exts []string) bool {
 	return exists
 }
 
+// existsOrCreate checks to see if a plan file and markdown exist or were created
+// Prints to terminal stating so
 func existsOrCreated(files []tpFile) error {
 	for _, v := range files {
-		if _, err := os.Stat(v.Name); err == nil {
+		exists := doesExist(v.Name)
+		if exists {
 			logger.Debugf("%s file %s was created.", v.Purpose, v.Name)
 			fmt.Fprintf(color.Output, "%s  %s%s\n", bold(green("✔")), v.Purpose, " Created...")
-		} else if errors.Is(err, os.ErrNotExist) {
+		} else if !exists {
 			//
 			logger.Errorf("Markdown file %s was not created.", v.Name)
 			fmt.Fprintf(color.Output, "%s  %s%s\n", bold(red("✕")), v.Purpose, " Failed to Create ...")
@@ -48,77 +48,31 @@ func existsOrCreated(files []tpFile) error {
 	return err
 }
 
-// Feels like a bit of a duplicate to the above function, this takes a path string an returns a bool
-// on whether or not the path exists -- TODO #66 probably worth deduping this eventually
-func doesNotExist(path string) bool {
+// doesExist takes a path string and returns a bool
+// on whether or not the path exists
+func doesExist(path string) bool {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return true
+		return false
 	}
-	return false
+	return true
 }
 
 func getDirectories() (homeDir, configDir, cwd string, err error) {
-	homeDir = xdg.Home
+	homeDir, err = os.UserHomeDir()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	configDir = xdg.ConfigHome
+	configDir, err = os.UserConfigDir()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	cwd, cwderr := os.Getwd()
 	if cwderr != nil {
 		logger.Errorf("Error: %s", err)
 	}
 	return homeDir, configDir, cwd, err
-}
-
-func genConfig(conf ConfigParams) (data []byte, err error) {
-	data, err = toml.Marshal(conf)
-	if err != nil {
-		logger.Fatalf("Failed marshalling TOML: %s", err)
-	}
-	return data, err
-}
-
-// takes cfgFile, appends ".tp.toml" to it
-// checks to see if file exists
-// based on existence, asks to create (doesn't exist)
-// or overwrite (exists)
-func mkFile(cfgFile string) (exists, createFile bool) {
-	configName = ".tp.toml"
-	noConfig := doesNotExist(cfgFile + "/" + configName)
-	logger.Debug(cfgFile + configName)
-	if noConfig {
-		logger.Debugf("%s/%s doesn't exist\n", cfgFile, configName)
-		err := huh.NewForm(
-			huh.NewGroup(
-				huh.NewConfirm().
-					Title("Create new file?").
-					Affirmative("Yes").
-					Negative("No").
-					Value(&createFile),
-			)).WithTheme(huh.ThemeBase16()).Run()
-		if err != nil {
-			logger.Fatal(err)
-		}
-		logger.Debugf("Inside mkFile() and config is %s/%s\n", cfgFile, configName)
-		return noConfig, createFile
-	} else if !noConfig {
-		err := huh.NewForm(
-			huh.NewGroup(
-				huh.NewConfirm().
-					Title("Overwrite existing config file?").
-					Affirmative("Yes").
-					Negative("No").
-					Value(&createFile),
-			)).WithTheme(huh.ThemeBase16()).Run()
-		if err != nil {
-			logger.Fatal(err)
-		}
-		logger.Debugf("Inside mkFile if exists, config is %s/%s\n", cfgFile, configName)
-		return noConfig, createFile
-	}
-
-	logger.Debugf("inside mkFile() noConfig is %t\n", noConfig)
-	logger.Debugf("Inside mkFile() config is %s/%s\n", cfgFile, configName)
-	return noConfig, createFile
 }
 
 // backupFile copies the file at source to dest

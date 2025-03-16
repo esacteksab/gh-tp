@@ -6,34 +6,12 @@ import (
 	"errors"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
 )
-
-var (
-	accessible  bool
-	binary      string
-	cfgBinary   string
-	cfgFile     string
-	cfgMdFile   string
-	cfgPlanFile string
-	configDir   string
-	createFile  bool
-	configName  string
-	homeDir     string
-	noConfig    bool
-)
-
-type ConfigParams struct {
-	Binary   string `toml:"binary" comment:"binary: (type: string) The name of the binary, expect either 'tofu' or 'terraform'. Must exist on your $PATH."`
-	PlanFile string `toml:"planFile" comment:"planFile: (type: string) The name of the plan file created by 'gh tp'."`
-	MdFile   string `toml:"mdFile" comment:"mdFile: (type: string) The name of the Markdown file created by 'gh tp'."`
-	Verbose  bool   `toml:"verbose" comment:"verbose: (type: bool) Enable Verbose Logging. Default is false."`
-}
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
@@ -145,57 +123,15 @@ var initCmd = &cobra.Command{
 				},
 			}).WithShowHelp(true).WithShowErrors(true).WithAccessible(accessible)
 
-		runerr := form.Run()
-		if runerr != nil {
-			logger.Warn(runerr)
-			os.Exit(1)
-		}
-
-		noConfig, createFile = mkFile(cfgFile)
-
-		conf := ConfigParams{
-			Binary:   cfgBinary,
-			PlanFile: cfgPlanFile,
-			MdFile:   cfgMdFile,
-			Verbose:  false,
-		}
-
-		config, err := genConfig(conf)
+		err = form.Run()
 		if err != nil {
 			logger.Fatal(err)
 		}
 
-		if createFile {
-			if noConfig {
-				// #69 Figure out how to get in here logger.Debugf("Inside noConfig and 'config' is: %s", string(config))
-				err = os.WriteFile(cfgFile+"/.tp.toml", config, 0o600) //nolint:mnd    // https://go.dev/ref/spec#Integer_literals
-				if err != nil {
-					logger.Fatalf("Error writing Config file: %s", err)
-				}
-
-			} else if !noConfig {
-				// #69 like above: logger.Debugf("Inside !noConfig and 'config' is: %s", string(config))
-				// epoch as an int64
-				e := time.Now().Unix()
-				// epoch as string
-				epoch := strconv.FormatInt(e, 10)
-
-				existingConfigFile := cfgFile + "/" + configName
-				bkupConfigFile := cfgFile + "/" + configName + "-bkup-" + epoch
-				// Create Backup
-				err := backupFile(existingConfigFile, bkupConfigFile)
-				if err != nil {
-					logger.Fatal(err)
-				}
-				// Create New File
-				err = os.WriteFile(cfgFile+"/.tp.toml", config, 0o600) //nolint:mnd    // https://go.dev/ref/spec#Integer_literals
-				if err != nil {
-					logger.Fatalf("Error writing Config file: %s", err)
-				}
-				logger.Infof("Config file %s/.tp.toml created", cfgFile)
-			}
-		} else if !createFile {
-			logger.Info(string(config))
+		// createConfig() Goes Here
+		err = createConfig(cfgBinary, cfgFile, cfgMdFile, cfgPlanFile)
+		if err != nil {
+			logger.Fatal(err)
 		}
 	},
 }
