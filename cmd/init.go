@@ -4,29 +4,32 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"strconv"
+	"time"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/huh"
-	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
 
 var (
-	accessible bool
-	binary     string
-	cfgFile    string
-	configDir  string
-	createFile bool
-	homeDir    string
-	mdFile     string
-	planFile   string
+	accessible  bool
+	binary      string
+	cfgBinary   string
+	cfgFile     string
+	cfgMdFile   string
+	cfgPlanFile string
+	configDir   string
+	createFile  bool
+	configName  string
+	homeDir     string
+	noConfig    bool
 )
 
 type ConfigParams struct {
-	Binary   string `toml:"binary" comment:"binary: (type: string) The name of the binary, either 'tofu' or 'terraform'. Must exist on your $PATH."`
+	Binary   string `toml:"binary" comment:"binary: (type: string) The name of the binary, expect either 'tofu' or 'terraform'. Must exist on your $PATH."`
 	PlanFile string `toml:"planFile" comment:"planFile: (type: string) The name of the plan file created by 'gh tp'."`
 	MdFile   string `toml:"mdFile" comment:"mdFile: (type: string) The name of the Markdown file created by 'gh tp'."`
 	Verbose  bool   `toml:"verbose" comment:"verbose: (type: bool) Enable Verbose Logging. Default is false."`
@@ -34,18 +37,26 @@ type ConfigParams struct {
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
-	Use:   "init",
-	Short: "Simple terminal-based form to generate a config file for tp",
-	Long: `A CLI prompt-based form with some suggested values to generate a config file for tp
-'gh tp init' with no flags or arguments will instantiate the prompt-based form. File will be created
-in the location selected. Order of lookups is:
-    '$HOME/.config/.tp.toml'
-	'$HOME/.tp.toml'
-	'.tp.toml' (Project's Root).`,
+	Use:               "init",
+	Aliases:           []string{"i"},
+	SilenceUsage:      true,
+	SilenceErrors:     true,
+	Args:              cobra.NoArgs,
+	ValidArgsFunction: cobra.NoFileCompletions,
+	Short:             "A interactive prompt-based form to generate a config file for tp.",
+	Long: heredoc.Doc(`
+		An interactive prompt-based form with some suggested values to generate a config file for tp.
+		File will be created in the one of the following locations:
+		Order of lookups is:
+			1. A .tp.toml file in your project's root
+			2. $XDG_CONFIG_HOME/.tp.toml
+			3. $HOME/.tp.toml)
+
+		View docs at https://github.com/esacteksab/gh-tp for more information.`),
 	Run: func(cmd *cobra.Command, args []string) {
 		homeDir, configDir, cwd, err := getDirectories()
 		if err != nil {
-			log.Fatalf("Error: %s", err)
+			logger.Fatalf("Error: %s", err)
 		}
 
 		// Should we run in accessible mode?
@@ -57,10 +68,10 @@ in the location selected. Order of lookups is:
 				huh.NewSelect[string]().
 					Title("Where would you like to save your .tp.toml config file?").
 					Options(
+						huh.NewOption("Project Root:"+".tp.toml", cwd).Selected(true),
 						huh.NewOption("Home Config Directory: "+configDir+"/.tp.toml",
-							configDir).Selected(true),
+							configDir),
 						huh.NewOption("Home Directory: "+homeDir+"/.tp.toml", homeDir),
-						huh.NewOption("Project Root:"+".tp.toml", cwd),
 					).Value(&cfgFile),
 
 				// It could make sense some day to do a `gh tp init --binary`
@@ -69,13 +80,13 @@ in the location selected. Order of lookups is:
 					Options(
 						huh.NewOption("OpenTofu", "tofu"),
 						huh.NewOption("Terraform", "terraform").Selected(true),
-					).Value(&binary),
+					).Value(&cfgBinary),
 
 				huh.NewInput().
 					Title("What do you want the name of your plan's output file to be? ").
 					Placeholder("example: tpplan.out tp.out tp.plan plan.out out.plan ...").
 					Suggestions([]string{"tpplan.out", "tp.out", "tp.plan", "plan.out", "out.plan"}).
-					Value(&planFile).
+					Value(&cfgPlanFile).
 					Validate(func(pf string) error {
 						if pf == "" {
 							//lint:ignore ST1005 It's a user-facing error message. I want pretty!
@@ -88,7 +99,7 @@ in the location selected. Order of lookups is:
 					Title("What do you want the name of your Markdown file to be?  ").
 					Suggestions([]string{"tpplan.md", "tp.md", "plan.md"}).
 					Placeholder("example: tpplan.md tp.md plan.md ...").
-					Value(&mdFile).
+					Value(&cfgMdFile).
 					Validate(func(md string) error {
 						if md == "" {
 							//lint:ignore ST1005 It's a user-facing error message. I want pretty!
@@ -96,10 +107,6 @@ in the location selected. Order of lookups is:
 						}
 						return nil
 					}),
-
-				huh.NewConfirm().
-					Title("Create file [Y], Write to stdout [N]?").
-					Value(&createFile),
 			),
 		).WithTheme(huh.ThemeBase16()).
 			// Just in case https://raw.githubusercontent.com/charmbracelet/huh/refs/tags/v0.6.0/keymap.go
@@ -140,30 +147,55 @@ in the location selected. Order of lookups is:
 
 		runerr := form.Run()
 		if runerr != nil {
-			log.Warn(runerr)
+			logger.Warn(runerr)
 			os.Exit(1)
 		}
 
+		noConfig, createFile = mkFile(cfgFile)
+
 		conf := ConfigParams{
-			Binary:   binary,
-			PlanFile: planFile,
-			MdFile:   mdFile,
+			Binary:   cfgBinary,
+			PlanFile: cfgPlanFile,
+			MdFile:   cfgMdFile,
 			Verbose:  false,
 		}
 
 		config, err := genConfig(conf)
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 
 		if createFile {
-			err = os.WriteFile(cfgFile+"/.tp.toml", config, 0o600) //nolint:mnd    // https://go.dev/ref/spec#Integer_literals
-			if err != nil {
-				log.Fatalf("Error writing Config file: %s", err)
+			if noConfig {
+				// #69 Figure out how to get in here logger.Debugf("Inside noConfig and 'config' is: %s", string(config))
+				err = os.WriteFile(cfgFile+"/.tp.toml", config, 0o600) //nolint:mnd    // https://go.dev/ref/spec#Integer_literals
+				if err != nil {
+					logger.Fatalf("Error writing Config file: %s", err)
+				}
+
+			} else if !noConfig {
+				// #69 like above: logger.Debugf("Inside !noConfig and 'config' is: %s", string(config))
+				// epoch as an int64
+				e := time.Now().Unix()
+				// epoch as string
+				epoch := strconv.FormatInt(e, 10)
+
+				existingConfigFile := cfgFile + "/" + configName
+				bkupConfigFile := cfgFile + "/" + configName + "-bkup-" + epoch
+				// Create Backup
+				err := backupFile(existingConfigFile, bkupConfigFile)
+				if err != nil {
+					logger.Fatal(err)
+				}
+				// Create New File
+				err = os.WriteFile(cfgFile+"/.tp.toml", config, 0o600) //nolint:mnd    // https://go.dev/ref/spec#Integer_literals
+				if err != nil {
+					logger.Fatalf("Error writing Config file: %s", err)
+				}
+				logger.Infof("Config file %s/.tp.toml created", cfgFile)
 			}
-			logger.Infof("Config file %s/.tp.toml created", cfgFile)
-		} else {
-			fmt.Println(string(config))
+		} else if !createFile {
+			logger.Info(string(config))
 		}
 	},
 }
