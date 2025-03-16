@@ -1,0 +1,8 @@
+[files]
+extend-exclude = ['.goreleaser.yaml']
+
+[default.extend-words]
+Hashi = 'Hashi'
+optin = 'optin'
+fa-adn = 'fa-adn'
+ERRO = 'ERRO'
