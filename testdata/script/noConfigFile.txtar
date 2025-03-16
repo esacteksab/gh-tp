@@ -1,4 +1,0 @@
-# An empty directory
-! exec /home/bmorriso/local-repo/projects/tp/gh-tp/gh-tp
-! stdout .
-stderr 'ERRO Missing Config File: Config file should be named .tp.toml and exist in your home directory or in your project''s root.'
