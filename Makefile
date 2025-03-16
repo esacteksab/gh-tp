@@ -64,3 +64,22 @@ format:
 .PHONY: tidy
 tidy:
 	go mod tidy
+
+.PHONY: format
+reallyclean: clean
+
+ifneq (,$(wildcard ./.tp.toml*))
+	rm .tp.toml*
+endif
+
+ifneq (,$(wildcard ~/.tp.toml*))
+	rm ~/.tp.toml*
+endif
+
+ifneq (,$(wildcard ~/.config/tp.toml*))
+	rm ~/.config/tp.toml*
+endif
+
+ifneq (,$(wildcard /var/tmp/tp.toml*))
+	rm /var/tmp/tp.toml*
+endif
