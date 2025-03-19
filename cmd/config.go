@@ -4,6 +4,7 @@ package cmd
 
 import (
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/charmbracelet/huh"
@@ -63,22 +64,29 @@ func createOrOverwrite(cfgFile string) (configExists, createFile bool) {
 }
 
 func query(configExists bool) (createFile bool, err error) {
+	// Should we run in accessible mode?
+	accessible, _ = strconv.ParseBool(os.Getenv("ACCESSIBLE"))
+
 	if !configExists {
 		title = "Create new file?"
 	} else if configExists {
 		title = "Overwrite existing config file?"
 	}
-	err = huh.NewForm(
+	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewConfirm().
 				Title(title).
 				Affirmative("Yes").
 				Negative("No").
 				Value(&createFile),
-		)).WithTheme(huh.ThemeBase16()).Run()
+		)).WithTheme(huh.ThemeBase16()).
+		WithAccessible(accessible)
+
+	err = form.Run()
 	if err != nil {
 		logger.Fatal(err)
 	}
+
 	return createFile, err
 }
 
