@@ -78,6 +78,7 @@ realbuild: tidy format audit
 
 	-gh tp --version
 
+
 .PHONY: reallyclean
 reallyclean: clean
 
@@ -89,13 +90,18 @@ ifneq (,$(wildcard ~/.tp.toml*))
 	rm ~/.tp.toml*
 endif
 
-ifneq (,$(wildcard ~/.config/tp.toml*))
-	rm ~/.config/tp.toml*
+ifneq (,$(wildcard ~/.config/*tp.toml*))
+	rm ~/.config/*tp.toml*
 endif
 
-ifneq (,$(wildcard /var/tmp/tp.toml*))
-	rm /var/tmp/tp.toml*
+ifneq (,$(wildcard /var/tmp/*tp.toml*))
+	rm /var/tmp/*tp.toml*
 endif
+
+ifneq (,$(wildcard ~/.config/gh-tp/.tp.toml*))
+	rm -rf ~/.config/gh-tp
+endif
+
 
 .PHONY: test
 test: realbuild
