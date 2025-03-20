@@ -3,12 +3,11 @@
 # Currently expects TOML -- https://toml.io
 # TOML is case-sensitive | Keys are mixedCase
 
-# Type: String. Name of the binary (e.g tofu or terraform. Must exist in your $PATH)
-# This parameter is only required to be set if both `tofu` and `terraform` exist on your $PATH.
-#binary = ""
-
-# Type: String. The name of the plan output file created with `gh tp`
-planFile = ""
-
-# Type: String. The name of the Markdown file that will be created with `gh tp``
-mdFile = ""
+# binary: (type: string) The name of the binary, expect either 'tofu' or 'terraform'. Must exist on your $PATH. Only required if both binaries exist on your $PATH.
+# binary = ''
+# planFile: (type: string) The name of the plan file created by 'gh tp'.
+planFile = ''
+# mdFile: (type: string) The name of the Markdown file created by 'gh tp'.
+mdFile = ''
+# verbose: (type: bool) Enable Verbose Logging. Default is false.
+verbose = false
