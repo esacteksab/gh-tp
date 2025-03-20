@@ -38,11 +38,13 @@ func existsOrCreated(files []tpFile) error {
 		exists := doesExist(v.Name)
 		if exists {
 			Logger.Debugf("%s file %s was created.", v.Purpose, v.Name)
-			fmt.Fprintf(color.Output, "%s  %s%s\n", bold(green("✔")), v.Purpose, " Created...")
+			fmt.Fprintf(color.Output, "%s  %s%s\n",
+				bold(green("✔")), v.Purpose, " Created...")
 		} else if !exists {
 			//
 			Logger.Errorf("Markdown file %s was not created.", v.Name)
-			fmt.Fprintf(color.Output, "%s  %s%s\n", bold(red("✕")), v.Purpose, " Failed to Create ...")
+			fmt.Fprintf(color.Output, "%s  %s%s\n",
+				bold(red("✕")), v.Purpose, " Failed to Create ...")
 		} else {
 			// I'm only human. NFC how you got here. I hope to never have to find out.
 			Logger.Errorf("If you see this error message, please open a bug. Error Code: TPE003. Error: %s", err)
@@ -60,6 +62,8 @@ func doesExist(path string) bool {
 	return true
 }
 
+// getDirectories returns User's home directory, $XDG_CONFIG_HOME
+// and Current Working Directory
 func getDirectories() (homeDir, configDir, cwd string, err error) {
 	homeDir, err = os.UserHomeDir()
 	if err != nil {

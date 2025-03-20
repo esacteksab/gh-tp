@@ -22,6 +22,9 @@ import (
 
 var (
 	binaries           []string
+	configDir          string
+	cfgFile            string
+	homeDir            string
 	out                io.Reader
 	MaxWidth           int
 	mdParam            string
@@ -41,6 +44,13 @@ var (
 	red                = color.New(color.FgRed).SprintFunc()
 )
 
+const TpDir = "gh-tp"
+
+const ConfigName = ".tp.toml"
+
+// A struct representing the files created by tp
+// An Plan (Purpose) file named (Name)
+// A  Markdown (Purpose) file named (Name)
 type tpFile struct {
 	Name    string
 	Purpose string
@@ -236,7 +246,7 @@ func init() {
 			"",
 			`use this configuration file (default lookup:
 			1. a .tp.toml file in your project's root
-			2. $XDG_CONFIG_HOME/.tp.toml
+			2. $XDG_CONFIG_HOME/gh-tp/.tp.toml
 			3. $HOME/.tp.toml)`)
 
 	// Cobra also supports local flags, which will only run
@@ -248,18 +258,24 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	configFile := ConfigFile{}
 	if cfgFile != "" {
 		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
+		viper.SetConfigFile(configFile.Path)
+		// Set the Path in ConfigFile struct
+		configFile.Path = cfgFile
 	} else {
 		// Find home directory and home config directory.
 		homeDir, configDir, _, _ = getDirectories()
 
 		// Search config in home directory with name ".tp.toml"
+		// Current Working Directory - Presumed project's root
 		viper.SetConfigName(".tp.toml")
 		viper.SetConfigType("toml")
 		viper.AddConfigPath(".")
-		viper.AddConfigPath(configDir)
+		// $XDG_CONFIG_HOME/gh-tp
+		viper.AddConfigPath(configDir + "/" + TpDir)
+		// os.UserHomeDir
 		viper.AddConfigPath(homeDir)
 	}
 

@@ -4,6 +4,7 @@ package cmd
 
 import (
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -14,22 +15,16 @@ import (
 var (
 	accessible   bool
 	binary       string
-	cfgBinary    string
-	cfgFile      string
-	cfgMdFile    string
-	cfgPlanFile  string
-	configDir    string
 	configExists bool
 	createFile   bool
-	homeDir      string
 	title        string
 )
 
-const TpDir = "gh-tp"
-
-const ConfigName = ".tp.toml"
-
-const DefaultXDGConfigDirName = ".config"
+type ConfigFile struct {
+	Name   string
+	Path   string
+	Params ConfigParams
+}
 
 type ConfigParams struct {
 	Binary   string `toml:"binary" comment:"binary: (type: string) The name of the binary, expect either 'tofu' or 'terraform'. Must exist on your $PATH." validate:"oneof=terraform tofu"`
@@ -50,7 +45,6 @@ func genConfig(conf ConfigParams) (data []byte, err error) {
 // If one already exists, asks to overwrite
 // If one does not exist, asks to create
 func createOrOverwrite(cfgFile string) (configExists, createFile bool) {
-	// configName = ".tp.toml"
 	configExists = doesExist(cfgFile + "/" + ConfigName)
 	Logger.Debugf("Using config: %s", cfgFile+ConfigName)
 	createFile, err := query(configExists)
@@ -90,6 +84,9 @@ func query(configExists bool) (createFile bool, err error) {
 
 func createConfig(cfgBinary, cfgFile, cfgMdFile, cfgPlanFile string) error {
 	configExists, createFile = createOrOverwrite(cfgFile)
+	configFile := ConfigFile{}
+	configFile.Path = cfgFile
+	configDir = filepath.Dir(cfgFile)
 
 	conf := ConfigParams{
 		Binary:   cfgBinary,
@@ -104,20 +101,28 @@ func createConfig(cfgBinary, cfgFile, cfgMdFile, cfgPlanFile string) error {
 	}
 
 	if createFile {
+		// configFile.Path may be os.UserConfigDir + TpDir -- It may not exist
+		// If it doesn't, we need to create the directory, prior to trying to create the file
+		configDirExists := doesExist(configDir)
+		if !configDirExists {
+			if err = os.MkdirAll(configDir, 0o750); err != nil { //nolint:mnd
+				Logger.Fatal(err)
+			}
+		}
+
 		if !configExists {
-			// Figure out how to get in here
 			Logger.Debugf("Inside configExists and 'config' is: %s", string(config))
-			// Tracking this in #69
-			err = os.WriteFile(cfgFile+"/.tp.toml", config, 0o600) //nolint:mnd    // https://go.dev/ref/spec#Integer_literals
+			err = os.WriteFile(configFile.Path, config, 0o600) //nolint:mnd    // https://go.dev/ref/spec#Integer_literals
 			if err != nil {
 				Logger.Fatalf("Error writing Config file: %s", err)
 			}
 		} else if configExists {
 			Logger.Debugf("Config is: \n%s\n", string(config))
+
 			localNow := time.Now().Local().Format("200601021504")
 
-			existingConfigFile := cfgFile + "/" + ConfigName
-			bkupConfigFile := cfgFile + "/" + ConfigName + "-" + localNow
+			existingConfigFile := configFile.Path
+			bkupConfigFile := configFile.Path + "-" + localNow
 			// Create Backup
 			err := backupFile(existingConfigFile, bkupConfigFile)
 			if err != nil {
@@ -125,12 +130,12 @@ func createConfig(cfgBinary, cfgFile, cfgMdFile, cfgPlanFile string) error {
 			}
 			Logger.Infof("Backup file %s created", bkupConfigFile)
 			// Create New File
-			err = os.WriteFile(cfgFile+"/.tp.toml", config, 0o600) //nolint:mnd    // https://go.dev/ref/spec#Integer_literals
+			err = os.WriteFile(configFile.Path, config, 0o600) //nolint:mnd    // https://go.dev/ref/spec#Integer_literals
 			if err != nil {
 				Logger.Errorf("Error writing Config file: %s", err)
 			}
 		}
-		Logger.Infof("Config file %s/.tp.toml created", cfgFile)
+		Logger.Infof("Config file %s created", configFile.Path)
 	} else if !createFile {
 		Logger.Info(string(config))
 	}

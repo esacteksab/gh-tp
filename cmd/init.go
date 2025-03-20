@@ -4,6 +4,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"strconv"
 
@@ -47,6 +48,7 @@ var initCmd = &cobra.Command{
 
 		// Should we run in accessible mode?
 		accessible, _ = strconv.ParseBool(os.Getenv("ACCESSIBLE"))
+		configFile := ConfigFile{}
 
 		form := huh.NewForm(
 			huh.NewGroup(
@@ -54,11 +56,11 @@ var initCmd = &cobra.Command{
 				huh.NewSelect[string]().
 					Title("Where would you like to save your .tp.toml config file?").
 					Options(
-						huh.NewOption("Project Root:"+".tp.toml", cwd).Selected(true),
-						huh.NewOption("Home Config Directory: "+configDir+"/.tp.toml",
-							configDir),
-						huh.NewOption("Home Directory: "+homeDir+"/.tp.toml", homeDir),
-					).Value(&cfgFile),
+						huh.NewOption("Project Root:"+".tp.toml", cwd+"/"+ConfigName).Selected(true),
+						huh.NewOption("Home Config Directory: "+configDir+"/"+TpDir+"/"+ConfigName,
+							configDir+"/"+TpDir+"/"+ConfigName),
+						huh.NewOption("Home Directory: "+homeDir+"/"+ConfigName, homeDir+"/"+ConfigName),
+					).Value(&configFile.Path),
 
 				// It could make sense some day to do a `gh tp init --binary`
 				huh.NewSelect[string]().
@@ -66,13 +68,13 @@ var initCmd = &cobra.Command{
 					Options(
 						huh.NewOption("OpenTofu", "tofu"),
 						huh.NewOption("Terraform", "terraform").Selected(true),
-					).Value(&cfgBinary),
+					).Value(&configFile.Params.Binary),
 
 				huh.NewInput().
 					Title("What do you want the name of your plan's output file to be? ").
 					Placeholder("example: tpplan.out tp.out tp.plan plan.out out.plan ...").
-					Suggestions([]string{"tpplan.out", "tp.out", "tp.plan", "plan.out", "out.plan"}).
-					Value(&cfgPlanFile).
+					Suggestions([]string{"tpplan.out", "tp.out", "tp.plan", "plan.out", "out.plan ..."}).
+					Value(&configFile.Params.PlanFile).
 					Validate(func(pf string) error {
 						if pf == "" {
 							//lint:ignore ST1005 It's a user-facing error message. I want pretty!
@@ -83,9 +85,9 @@ var initCmd = &cobra.Command{
 
 				huh.NewInput().
 					Title("What do you want the name of your Markdown file to be?  ").
-					Suggestions([]string{"tpplan.md", "tp.md", "plan.md"}).
-					Placeholder("example: tpplan.md tp.md plan.md ...").
-					Value(&cfgMdFile).
+					Suggestions([]string{"tpplan.md", "tp.md", "plan.md", "out.md"}).
+					Placeholder("example: tpplan.md tp.md plan.md, out.md ...").
+					Value(&configFile.Params.MdFile).
 					Validate(func(md string) error {
 						if md == "" {
 							//lint:ignore ST1005 It's a user-facing error message. I want pretty!
@@ -135,9 +137,17 @@ var initCmd = &cobra.Command{
 		if err != nil {
 			Logger.Fatal(err)
 		}
+		fmt.Println(configFile.Path)
+		fmt.Println(configFile.Params.Binary)
+		fmt.Println(configFile.Params.PlanFile)
+		fmt.Println(configFile.Params.MdFile)
 
 		// createConfig() Goes Here
-		err = createConfig(cfgBinary, cfgFile, cfgMdFile, cfgPlanFile)
+		// err = createConfig(cfgBinary, cfgFile, cfgMdFile, cfgPlanFile)
+		err = createConfig(configFile.Params.Binary,
+			configFile.Path,
+			configFile.Params.MdFile,
+			configFile.Params.PlanFile)
 		if err != nil {
 			Logger.Fatal(err)
 		}
