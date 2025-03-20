@@ -11,7 +11,7 @@ gh ext install esacteksab/gh-tp
 
 ### `.tp.toml` config file
 
-I wanted to make as few assumptions about your environment as possible, so `tp` defines one default value `verbose = false` today. `tp` uses a config file named `.tp.toml`. This config file is written in [TOML](https://toml.io/). TOML is case-sensitive and keys are [mixedCase or camelCase](https://en.wikipedia.org/wiki/Camel_case) where applicable. It has 2 required parameters with two optional parameters. The lookup order for locating the config file is, your project's root (.e.g '.tp.toml'), `$XDG_CONFIG_HOME/.tp.toml`, on \*nix this is `~/.config`, on MacOS this is `~/Library/Application Support`, on Windows this is `LocalAppData` falling back to `%LOCALAPPDATA%` and finally, we look in `$HOME/.tp.toml`.
+I wanted to make as few assumptions about your environment as possible, so `tp` defines one default value `verbose = false` today. `tp` uses a config file named `.tp.toml`. This config file is written in [TOML](https://toml.io/). TOML is case-sensitive and keys are [mixedCase or camelCase](https://en.wikipedia.org/wiki/Camel_case) where applicable. It has 2 required parameters with two optional parameters. The lookup order for locating the config file is, your project's root (.e.g `.tp.toml`), `$XDG_CONFIG_HOME/gh-tp/.tp.toml`, on \*nix this is `~/.config/gh-tp`, on MacOS this is `~/Library/Application Support/gh-tp`, on Windows this is `LocalAppData/gh-tp` falling back to `%LOCALAPPDATA%` and finally, we look in `$HOME/.tp.toml`.
 
 A annotated copy exists in the [example](./example) directory. **_The config file, the parameters and possibly the presence of default values is actively being worked on. This behavior may change in a future release._**
 
