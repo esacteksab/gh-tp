@@ -32,7 +32,7 @@ const (
 func createMarkdown(mdParam, planStr string) (*os.File, string, error) {
 	planMd, err = os.Create(mdParam)
 	if err != nil {
-		logger.Errorf("failed to create Markdown: %s\n", err)
+		Logger.Errorf("failed to create Markdown: %s\n", err)
 	}
 
 	// Close the file when we're done with it
@@ -42,7 +42,7 @@ func createMarkdown(mdParam, planStr string) (*os.File, string, error) {
 	planBody = md.NewMarkdown(os.Stdout).
 		CodeBlocks(md.SyntaxHighlight(SyntaxHighlightTerraform), planStr)
 	if err != nil {
-		logger.Errorf("error generating plan Markdown: %s\n", err)
+		Logger.Errorf("error generating plan Markdown: %s\n", err)
 	}
 
 	// NewMarkdown returns io.Writer
@@ -60,22 +60,23 @@ func createMarkdown(mdParam, planStr string) (*os.File, string, error) {
 	// This is what creates the final document (`mdoutfile`) plmd here could possibly be os.Stdout one day
 	mderr := md.NewMarkdown(planMd).Details(planDetails, sbPlan).Build()
 	if mderr != nil {
-		logger.Errorf("error generating %s markdown file, error: %s", mdParam, err)
+		Logger.Errorf("error generating %s markdown file, error: %s", mdParam, err)
 	}
 
 	// planMd doesn't have a new line at eof, we need to give it one because Markdown
-	// Open the file
 	file, err := os.OpenFile("./"+mdParam, os.O_APPEND|os.O_WRONLY, 0o644) //nolint:mnd
 	if err != nil {
-		logger.Error(err)
+		Logger.Errorf("Unable to create Markdown: %s\n", err)
 	}
 
 	// Add new line
 	_, err = file.WriteString("\n\n")
 	if err != nil {
-		logger.Error(err)
+		Logger.Error(err)
 	}
 
+	// Close file
 	file.Close()
+
 	return planMd, mdParam, mderr
 }

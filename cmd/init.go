@@ -4,36 +4,16 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
-
-var (
-	accessible  bool
-	binary      string
-	cfgBinary   string
-	cfgFile     string
-	cfgMdFile   string
-	cfgPlanFile string
-	configDir   string
-	createFile  bool
-	configName  string
-	homeDir     string
-	noConfig    bool
-)
-
-type ConfigParams struct {
-	Binary   string `toml:"binary" comment:"binary: (type: string) The name of the binary, expect either 'tofu' or 'terraform'. Must exist on your $PATH."`
-	PlanFile string `toml:"planFile" comment:"planFile: (type: string) The name of the plan file created by 'gh tp'."`
-	MdFile   string `toml:"mdFile" comment:"mdFile: (type: string) The name of the Markdown file created by 'gh tp'."`
-	Verbose  bool   `toml:"verbose" comment:"verbose: (type: bool) Enable Verbose Logging. Default is false."`
-}
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
@@ -54,13 +34,21 @@ var initCmd = &cobra.Command{
 
 		View docs at https://github.com/esacteksab/gh-tp for more information.`),
 	Run: func(cmd *cobra.Command, args []string) {
+		// Check if Verbose is defined in config file
+		v := viper.IsSet("verbose")
+		if v {
+			Verbose = viper.GetBool("verbose")
+			createLogger(Verbose)
+		}
+
 		homeDir, configDir, cwd, err := getDirectories()
 		if err != nil {
-			logger.Fatalf("Error: %s", err)
+			Logger.Fatalf("Error: %s", err)
 		}
 
 		// Should we run in accessible mode?
 		accessible, _ = strconv.ParseBool(os.Getenv("ACCESSIBLE"))
+		configFile := ConfigFile{}
 
 		form := huh.NewForm(
 			huh.NewGroup(
@@ -68,11 +56,11 @@ var initCmd = &cobra.Command{
 				huh.NewSelect[string]().
 					Title("Where would you like to save your .tp.toml config file?").
 					Options(
-						huh.NewOption("Project Root:"+".tp.toml", cwd).Selected(true),
-						huh.NewOption("Home Config Directory: "+configDir+"/.tp.toml",
-							configDir),
-						huh.NewOption("Home Directory: "+homeDir+"/.tp.toml", homeDir),
-					).Value(&cfgFile),
+						huh.NewOption("Project Root:"+".tp.toml", cwd+"/"+ConfigName).Selected(true),
+						huh.NewOption("Home Config Directory: "+configDir+"/"+TpDir+"/"+ConfigName,
+							configDir+"/"+TpDir+"/"+ConfigName),
+						huh.NewOption("Home Directory: "+homeDir+"/"+ConfigName, homeDir+"/"+ConfigName),
+					).Value(&configFile.Path),
 
 				// It could make sense some day to do a `gh tp init --binary`
 				huh.NewSelect[string]().
@@ -80,13 +68,13 @@ var initCmd = &cobra.Command{
 					Options(
 						huh.NewOption("OpenTofu", "tofu"),
 						huh.NewOption("Terraform", "terraform").Selected(true),
-					).Value(&cfgBinary),
+					).Value(&configFile.Params.Binary),
 
 				huh.NewInput().
 					Title("What do you want the name of your plan's output file to be? ").
 					Placeholder("example: tpplan.out tp.out tp.plan plan.out out.plan ...").
-					Suggestions([]string{"tpplan.out", "tp.out", "tp.plan", "plan.out", "out.plan"}).
-					Value(&cfgPlanFile).
+					Suggestions([]string{"tpplan.out", "tp.out", "tp.plan", "plan.out", "out.plan ..."}).
+					Value(&configFile.Params.PlanFile).
 					Validate(func(pf string) error {
 						if pf == "" {
 							//lint:ignore ST1005 It's a user-facing error message. I want pretty!
@@ -97,9 +85,9 @@ var initCmd = &cobra.Command{
 
 				huh.NewInput().
 					Title("What do you want the name of your Markdown file to be?  ").
-					Suggestions([]string{"tpplan.md", "tp.md", "plan.md"}).
-					Placeholder("example: tpplan.md tp.md plan.md ...").
-					Value(&cfgMdFile).
+					Suggestions([]string{"tpplan.md", "tp.md", "plan.md", "out.md"}).
+					Placeholder("example: tpplan.md tp.md plan.md, out.md ...").
+					Value(&configFile.Params.MdFile).
 					Validate(func(md string) error {
 						if md == "" {
 							//lint:ignore ST1005 It's a user-facing error message. I want pretty!
@@ -145,57 +133,23 @@ var initCmd = &cobra.Command{
 				},
 			}).WithShowHelp(true).WithShowErrors(true).WithAccessible(accessible)
 
-		runerr := form.Run()
-		if runerr != nil {
-			logger.Warn(runerr)
-			os.Exit(1)
-		}
-
-		noConfig, createFile = mkFile(cfgFile)
-
-		conf := ConfigParams{
-			Binary:   cfgBinary,
-			PlanFile: cfgPlanFile,
-			MdFile:   cfgMdFile,
-			Verbose:  false,
-		}
-
-		config, err := genConfig(conf)
+		err = form.Run()
 		if err != nil {
-			logger.Fatal(err)
+			Logger.Fatal(err)
 		}
+		fmt.Println(configFile.Path)
+		fmt.Println(configFile.Params.Binary)
+		fmt.Println(configFile.Params.PlanFile)
+		fmt.Println(configFile.Params.MdFile)
 
-		if createFile {
-			if noConfig {
-				// #69 Figure out how to get in here logger.Debugf("Inside noConfig and 'config' is: %s", string(config))
-				err = os.WriteFile(cfgFile+"/.tp.toml", config, 0o600) //nolint:mnd    // https://go.dev/ref/spec#Integer_literals
-				if err != nil {
-					logger.Fatalf("Error writing Config file: %s", err)
-				}
-
-			} else if !noConfig {
-				// #69 like above: logger.Debugf("Inside !noConfig and 'config' is: %s", string(config))
-				// epoch as an int64
-				e := time.Now().Unix()
-				// epoch as string
-				epoch := strconv.FormatInt(e, 10)
-
-				existingConfigFile := cfgFile + "/" + configName
-				bkupConfigFile := cfgFile + "/" + configName + "-bkup-" + epoch
-				// Create Backup
-				err := backupFile(existingConfigFile, bkupConfigFile)
-				if err != nil {
-					logger.Fatal(err)
-				}
-				// Create New File
-				err = os.WriteFile(cfgFile+"/.tp.toml", config, 0o600) //nolint:mnd    // https://go.dev/ref/spec#Integer_literals
-				if err != nil {
-					logger.Fatalf("Error writing Config file: %s", err)
-				}
-				logger.Infof("Config file %s/.tp.toml created", cfgFile)
-			}
-		} else if !createFile {
-			logger.Info(string(config))
+		// createConfig() Goes Here
+		// err = createConfig(cfgBinary, cfgFile, cfgMdFile, cfgPlanFile)
+		err = createConfig(configFile.Params.Binary,
+			configFile.Path,
+			configFile.Params.MdFile,
+			configFile.Params.PlanFile)
+		if err != nil {
+			Logger.Fatal(err)
 		}
 	},
 }

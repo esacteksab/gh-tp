@@ -30,6 +30,9 @@ go.work.sum
 /gh-tp
 /gh-tp.exe
 
+# The world isn't ready for this. Or this isn't ready for the world
+/cmd/config_test.go
+
 #################
 # VSCode Things #
 #################

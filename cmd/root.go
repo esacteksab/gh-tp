@@ -8,11 +8,9 @@ import (
 	"os"
 	"runtime"
 	"runtime/debug"
-	"strings"
 	"time"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/log"
 	"github.com/cli/safeexec"
 	"github.com/fatih/color"
@@ -24,8 +22,10 @@ import (
 
 var (
 	binaries           []string
+	configDir          string
+	cfgFile            string
+	homeDir            string
 	out                io.Reader
-	logger             *log.Logger
 	MaxWidth           int
 	mdParam            string
 	spinnerDuration    time.Duration
@@ -38,11 +38,19 @@ var (
 	BuiltBy            string
 	exts               []string
 	workingDir         string
+	Logger             *log.Logger
 	bold               = color.New(color.Bold).SprintFunc()
 	green              = color.New(color.FgGreen).SprintFunc()
 	red                = color.New(color.FgRed).SprintFunc()
 )
 
+const TpDir = "gh-tp"
+
+const ConfigName = ".tp.toml"
+
+// A struct representing the files created by tp
+// An Plan (Purpose) file named (Name)
+// A  Markdown (Purpose) file named (Name)
 type tpFile struct {
 	Name    string
 	Purpose string
@@ -88,28 +96,22 @@ var rootCmd = &cobra.Command{
 		v := viper.IsSet("verbose")
 		if v {
 			Verbose = viper.GetBool("verbose")
-		}
-		if err != nil {
-			logger.Fatal("Unable to enable verbose output:", err)
-		}
-		if Verbose {
-			logger.SetLevel(log.DebugLevel)
-			logger.Debug("I'm a Debug statement in initConfig().")
+			createLogger(Verbose)
 		}
 
 		keys := viper.AllKeys()
-		logger.Debugf("Defined keys: %s in %s", keys, viper.ConfigFileUsed())
+		Logger.Debugf("Defined keys: %s in %s", keys, viper.ConfigFileUsed())
 
-		if doesNotExist(viper.ConfigFileUsed()) {
-			logger.Debug(viper.ConfigFileUsed())
-			logger.Error("Config file not found. Please run 'gh tp init' or run 'gh tp help' or refer to the documentation on how to create a config file. https://github.com/esacteksab/gh-tp")
+		if !doesExist(viper.ConfigFileUsed()) {
+			Logger.Debug(viper.ConfigFileUsed())
+			Logger.Error("Config file not found. Please run 'gh tp init' or run 'gh tp help' or refer to the documentation on how to create a config file. https://github.com/esacteksab/gh-tp")
 			os.Exit(1)
 			// May want to put cmd.Help() or something about expectations with config parameters.
 		} else {
 			// Check to see if required 'planFile' parameter is set
 			o := viper.IsSet("planFile")
 			if !o {
-				logger.Errorf(
+				Logger.Errorf(
 					"Missing Parameter: 'planFile' (type: string) is not defined in %s. This is the name of the plan's output file that will be created by `gh tp`.\n", viper.ConfigFileUsed())
 				os.Exit(1)
 			}
@@ -117,11 +119,11 @@ var rootCmd = &cobra.Command{
 			// Check to see if required 'mdFile' parameter is set
 			m := viper.IsSet("mdFile")
 			if !m {
-				logger.Errorf(
+				Logger.Errorf(
 					"Missing Parameter: 'mdFile' (type: string) is not defined in %s. This is the name of the Markdown file that will be created by `gh tp`.\n", viper.ConfigFileUsed())
 				os.Exit(1)
 			}
-			logger.Debugf("Using config file: %s", viper.ConfigFileUsed())
+			Logger.Debugf("Using config file: %s", viper.ConfigFileUsed())
 		}
 
 		b := viper.IsSet("binary")
@@ -133,7 +135,7 @@ var rootCmd = &cobra.Command{
 			for _, v := range binaries {
 				bin, err := safeexec.LookPath(v)
 				if err != nil {
-					logger.Debugf("%s", err)
+					Logger.Debugf("%s", err)
 				}
 				// It's possible for both `tofu` and `terraform` to exist on $PATH and we need to handle that.
 				if len(bin) > 0 {
@@ -141,7 +143,7 @@ var rootCmd = &cobra.Command{
 				}
 			}
 			if len(exists) == len(binaries) {
-				logger.Errorf("Found both `tofu` and `terraform` in your $PATH. We're not sure which one to use. Please set the 'binary' parameter in your %s config file to the binary you want to use.", viper.ConfigFileUsed())
+				Logger.Errorf("Found both `tofu` and `terraform` in your $PATH. We're not sure which one to use. Please set the 'binary' parameter in your %s config file to the binary you want to use.", viper.ConfigFileUsed())
 				os.Exit(1)
 			}
 		}
@@ -154,35 +156,35 @@ var rootCmd = &cobra.Command{
 			if len(args) == 0 {
 				planStr, err = createPlan()
 				if err != nil {
-					logger.Errorf("Unable to create plan: %s", err)
+					Logger.Errorf("Unable to create plan: %s", err)
 				}
 				// Create the Markdown from the Plan.
 				planMd, mdParam, err = createMarkdown(mdParam, planStr)
 				if err != nil {
-					logger.Errorf("Something is not right, %s", err)
+					Logger.Errorf("Something is not right, %s", err)
 				}
 
 			} else if args[0] == "-" {
 				out = cmd.InOrStdin()
 				content, err := io.ReadAll(out)
 				if err != nil {
-					logger.Errorf("unable to read stdIn: %s", err)
+					Logger.Errorf("unable to read stdIn: %s", err)
 				}
 
 				mdParam = viper.GetString("mdFile")
 
 				planStr := string(content)
 
-				logger.Debugf("Plan output is: %s\n", planStr)
+				Logger.Debugf("Plan output is: %s\n", planStr)
 				// Create the plan from Stdin.
 				planMd, mdParam, err = createMarkdown(mdParam, planStr)
 				if err != nil {
-					logger.Errorf("Something is not right, %s", err)
+					Logger.Errorf("Something is not right, %s", err)
 				}
 				// the arg received looks like a file, we try to open it
 			}
 		} else {
-			logger.Errorf("No %s files found. Please run this in a directory with %s files present.",
+			Logger.Errorf("No %s files found. Please run this in a directory with %s files present.",
 				cases.Title(language.English).String(binary), cases.Title(language.English).String(binary))
 			os.Exit(1)
 		}
@@ -194,7 +196,7 @@ var rootCmd = &cobra.Command{
 
 		tpFilesErr := existsOrCreated(tpFiles)
 		if tpFilesErr != nil {
-			logger.Error(err)
+			Logger.Error(err)
 		}
 	},
 }
@@ -202,6 +204,7 @@ var rootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
+	createLogger(Verbose)
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
@@ -209,56 +212,31 @@ func Execute() {
 }
 
 func init() {
-	logger = log.NewWithOptions(os.Stderr, log.Options{
-		ReportCaller:    false,
-		ReportTimestamp: false,
-		TimeFormat:      time.Kitchen,
-	})
-	MaxWidth = 4
-	styles := log.DefaultStyles()
-	styles.Levels[log.DebugLevel] = lipgloss.NewStyle().
-		SetString(strings.ToUpper(log.DebugLevel.String())).
-		Bold(true).MaxWidth(MaxWidth).Foreground(lipgloss.Color("12"))
-	logger.SetStyles(styles)
-	logger.Debug("Testing new Debug")
-	logger.Debugf("I'm inside initConfig() and Verbose is %t:\n", Verbose)
-
 	cobra.OnInitialize(initConfig)
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
-	rootCmd.Flags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
+	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
 	rootCmd.Flags().StringP("binary", "b", "", "The name of the binary to use. Expect either `tofu` or `terraform`. Must exist on your $PATH.")
 	rootCmd.Flags().StringP("outFile", "o", "", "The name of the plan output file created by tp.")
 	rootCmd.Flags().StringP("mdFile", "m", "", "The name of the Markdown file created by tp.")
 
-	err := viper.BindPFlag("verbose", rootCmd.Flags().Lookup("verbose"))
+	err := viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
 	if err != nil {
-		logger.Error("Unable to bind to verbose flag: ", err)
+		Logger.Error("Unable to bind to verbose flag: ", err)
 	}
 	err = viper.BindPFlag("binary", rootCmd.Flags().Lookup("binary"))
 	if err != nil {
-		logger.Error("Unable to bind to binary flag: ", err)
+		Logger.Error("Unable to bind to binary flag: ", err)
 	}
 	err = viper.BindPFlag("planFile", rootCmd.Flags().Lookup("outFile"))
 	if err != nil {
-		logger.Error("Unable to bind to planFile flag: ", err)
+		Logger.Error("Unable to bind to planFile flag: ", err)
 	}
 	err = viper.BindPFlag("mdFile", rootCmd.Flags().Lookup("mdFile"))
 	if err != nil {
-		logger.Error("Unable to bind to mdFile flag: ", err)
-	}
-
-	Verbose, err := rootCmd.Flags().GetBool("verbose")
-	logger.Debug("I'm inside init, Verbose is %t\n", Verbose)
-	if err != nil {
-		logger.Errorf("Unable to get verbose flag: %s", err)
-	}
-
-	if Verbose {
-		logger.SetLevel(log.DebugLevel)
-		logger.Errorf("I'm inside !Verbose init() and my value is %t\n", Verbose)
+		Logger.Error("Unable to bind to mdFile flag: ", err)
 	}
 
 	rootCmd.Flags().
@@ -268,7 +246,7 @@ func init() {
 			"",
 			`use this configuration file (default lookup:
 			1. a .tp.toml file in your project's root
-			2. $XDG_CONFIG_HOME/.tp.toml
+			2. $XDG_CONFIG_HOME/gh-tp/.tp.toml
 			3. $HOME/.tp.toml)`)
 
 	// Cobra also supports local flags, which will only run
@@ -280,18 +258,24 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	configFile := ConfigFile{}
 	if cfgFile != "" {
 		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
+		viper.SetConfigFile(configFile.Path)
+		// Set the Path in ConfigFile struct
+		configFile.Path = cfgFile
 	} else {
 		// Find home directory and home config directory.
 		homeDir, configDir, _, _ = getDirectories()
 
 		// Search config in home directory with name ".tp.toml"
+		// Current Working Directory - Presumed project's root
 		viper.SetConfigName(".tp.toml")
 		viper.SetConfigType("toml")
 		viper.AddConfigPath(".")
-		viper.AddConfigPath(configDir)
+		// $XDG_CONFIG_HOME/gh-tp
+		viper.AddConfigPath(configDir + "/" + TpDir)
+		// os.UserHomeDir
 		viper.AddConfigPath(homeDir)
 	}
 
@@ -300,11 +284,11 @@ func initConfig() {
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.UnsupportedConfigError); ok {
-			logger.Errorf("Unsupported Format. Config file should be named .tp.toml %s.", err)
+			Logger.Errorf("Unsupported Format. Config file should be named .tp.toml %s.", err)
 			os.Exit(1)
 			// This handles the situation where a duplicate key exists.
 		} else if _, ok := err.(viper.ConfigParseError); ok {
-			logger.Errorf("There is an issue %s.", err)
+			Logger.Errorf("There is an issue %s.", err)
 			os.Exit(1)
 		}
 	}

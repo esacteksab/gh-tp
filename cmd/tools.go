@@ -3,16 +3,16 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
+	"time"
 
-	"github.com/adrg/xdg"
-	"github.com/charmbracelet/huh"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/log"
 	"github.com/fatih/color"
-	"github.com/pelletier/go-toml/v2"
 )
 
 func checkFilesByExtension(dir string, exts []string) bool {
@@ -31,94 +31,55 @@ func checkFilesByExtension(dir string, exts []string) bool {
 	return exists
 }
 
+// existsOrCreate checks to see if a plan file and markdown exist or were created
+// Prints to terminal stating so
 func existsOrCreated(files []tpFile) error {
 	for _, v := range files {
-		if _, err := os.Stat(v.Name); err == nil {
-			logger.Debugf("%s file %s was created.", v.Purpose, v.Name)
-			fmt.Fprintf(color.Output, "%s  %s%s\n", bold(green("✔")), v.Purpose, " Created...")
-		} else if errors.Is(err, os.ErrNotExist) {
+		exists := doesExist(v.Name)
+		if exists {
+			Logger.Debugf("%s file %s was created.", v.Purpose, v.Name)
+			fmt.Fprintf(color.Output, "%s  %s%s\n",
+				bold(green("✔")), v.Purpose, " Created...")
+		} else if !exists {
 			//
-			logger.Errorf("Markdown file %s was not created.", v.Name)
-			fmt.Fprintf(color.Output, "%s  %s%s\n", bold(red("✕")), v.Purpose, " Failed to Create ...")
+			Logger.Errorf("Markdown file %s was not created.", v.Name)
+			fmt.Fprintf(color.Output, "%s  %s%s\n",
+				bold(red("✕")), v.Purpose, " Failed to Create ...")
 		} else {
 			// I'm only human. NFC how you got here. I hope to never have to find out.
-			logger.Errorf("If you see this error message, please open a bug. Error Code: TPE003. Error: %s", err)
+			Logger.Errorf("If you see this error message, please open a bug. Error Code: TPE003. Error: %s", err)
 		}
 	}
 	return err
 }
 
-// Feels like a bit of a duplicate to the above function, this takes a path string an returns a bool
-// on whether or not the path exists -- TODO #66 probably worth deduping this eventually
-func doesNotExist(path string) bool {
+// doesExist takes a path string and returns a bool
+// on whether or not the path exists
+func doesExist(path string) bool {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return true
+		return false
 	}
-	return false
+	return true
 }
 
+// getDirectories returns User's home directory, $XDG_CONFIG_HOME
+// and Current Working Directory
 func getDirectories() (homeDir, configDir, cwd string, err error) {
-	homeDir = xdg.Home
+	homeDir, err = os.UserHomeDir()
+	if err != nil {
+		Logger.Fatal(err)
+	}
 
-	configDir = xdg.ConfigHome
+	configDir, err = os.UserConfigDir()
+	if err != nil {
+		Logger.Fatal(err)
+	}
 
 	cwd, cwderr := os.Getwd()
 	if cwderr != nil {
-		logger.Errorf("Error: %s", err)
+		Logger.Errorf("Error: %s", err)
 	}
 	return homeDir, configDir, cwd, err
-}
-
-func genConfig(conf ConfigParams) (data []byte, err error) {
-	data, err = toml.Marshal(conf)
-	if err != nil {
-		logger.Fatalf("Failed marshalling TOML: %s", err)
-	}
-	return data, err
-}
-
-// takes cfgFile, appends ".tp.toml" to it
-// checks to see if file exists
-// based on existence, asks to create (doesn't exist)
-// or overwrite (exists)
-func mkFile(cfgFile string) (exists, createFile bool) {
-	configName = ".tp.toml"
-	noConfig := doesNotExist(cfgFile + "/" + configName)
-	logger.Debug(cfgFile + configName)
-	if noConfig {
-		logger.Debugf("%s/%s doesn't exist\n", cfgFile, configName)
-		err := huh.NewForm(
-			huh.NewGroup(
-				huh.NewConfirm().
-					Title("Create new file?").
-					Affirmative("Yes").
-					Negative("No").
-					Value(&createFile),
-			)).WithTheme(huh.ThemeBase16()).Run()
-		if err != nil {
-			logger.Fatal(err)
-		}
-		logger.Debugf("Inside mkFile() and config is %s/%s\n", cfgFile, configName)
-		return noConfig, createFile
-	} else if !noConfig {
-		err := huh.NewForm(
-			huh.NewGroup(
-				huh.NewConfirm().
-					Title("Overwrite existing config file?").
-					Affirmative("Yes").
-					Negative("No").
-					Value(&createFile),
-			)).WithTheme(huh.ThemeBase16()).Run()
-		if err != nil {
-			logger.Fatal(err)
-		}
-		logger.Debugf("Inside mkFile if exists, config is %s/%s\n", cfgFile, configName)
-		return noConfig, createFile
-	}
-
-	logger.Debugf("inside mkFile() noConfig is %t\n", noConfig)
-	logger.Debugf("Inside mkFile() config is %s/%s\n", cfgFile, configName)
-	return noConfig, createFile
 }
 
 // backupFile copies the file at source to dest
@@ -144,4 +105,40 @@ func backupFile(source, dest string) error {
 	}
 	err = destFile.Sync()
 	return err
+}
+
+// initLogger is how we initially create Logger. The values passed are based on 'Verbose' being true
+// Colors are defined here https://github.com/charmbracelet/x/blob/aedd0cd23ed703ff7cbccc5c4f9ab51a4768a9e6/ansi/color.go#L15-L32
+// 14 is Bright Cyan, 9 is Red -- no more purple
+func initLogger(ReportCaller, ReportTimestamp bool, TimeFormat string) (Logger *log.Logger) {
+	Logger = log.NewWithOptions(os.Stderr, log.Options{
+		ReportCaller:    ReportCaller,
+		ReportTimestamp: ReportTimestamp,
+		TimeFormat:      TimeFormat,
+	})
+	MaxWidth = 4
+	styles := log.DefaultStyles()
+	styles.Levels[log.DebugLevel] = lipgloss.NewStyle().
+		SetString(strings.ToUpper(log.DebugLevel.String())).
+		Bold(true).MaxWidth(MaxWidth).Foreground(lipgloss.Color("14"))
+	styles.Levels[log.FatalLevel] = lipgloss.NewStyle().
+		SetString(strings.ToUpper(log.FatalLevel.String())).
+		Bold(true).MaxWidth(MaxWidth).Foreground(lipgloss.Color("9"))
+	Logger.SetStyles(styles)
+	Logger.SetLevel(log.DebugLevel)
+	log.SetDefault(Logger)
+	return Logger
+}
+
+func createLogger(verbose bool) {
+	Verbose = verbose
+	if Verbose {
+		Logger = initLogger(true, true, "2006/01/02 15:04:05")
+		log.SetLevel(log.DebugLevel)
+		log.SetDefault(Logger)
+	} else {
+		Logger = initLogger(false, false, time.Kitchen)
+		log.SetLevel(log.InfoLevel)
+		log.SetDefault(Logger)
+	}
 }

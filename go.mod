@@ -4,7 +4,6 @@ go 1.24
 
 require (
 	github.com/MakeNowJust/heredoc v1.0.0
-	github.com/adrg/xdg v0.5.3
 	github.com/briandowns/spinner v1.23.2
 	github.com/charmbracelet/bubbles v0.20.0
 	github.com/charmbracelet/huh v0.6.0
