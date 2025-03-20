@@ -5,10 +5,13 @@ package cmd
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
+	"strings"
+	"time"
 
+	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/log"
 	"github.com/fatih/color"
 )
 
@@ -34,15 +37,15 @@ func existsOrCreated(files []tpFile) error {
 	for _, v := range files {
 		exists := doesExist(v.Name)
 		if exists {
-			logger.Debugf("%s file %s was created.", v.Purpose, v.Name)
+			Logger.Debugf("%s file %s was created.", v.Purpose, v.Name)
 			fmt.Fprintf(color.Output, "%s  %s%s\n", bold(green("✔")), v.Purpose, " Created...")
 		} else if !exists {
 			//
-			logger.Errorf("Markdown file %s was not created.", v.Name)
+			Logger.Errorf("Markdown file %s was not created.", v.Name)
 			fmt.Fprintf(color.Output, "%s  %s%s\n", bold(red("✕")), v.Purpose, " Failed to Create ...")
 		} else {
 			// I'm only human. NFC how you got here. I hope to never have to find out.
-			logger.Errorf("If you see this error message, please open a bug. Error Code: TPE003. Error: %s", err)
+			Logger.Errorf("If you see this error message, please open a bug. Error Code: TPE003. Error: %s", err)
 		}
 	}
 	return err
@@ -60,17 +63,17 @@ func doesExist(path string) bool {
 func getDirectories() (homeDir, configDir, cwd string, err error) {
 	homeDir, err = os.UserHomeDir()
 	if err != nil {
-		log.Fatal(err)
+		Logger.Fatal(err)
 	}
 
 	configDir, err = os.UserConfigDir()
 	if err != nil {
-		log.Fatal(err)
+		Logger.Fatal(err)
 	}
 
 	cwd, cwderr := os.Getwd()
 	if cwderr != nil {
-		logger.Errorf("Error: %s", err)
+		Logger.Errorf("Error: %s", err)
 	}
 	return homeDir, configDir, cwd, err
 }
@@ -98,4 +101,37 @@ func backupFile(source, dest string) error {
 	}
 	err = destFile.Sync()
 	return err
+}
+
+func initLogger(ReportCaller, ReportTimestamp bool, TimeFormat string) (Logger *log.Logger) {
+	Logger = log.NewWithOptions(os.Stderr, log.Options{
+		ReportCaller:    ReportCaller,
+		ReportTimestamp: ReportTimestamp,
+		TimeFormat:      TimeFormat,
+	})
+	MaxWidth = 4
+	styles := log.DefaultStyles()
+	styles.Levels[log.DebugLevel] = lipgloss.NewStyle().
+		SetString(strings.ToUpper(log.DebugLevel.String())).
+		Bold(true).MaxWidth(MaxWidth).Foreground(lipgloss.Color("14"))
+	styles.Levels[log.FatalLevel] = lipgloss.NewStyle().
+		SetString(strings.ToUpper(log.FatalLevel.String())).
+		Bold(true).MaxWidth(MaxWidth).Foreground(lipgloss.Color("9"))
+	Logger.SetStyles(styles)
+	Logger.SetLevel(log.DebugLevel)
+	log.SetDefault(Logger)
+	return Logger
+}
+
+func createLogger(verbose bool) {
+	Verbose = verbose
+	if Verbose {
+		Logger = initLogger(true, true, "2006/01/02 15:04:05")
+		log.SetLevel(log.DebugLevel)
+		log.SetDefault(Logger)
+	} else {
+		Logger = initLogger(false, false, time.Kitchen)
+		log.SetLevel(log.InfoLevel)
+		log.SetDefault(Logger)
+	}
 }

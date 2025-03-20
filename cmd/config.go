@@ -41,7 +41,7 @@ type ConfigParams struct {
 func genConfig(conf ConfigParams) (data []byte, err error) {
 	data, err = toml.Marshal(conf)
 	if err != nil {
-		logger.Fatalf("Failed marshalling TOML: %s", err)
+		Logger.Fatalf("Failed marshalling TOML: %s", err)
 	}
 	return data, err
 }
@@ -52,14 +52,12 @@ func genConfig(conf ConfigParams) (data []byte, err error) {
 func createOrOverwrite(cfgFile string) (configExists, createFile bool) {
 	// configName = ".tp.toml"
 	configExists = doesExist(cfgFile + "/" + ConfigName)
-	logger.Debug(cfgFile + ConfigName)
+	Logger.Debugf("Using config: %s", cfgFile+ConfigName)
 	createFile, err := query(configExists)
 	if err != nil {
-		logger.Fatal(err)
+		Logger.Error(err)
 	}
 
-	// #69 logger.Debugf("inside mkFile() configExists is %t\n", configExists)
-	// #69 logger.Debugf("Inside mkFile() config is %s/%s\n", cfgFile, ConfigName)
 	return configExists, createFile
 }
 
@@ -84,7 +82,7 @@ func query(configExists bool) (createFile bool, err error) {
 
 	err = form.Run()
 	if err != nil {
-		logger.Fatal(err)
+		Logger.Error(err)
 	}
 
 	return createFile, err
@@ -102,20 +100,20 @@ func createConfig(cfgBinary, cfgFile, cfgMdFile, cfgPlanFile string) error {
 
 	config, err := genConfig(conf)
 	if err != nil {
-		logger.Fatal(err)
+		Logger.Error(err)
 	}
 
 	if createFile {
 		if !configExists {
 			// Figure out how to get in here
-			// logger.Debugf("Inside configExists and 'config' is: %s", string(config))
+			Logger.Debugf("Inside configExists and 'config' is: %s", string(config))
 			// Tracking this in #69
 			err = os.WriteFile(cfgFile+"/.tp.toml", config, 0o600) //nolint:mnd    // https://go.dev/ref/spec#Integer_literals
 			if err != nil {
-				logger.Fatalf("Error writing Config file: %s", err)
+				Logger.Fatalf("Error writing Config file: %s", err)
 			}
 		} else if configExists {
-			// #69 logger.Debugf("Inside !configExists and 'config' is: %s", string(config))
+			Logger.Debugf("Config is: \n%s\n", string(config))
 			localNow := time.Now().Local().Format("200601021504")
 
 			existingConfigFile := cfgFile + "/" + ConfigName
@@ -123,18 +121,18 @@ func createConfig(cfgBinary, cfgFile, cfgMdFile, cfgPlanFile string) error {
 			// Create Backup
 			err := backupFile(existingConfigFile, bkupConfigFile)
 			if err != nil {
-				logger.Fatal(err)
+				Logger.Fatal(err)
 			}
-			logger.Infof("Backup file %s created", bkupConfigFile)
+			Logger.Infof("Backup file %s created", bkupConfigFile)
 			// Create New File
 			err = os.WriteFile(cfgFile+"/.tp.toml", config, 0o600) //nolint:mnd    // https://go.dev/ref/spec#Integer_literals
 			if err != nil {
-				logger.Fatalf("Error writing Config file: %s", err)
+				Logger.Errorf("Error writing Config file: %s", err)
 			}
 		}
-		logger.Infof("Config file %s/.tp.toml created", cfgFile)
+		Logger.Infof("Config file %s/.tp.toml created", cfgFile)
 	} else if !createFile {
-		logger.Info(string(config))
+		Logger.Info(string(config))
 	}
 	return err
 }

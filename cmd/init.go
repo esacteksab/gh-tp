@@ -11,6 +11,7 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // initCmd represents the init command
@@ -32,9 +33,16 @@ var initCmd = &cobra.Command{
 
 		View docs at https://github.com/esacteksab/gh-tp for more information.`),
 	Run: func(cmd *cobra.Command, args []string) {
+		// Check if Verbose is defined in config file
+		v := viper.IsSet("verbose")
+		if v {
+			Verbose = viper.GetBool("verbose")
+			createLogger(Verbose)
+		}
+
 		homeDir, configDir, cwd, err := getDirectories()
 		if err != nil {
-			logger.Fatalf("Error: %s", err)
+			Logger.Fatalf("Error: %s", err)
 		}
 
 		// Should we run in accessible mode?
@@ -125,13 +133,13 @@ var initCmd = &cobra.Command{
 
 		err = form.Run()
 		if err != nil {
-			logger.Fatal(err)
+			Logger.Fatal(err)
 		}
 
 		// createConfig() Goes Here
 		err = createConfig(cfgBinary, cfgFile, cfgMdFile, cfgPlanFile)
 		if err != nil {
-			logger.Fatal(err)
+			Logger.Fatal(err)
 		}
 	},
 }
