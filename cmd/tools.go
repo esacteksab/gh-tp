@@ -103,6 +103,9 @@ func backupFile(source, dest string) error {
 	return err
 }
 
+// initLogger is how we initially create Logger. The values passed are based on 'Verbose' being true
+// Colors are defined here https://github.com/charmbracelet/x/blob/aedd0cd23ed703ff7cbccc5c4f9ab51a4768a9e6/ansi/color.go#L15-L32
+// 14 is Bright Cyan, 9 is Red -- no more purple
 func initLogger(ReportCaller, ReportTimestamp bool, TimeFormat string) (Logger *log.Logger) {
 	Logger = log.NewWithOptions(os.Stderr, log.Options{
 		ReportCaller:    ReportCaller,
