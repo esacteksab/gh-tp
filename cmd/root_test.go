@@ -3,6 +3,7 @@ package cmd
 
 import (
 	"bytes"
+	"errors"
 	"os/exec"
 	"strings"
 	"testing"
@@ -23,14 +24,19 @@ func TestNoConfigFileFound(t *testing.T) {
 	if err != nil {
 		log.Errorf("cmd.Run() failed with %s\n", err)
 	}
-	_, errStr := string(stdout.String()), string(stderr.String())
+	_, errStr := stdout.String(), stderr.String()
 
 	if assert.Error(t, err) {
-		exitError, ok := err.(*exec.ExitError)
+		var exitError *exec.ExitError
+		ok := errors.As(err, &exitError)
 		assert.Error(t, err, "Expected an error.")
 		assert.True(t, ok, "Expected *exec.ExitError, got: %T", err)
 		assert.Equal(t, 1, exitError.ExitCode(), "Expected exit code 1")
-		assert.Equal(t, msg, strings.TrimSuffix(errStr, "\n"))
+		assert.Equal(
+			t,
+			msg,
+			strings.TrimSuffix(errStr, "\n"),
+		)
 	}
 }
 
@@ -46,10 +52,11 @@ func TestDuplicateBinaries(t *testing.T) {
 	if err != nil {
 		log.Errorf("cmd.Run() failed with %s\n", err)
 	}
-	_, errStr := string(stdout.String()), string(stderr.String())
+	_, errStr := stdout.String(), stderr.String()
 
 	if assert.Error(t, err) {
-		exitError, ok := err.(*exec.ExitError)
+		var exitError *exec.ExitError
+		ok := errors.As(err, &exitError)
 		assert.Error(t, err, "Expected an error.")
 		assert.True(t, ok, "Expected *exec.ExitError, got: %T", err)
 		assert.Equal(t, 1, exitError.ExitCode(), "Expected exit code 1")
