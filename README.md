@@ -11,9 +11,9 @@ gh ext install esacteksab/gh-tp
 
 ### `.tp.toml` config file
 
-I wanted to make as few assumptions about your environment as possible, so `tp` defines one default value `verbose = false` today. `tp` uses a config file named `.tp.toml`. This config file is written in [TOML](https://toml.io/). TOML is case-sensitive and keys are [mixedCase or camelCase](https://en.wikipedia.org/wiki/Camel_case) where applicable. It has 2 required parameters with two optional parameters. The lookup order for locating the config file is, your project's root (.e.g `.tp.toml`), `$XDG_CONFIG_HOME/gh-tp/.tp.toml`, on \*nix this is `~/.config/gh-tp`, on MacOS this is `~/Library/Application Support/gh-tp`, on Windows this is `LocalAppData/gh-tp` falling back to `%LOCALAPPDATA%` and finally, we look in `$HOME/.tp.toml`.
+I wanted to make as few assumptions about your environment as possible, so `tp` defines one default value `verbose = false` today. `tp` uses a config file named `.tp.toml`. This config file is written in [TOML](https://toml.io/). TOML is case-sensitive and keys are [mixedCase or camelCase](https://en.wikipedia.org/wiki/Camel_case) where applicable. It has 2 required parameters with two optional parameters. The lookup order for locating the config file is, your project's root (.e.g `.tp.toml`), `$XDG_CONFIG_HOME/gh-tp/.tp.toml`, on \*nix this is `~/.config/gh-tp`, on macOS this is `~/Library/Application Support/gh-tp`, on Windows this is `LocalAppData/gh-tp` falling back to `%LOCALAPPDATA%` and finally, we look in `$HOME/.tp.toml`.
 
-A annotated copy exists in the [example](./example) directory. **_The config file, the parameters and possibly the presence of default values is actively being worked on. This behavior may change in a future release._**
+An annotated copy exists in the [example](./example) directory. **_The config file, the parameters and possibly the presence of default values is actively being worked on. This behavior may change in a future release._**
 
 | Parameter | Type   | Flag              | Required | Description                                                                                                                                                          |
 | --------- | ------ | ----------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -84,7 +84,7 @@ Like with `gh tp` two files will exist. The first being whatever you passed to `
 
 ### Extended Example
 
-The above example is intended to be just enough to get you started. If you'd like to see an example representative of a more real-world use case, one exists in the [example](./example/) directory. A note though, I've been unable to figure out how to put Markdown with code fences inside Markdown code fences. So the formatting on that example exists purely out of a need to handle the situation where I output Markdown and I'm trying to put it inside code fences. I hope you understand and I hope I can come up with a solution long-term to better display the output of `tp`.
+The above example is intended to be just enough to get you started. If you'd like to see an example representative of a more real-world use case, one exists in the [example](./example) directory. A note though, I've been unable to figure out how to put Markdown with code fences inside Markdown code fences. So the formatting on that example exists purely out of a need to handle the situation where I output Markdown, and I'm trying to put it inside code fences. I hope you understand and I hope I can come up with a solution long-term to better display the output of `tp`.
 
 ### Disable Terminal Colors
 
