@@ -26,6 +26,10 @@ ifneq (,$(wildcard ./*.tf))
 	rm *.tf
 endif
 
+ifneq (,$(wildcard ./*.tfstate))
+	rm *.tfstate
+endif
+
 ifneq (,$(wildcard ./*.tofu))
 	rm *.tofu
 endif
@@ -104,5 +108,9 @@ endif
 
 
 .PHONY: test
-test: realbuild
+test:
+	go test ./...
+
+.PHONY: reallytest
+reallytest: realbuild
 	go test ./...
