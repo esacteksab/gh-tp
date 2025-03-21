@@ -11,6 +11,10 @@ max_line_length = 80
 indent_style = space
 indent_size = 2
 
+[*.go]
+indent_style = tab
+indent_size = 4
+
 # TOML
 # https://github.com/toml-lang/toml/tree/master/examples
 [*.toml]
