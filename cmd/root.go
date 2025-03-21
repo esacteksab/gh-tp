@@ -261,9 +261,9 @@ func initConfig() {
 	configFile := ConfigFile{}
 	if cfgFile != "" {
 		// Use config file from the flag.
-		viper.SetConfigFile(configFile.Path)
+		viper.SetConfigFile(cfgFile)
 		// Set the Path in ConfigFile struct
-		configFile.Path = cfgFile
+		cfgFile = configFile.Path
 	} else {
 		// Find home directory and home config directory.
 		homeDir, configDir, _, _ = getDirectories()
