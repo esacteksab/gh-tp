@@ -42,9 +42,9 @@ func existsOrCreated(files []tpFile) error {
 				bold(green("✔")), v.Purpose, " Created...")
 		} else if !exists {
 			//
-			Logger.Errorf("Markdown file %s was not created.", v.Name)
+			Logger.Debugf("%s file %s was not created.", v.Purpose, v.Name)
 			fmt.Fprintf(color.Output, "%s  %s%s\n",
-				bold(red("✕")), v.Purpose, " Failed to Create ...")
+				bold(red("✕")), v.Purpose, " Failed to Create")
 		} else {
 			// I'm only human. NFC how you got here. I hope to never have to find out.
 			Logger.Errorf("If you see this error message, please open a bug. Error Code: TPE003. Error: %s", err)

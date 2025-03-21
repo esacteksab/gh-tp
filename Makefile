@@ -63,7 +63,7 @@ build:
 
 .PHONY: format
 format:
-	gofumpt -l -w .
+	gofumpt -l -w -extra .
 
 .PHONY: tidy
 tidy:

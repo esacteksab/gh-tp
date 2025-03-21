@@ -3,6 +3,7 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"os"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"github.com/MakeNowJust/heredoc"
+	"github.com/briandowns/spinner"
 	"github.com/charmbracelet/log"
 	"github.com/cli/safeexec"
 	"github.com/fatih/color"
@@ -25,7 +27,7 @@ var (
 	configDir          string
 	cfgFile            string
 	homeDir            string
-	out                io.Reader
+	out                *bufio.Reader
 	MaxWidth           int
 	mdParam            string
 	spinnerDuration    time.Duration
@@ -154,6 +156,7 @@ var rootCmd = &cobra.Command{
 		// we check to see if there are tf or tofu files in the current working directory. If not, we don't call tf.plan
 		if files {
 			if len(args) == 0 {
+				Logger.Debugf("args: %s", args)
 				planStr, err = createPlan()
 				if err != nil {
 					Logger.Errorf("Unable to create plan: %s", err)
@@ -165,10 +168,31 @@ var rootCmd = &cobra.Command{
 				}
 
 			} else if args[0] == "-" {
-				out = cmd.InOrStdin()
+				spinnerDuration = 100
+				s := spinner.New(spinner.CharSets[14], spinnerDuration*time.Millisecond)
+				s.Suffix = "  Creating the Plan...\n"
+				s.Start()
+
+				Logger.Debugf("args: %s", args)
+
+				out = bufio.NewReader(cmd.InOrStdin())
+				// os.Stdin is *os.File, checking the size to see if it holds any data
+				fi, err := os.Stdin.Stat()
+				if err != nil {
+					Logger.Error(err)
+				}
+
+				// stdin is a file size of 0, so we check if the os.ModeNamedPipe
+				// is set in *os.File's Mode()
+				// https://cs.opensource.google/go/go/+/refs/tags/go1.24.1:src/os/types.go;l=46
+				if fi.Size() == 0 && fi.Mode()&os.ModeNamedPipe == 0 {
+					Logger.Error("No input provided via stdin")
+					os.Exit(1)
+				}
+
 				content, err := io.ReadAll(out)
 				if err != nil {
-					Logger.Errorf("unable to read stdIn: %s", err)
+					Logger.Errorf("unable to read stdin: %s", err)
 				}
 
 				mdParam = viper.GetString("mdFile")
@@ -181,7 +205,7 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					Logger.Errorf("Something is not right, %s", err)
 				}
-				// the arg received looks like a file, we try to open it
+				s.Stop()
 			}
 		} else {
 			Logger.Errorf("No %s files found. Please run this in a directory with %s files present.",
