@@ -23,7 +23,6 @@ import (
 	"golang.org/x/text/language"
 )
 
-//goland:noinspection SpellCheckingInspection
 var (
 	binaries           []string
 	configDir          string
@@ -41,7 +40,7 @@ var (
 	Commit             string
 	BuiltBy            string
 	exists             []string
-	exts               []string
+	fileExts           []string
 	workingDir         string
 	Logger             *log.Logger
 	bold               = color.New(color.Bold).SprintFunc()
@@ -167,8 +166,8 @@ var rootCmd = &cobra.Command{
 		}
 
 		planPath = viper.GetString("planFile")
-		exts = []string{".tf", ".tofu"}
-		files := checkFilesByExtension(workingDir, exts)
+		fileExts = []string{".tf", ".tofu"}
+		files := checkFilesByExtension(workingDir, fileExts)
 		// we check to see if there are tf or tofu files in the current working directory. If not, we don't call tf.plan
 		if files {
 			if len(args) == 0 {
