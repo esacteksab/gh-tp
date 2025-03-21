@@ -55,8 +55,7 @@ func existsOrCreated(files []tpFile) error {
 	return err
 }
 
-// doesExist takes a path string and returns a bool
-// on whether or not the path exists
+// doesExist takes a path string and returns a bool on whether the path exists
 func doesExist(path string) bool {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return false
@@ -132,7 +131,7 @@ func initLogger(
 			TimeFormat:      TimeFormat,
 		},
 	)
-	MaxWidth = 4
+	MaxWidth := 4
 	styles := log.DefaultStyles()
 	styles.Levels[log.DebugLevel] = lipgloss.NewStyle().
 		SetString(strings.ToUpper(log.DebugLevel.String())).

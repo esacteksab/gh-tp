@@ -42,9 +42,8 @@ func genConfig(conf ConfigParams) (data []byte, err error) {
 	return data, err
 }
 
-// Checks the existence of a config file
-// If one already exists, asks to overwrite
-// If one does not exist, asks to create
+// Checks the existence of a config file.
+// If one exists, asks to overwrite it, otherwise creates it.
 func createOrOverwrite(cfgFile string) (configExists, createFile bool) {
 	configExists = doesExist(cfgFile + "/" + ConfigName)
 	Logger.Debugf("Using config: %s", cfgFile+ConfigName)
