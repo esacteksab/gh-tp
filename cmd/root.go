@@ -346,7 +346,7 @@ func initConfig() {
 		if !errors.As(err, &unsupportedConfigError) {
 			var configParseError viper.ConfigParseError
 			if errors.As(err, &configParseError) {
-				Logger.Errorf("There is an issue %s.", err)
+				Logger.Error(err)
 				os.Exit(1)
 			}
 		}

@@ -17,6 +17,7 @@ var (
 	binary       string
 	configExists bool
 	createFile   bool
+	localNow     string
 	title        string
 )
 
@@ -59,10 +60,10 @@ func query(configExists bool) (createFile bool, err error) {
 	// Should we run in accessible mode?
 	accessible, _ = strconv.ParseBool(os.Getenv("ACCESSIBLE"))
 
-	if !configExists {
-		title = "Create new file?"
-	} else if configExists {
+	if configExists {
 		title = "Overwrite existing config file?"
+	} else {
+		title = "Create new file?"
 	}
 	form := huh.NewForm(
 		huh.NewGroup(
@@ -71,7 +72,8 @@ func query(configExists bool) (createFile bool, err error) {
 				Affirmative("Yes").
 				Negative("No").
 				Value(&createFile),
-		)).WithTheme(huh.ThemeBase16()).
+		),
+	).WithTheme(huh.ThemeBase16()).
 		WithAccessible(accessible)
 
 	err = form.Run()
@@ -105,22 +107,27 @@ func createConfig(cfgBinary, cfgFile, cfgMdFile, cfgPlanFile string) error {
 		// If it doesn't, we need to create the directory, prior to trying to create the file
 		configDirExists := doesExist(configDir)
 		if !configDirExists {
-			if err = os.MkdirAll(configDir, 0o750); err != nil { //nolint:mnd
+			if err = os.MkdirAll(
+				configDir, 0o750, //nolint:mnd
+			); err != nil {
 				Logger.Fatal(err)
 			}
 		}
 
 		if !configExists {
-			Logger.Debugf("Inside configExists and 'config' is: %s", string(config))
-			err = os.WriteFile(configFile.Path, config, 0o600) //nolint:mnd    // https://go.dev/ref/spec#Integer_literals
+			Logger.Debugf(
+				"Inside configExists and 'config' is: %s", string(config),
+			)
+			err = os.WriteFile(
+				configFile.Path, config, 0o600, //nolint:mnd
+			)
 			if err != nil {
 				Logger.Fatalf("Error writing Config file: %s", err)
 			}
 		} else if configExists {
 			Logger.Debugf("Config is: \n%s\n", string(config))
 
-			localNow := time.Now().Local().Format("200601021504")
-
+			localNow = time.Now().Local().Format("200601021504")
 			existingConfigFile := configFile.Path
 			bkupConfigFile := configFile.Path + "-" + localNow
 			// Create Backup
@@ -130,7 +137,9 @@ func createConfig(cfgBinary, cfgFile, cfgMdFile, cfgPlanFile string) error {
 			}
 			Logger.Infof("Backup file %s created", bkupConfigFile)
 			// Create New File
-			err = os.WriteFile(configFile.Path, config, 0o600) //nolint:mnd    // https://go.dev/ref/spec#Integer_literals
+			err = os.WriteFile(
+				configFile.Path, config, 0o600, //nolint:mnd
+			)
 			if err != nil {
 				Logger.Errorf("Error writing Config file: %s", err)
 			}
