@@ -34,6 +34,12 @@ go.work.sum
 /cmd/config_test.go
 
 #################
+# Goland Things #
+#################
+
+.idea
+
+#################
 # VSCode Things #
 #################
 # sometimes there is other stuff in here
