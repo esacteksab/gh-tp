@@ -63,24 +63,28 @@ func doesExist(path string) bool {
 	return true
 }
 
-// getDirectories returns User's home directory, $XDG_CONFIG_HOME
-// and Current Working Directory
+// getDirectories returns the user's home directory, config directory, and current working directory.
+// It handles platform-specific differences for config directories.
 func getDirectories() (homeDir, configDir, cwd string, err error) {
+	// Get home directory
 	homeDir, err = os.UserHomeDir()
 	if err != nil {
-		Logger.Fatal(err)
+		return "", "", "", fmt.Errorf("failed to get home directory: %w", err)
 	}
 
+	// Get config directory
 	configDir, err = os.UserConfigDir()
 	if err != nil {
-		Logger.Fatal(err)
+		return homeDir, "", "", fmt.Errorf("failed to get config directory: %w", err)
 	}
 
+	// Get current working directory
 	cwd, err = os.Getwd()
 	if err != nil {
-		Logger.Errorf("Error: %s", err)
+		return homeDir, configDir, "", fmt.Errorf("failed to get current working directory: %w", err)
 	}
-	return homeDir, configDir, cwd, err
+
+	return homeDir, configDir, cwd, nil
 }
 
 // backupFile copies the file at source to dest we use this when creating a

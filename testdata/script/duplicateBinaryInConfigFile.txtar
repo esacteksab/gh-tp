@@ -1,0 +1,14 @@
+# Passing it a bad config file with the 'binary' key defined twice
+! exec /home/bmorriso/local-repo/projects/tp/gh-tp/gh-tp
+! stdout .
+stderr 'ERRO While parsing config: toml: key binary is already defined'
+
+-- .tp.toml --
+binary = 'terraform'
+binary = 'tofu'
+planFile = 'plan.out'
+mdFile = 'plan.md'
+verbose = false
+
+-- formatters --
+# This exists because the formatters try and remove more than one line and it breaks golden.md
