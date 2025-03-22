@@ -31,8 +31,8 @@ func checkFilesByExtension(dir string, exts []string) bool {
 	return exists
 }
 
-// existsOrCreate checks to see if a plan file and markdown exist or were created
-// Prints to terminal stating so
+// existsOrCreate checks to see if a plan file and markdown exist or were
+// created Prints to terminal stating so
 func existsOrCreated(files []tpFile) error {
 	for _, v := range files {
 		exists := doesExist(v.Name)
@@ -83,10 +83,9 @@ func getDirectories() (homeDir, configDir, cwd string, err error) {
 	return homeDir, configDir, cwd, err
 }
 
-// backupFile copies the file at source to dest
-// we use this when creating a config file.
-// if a existing config file is present, we back it up
-// prior to overwriting it.
+// backupFile copies the file at source to dest we use this when creating a
+// config file. if a existing config file is present, we back it up prior
+// to overwriting it.
 func backupFile(source, dest string) error {
 	srcFile, err := os.Open(source)
 	if err != nil {
@@ -118,8 +117,9 @@ func backupFile(source, dest string) error {
 	return err
 }
 
-// initLogger is how we initially create Logger. The values passed are based on 'Verbose' being true
-// Colors are defined here https://github.com/charmbracelet/x/blob/aedd0cd23ed703ff7cbccc5c4f9ab51a4768a9e6/ansi/color.go#L15-L32
+// initLogger is how we initially create Logger. The values passed are based on
+// 'Verbose' being true Colors are defined here
+// https://github.com/charmbracelet/x/blob/aedd0cd23ed703ff7cbccc5c4f9ab51a4768a9e6/ansi/color.go#L15-L32
 // 14 is Bright Cyan, 9 is Red -- no more purple
 func initLogger(
 	ReportCaller, ReportTimestamp bool, TimeFormat string,

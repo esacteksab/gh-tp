@@ -69,7 +69,8 @@ func createMarkdown(mdParam, planStr string) (*os.File, string, error) {
 		sbDetails.WriteString(" ")
 		sbDetails.WriteString("Plan")
 		planDetails = sbDetails.String()
-		// This is what creates the final document (`mdoutfile`) plmd here could possibly be os.Stdout one day
+		// This is what creates the final document (`mdFile`) planMd here could
+		// possibly be os.Stdout one day
 		mderr := md.NewMarkdown(planMd).Details(planDetails, sbPlan).Build()
 		if mderr != nil {
 			Logger.Errorf(

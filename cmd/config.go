@@ -5,10 +5,12 @@ package cmd
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"time"
 
 	"github.com/charmbracelet/huh"
+	"github.com/go-playground/validator/v10"
 	"github.com/pelletier/go-toml/v2"
 )
 
@@ -30,7 +32,7 @@ type ConfigFile struct {
 type ConfigParams struct {
 	Binary   string `toml:"binary" comment:"binary: (type: string) The name of the binary, expect either 'tofu' or 'terraform'. Must exist on your $PATH." validate:"oneof=terraform tofu"`
 	PlanFile string `toml:"planFile" comment:"planFile: (type: string) The name of the plan file created by 'gh tp'." validate:"required"`
-	MdFile   string `toml:"mdFile" comment:"mdFile: (type: string) The name of the Markdown file created by 'gh tp'." validate:"required"`
+	MdFile   string `toml:"mdFile" comment:"mdFile: (type: string) The name of the Markdown file created by 'gh tp'." validate:"required,nefield=PlanFile"`
 	Verbose  bool   `toml:"verbose" comment:"verbose: (type: bool) Enable Verbose Logging. Default is false." validate:"boolean"`
 }
 
@@ -89,12 +91,27 @@ func createConfig(cfgBinary, cfgFile, cfgMdFile, cfgPlanFile string) error {
 	configFile.Path = cfgFile
 	configDir = filepath.Dir(cfgFile)
 
+	validate := validator.New(validator.WithRequiredStructEnabled())
+
+	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		return fld.Name
+	})
+
 	conf := ConfigParams{
 		Binary:   cfgBinary,
 		PlanFile: cfgPlanFile,
 		MdFile:   cfgMdFile,
 		Verbose:  false,
 	}
+
+	err := validate.Struct(conf)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			Logger.Errorf(" Field: %s, Error: %s, Param: %s\n", err.Field(), err.Tag(), err.Param())
+		}
+	}
+
+	Logger.Debug("Config is valid")
 
 	config, err := genConfig(conf)
 	if err != nil {
@@ -103,7 +120,8 @@ func createConfig(cfgBinary, cfgFile, cfgMdFile, cfgPlanFile string) error {
 
 	if createFile {
 		// configFile.Path may be os.UserConfigDir + TpDir -- It may not exist
-		// If it doesn't, we need to create the directory, prior to trying to create the file
+		// If it doesn't, we need to create the directory, prior to trying to
+		// create the file
 		configDirExists := doesExist(configDir)
 		if !configDirExists {
 			if err = os.MkdirAll(

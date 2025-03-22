@@ -113,7 +113,6 @@ var rootCmd = &cobra.Command{
 			Logger.Error(
 				"Config file not found. Please run 'gh tp init' or run 'gh tp help' or refer to the documentation on how to create a config file. https://github.com/esacteksab/gh-tp")
 			os.Exit(1)
-			// May want to put cmd.Help() or something about expectations with config parameters.
 		} else {
 			// Check to see if required 'planFile' parameter is set
 			o := viper.IsSet("planFile")
@@ -170,7 +169,8 @@ var rootCmd = &cobra.Command{
 
 		fileExts := []string{".tf", ".tofu"}
 		files := checkFilesByExtension(workingDir, fileExts)
-		// we check to see if there are tf or tofu files in the current working directory. If not, we don't call tf.plan
+		// we check to see if there are tf or tofu files in the current working
+		// directory. If not, there is no sense in tf.plan
 		if files {
 			if len(args) == 0 {
 				Logger.Debugf("args: %s", args)
@@ -328,8 +328,9 @@ func initConfig() {
 		// Find home directory and home config directory.
 		homeDir, configDir, _, _ := getDirectories()
 
-		// Search config in home directory with name ".tp.toml"
-		// Current Working Directory - Presumed project's root
+		// Search config in os.UserConfigDir/gh-tp with name ".tp.toml"
+		// Search config in os.UserHomeDir with name ".tp.toml"
+		// Current Working Directory '.' - Presumed project's root
 		viper.SetConfigName(".tp.toml")
 		viper.SetConfigType("toml")
 		viper.AddConfigPath(".")
