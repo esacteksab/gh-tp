@@ -109,7 +109,7 @@ endif
 
 .PHONY: test
 test:
-	go test ./...
+	go test ./... -cover
 
 .PHONY: reallytest
 reallytest: realbuild
