@@ -57,8 +57,6 @@ func createPlan() (planStr string, err error) {
 	if err != nil {
 		// binary defined. .tf or .tofu files exist. Still errors. Show me the error
 		Logger.With("err", err).Errorf("%s returned the follow error", binary)
-		// Edge case exists where we detect .tofu file but terraform was called,
-		// which doesn't support .tofu files. tf.Plan returns error.
 		// There is a condition that exists where .tofu files exist, but terraform
 		// is the binary, this error will occur. But we're not checking _explicitly_
 		// for either .tf or .tofu in files above.

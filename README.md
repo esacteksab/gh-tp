@@ -1,4 +1,4 @@
-`tp` is a GitHub [CLI](https://github.com/cli/cli) extension to create GitHub pull requests with [GitHub Flavored Markdown](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/about-writing-and-formatting-on-github) containing the output from an [OpenTofu](https://opentofu.org/) or [Terraform](https://www.terraform.io/) plan's output [^1] [^2], wrapped around a [`<details></details>`](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/organizing-information-with-collapsed-sections) block so the plan output can be collapsed for easier reading. The body of your pull request will look like this [example](./example/EXAMPLE-PR.md) in the example directory.
+`tp` is a GitHub [CLI](https://github.com/cli/cli) extension to create GitHub pull requests with [GitHub Flavored Markdown](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/about-writing-and-formatting-on-github) containing the output from an [OpenTofu](https://opentofu.org/) or [Terraform](https://www.terraform.io/) plan's output [^1] [^2] wrapped around a `<details></details>` [elements](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/organizing-information-with-collapsed-sections) so the plan output can be collapsed for easier reading. The body of your pull request will look like this [example](./example/EXAMPLE-PR.md) in the example directory.
 
 > [!TIP]
 > View it in 'rich diff' mode to see the rendered view.
@@ -11,13 +11,13 @@ gh ext install esacteksab/gh-tp
 
 ### `.tp.toml` config file
 
-I wanted to make as few assumptions about your environment as possible, so `tp` defines one default value `verbose = false` today. `tp` uses a config file named `.tp.toml`. This config file is written in [TOML](https://toml.io/). TOML is case-sensitive and keys are [mixedCase or camelCase](https://en.wikipedia.org/wiki/Camel_case) where applicable. It has 2 required parameters with two optional parameters. The lookup order for locating the config file is, your project's root (.e.g `.tp.toml`), `$XDG_CONFIG_HOME/gh-tp/.tp.toml`, on \*nix this is `~/.config/gh-tp`, on MacOS this is `~/Library/Application Support/gh-tp`, on Windows this is `LocalAppData/gh-tp` falling back to `%LOCALAPPDATA%` and finally, we look in `$HOME/.tp.toml`.
+I wanted to make as few assumptions about your environment as possible, so `tp` defines one default value `verbose = false` today. `tp` uses a config file named `.tp.toml`. This config file is written in [TOML](https://toml.io/). TOML is case-sensitive and keys are [mixedCase or camelCase](https://en.wikipedia.org/wiki/Camel_case) where applicable. It has 2 required parameters with two optional parameters. The lookup order for locating the config file is, your project's root (.e.g `.tp.toml`), `$XDG_CONFIG_HOME/gh-tp/.tp.toml`, on \*nix this is `~/.config/gh-tp`, on macOS this is `~/Library/Application Support/gh-tp`, on Windows this is `LocalAppData/gh-tp` falling back to `%LOCALAPPDATA%` and finally, we look in `$HOME/.tp.toml`.
 
-A annotated copy exists in the [example](./example) directory. **_The config file, the parameters and possibly the presence of default values is actively being worked on. This behavior may change in a future release._**
+An annotated copy exists in the [example](./example) directory. **_The config file, the parameters and possibly the presence of default values is actively being worked on. This behavior may change in a future release._**
 
 | Parameter | Type   | Flag              | Required | Description                                                                                                                                                          |
 | --------- | ------ | ----------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| binary    | string | `-b`, `--binary`  | N [^3]   | We look on your `$PATH` for `tofu` or `terraform`, if both exist, you _must_ define _one_ in your config or pass the flag `-b` or `--binary`. _Default: `undefined`_ |
+| binary    | string | `-b`,`--binary`   | N [^3]   | We look on your `$PATH` for `tofu` or `terraform`, if both exist, you _must_ define _one_ in your config or pass the flag `-b` or `--binary`. _Default: `undefined`_ |
 | planFile  | string | `-o`, `--outFile` | Y        | The name of the plan's output file created by `gh tp`. _Default: `""`_                                                                                               |
 | mdFile    | string | `-m`, `--mdFile`  | Y        | The name of the Markdown file created by `gh tp`. _Default: `""`_                                                                                                    |
 | verbose   | bool   | `-v`, `--verbose` | N        | Enable verbose logging. _Default: `false`_                                                                                                                           |
@@ -84,7 +84,7 @@ Like with `gh tp` two files will exist. The first being whatever you passed to `
 
 ### Extended Example
 
-The above example is intended to be just enough to get you started. If you'd like to see an example representative of a more real-world use case, one exists in the [example](./example/) directory. A note though, I've been unable to figure out how to put Markdown with code fences inside Markdown code fences. So the formatting on that example exists purely out of a need to handle the situation where I output Markdown and I'm trying to put it inside code fences. I hope you understand and I hope I can come up with a solution long-term to better display the output of `tp`.
+The above example is intended to be just enough to get you started. If you'd like to see an example representative of a more real-world use case, one exists in the [example](./example) directory. A note though, I've been unable to figure out how to put Markdown with code fences inside Markdown code fences. So the formatting on that example exists purely out of a need to handle the situation where I output Markdown, and I'm trying to put it inside code fences. I hope you understand and I hope I can come up with a solution long-term to better display the output of `tp`.
 
 ### Disable Terminal Colors
 
@@ -137,8 +137,7 @@ GOARCH: amd64
 
 #### Disclaimer
 
-> [!NOTE]
-> This is a personal project that was born out of need and want to automate the repetitive task out of my life. `tp` is in no way affiliated with or associated with Terraform, HashiCorp, OpenTofu or any entities official or unofficial. The views expressed here are my own and don't reflect any past, current or future employer.
+> This is a personal project that was born out of need and want to automate the repetitive task out of my life. `tp` is in no way affiliated with or associated with Terraform, HashiCorp, IBM, OpenTofu or any entities official or unofficial. The views expressed here are my own and don't reflect any past, current or future employer.
 
 [^1]: https://opentofu.org/docs/cli/commands/plan/#other-options <!-- markdownlint-disable-line MD034 -->
 

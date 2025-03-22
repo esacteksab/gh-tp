@@ -31,30 +31,31 @@ func checkFilesByExtension(dir string, exts []string) bool {
 	return exists
 }
 
-// existsOrCreate checks to see if a plan file and markdown exist or were created
-// Prints to terminal stating so
+// existsOrCreate checks to see if a plan file and markdown exist or were
+// created Prints to terminal stating so
 func existsOrCreated(files []tpFile) error {
 	for _, v := range files {
 		exists := doesExist(v.Name)
-		if exists {
-			Logger.Debugf("%s file %s was created.", v.Purpose, v.Name)
-			fmt.Fprintf(color.Output, "%s  %s%s\n",
-				bold(green("✔")), v.Purpose, " Created...")
-		} else if !exists {
-			//
-			Logger.Debugf("%s file %s was not created.", v.Purpose, v.Name)
-			fmt.Fprintf(color.Output, "%s  %s%s\n",
-				bold(red("✕")), v.Purpose, " Failed to Create")
+		if !exists {
+			Logger.Debugf(
+				"%s file %s was not created.", v.Purpose, v.Name,
+			)
+			fmt.Fprintf(
+				color.Output, "%s  %s%s\n",
+				bold(red("✕")), v.Purpose, " Failed to Create",
+			)
 		} else {
-			// I'm only human. NFC how you got here. I hope to never have to find out.
-			Logger.Errorf("If you see this error message, please open a bug. Error Code: TPE003. Error: %s", err)
+			Logger.Debugf("%s file %s was created.", v.Purpose, v.Name)
+			fmt.Fprintf(
+				color.Output, "%s  %s%s\n",
+				bold(green("✔")), v.Purpose, " Created...",
+			)
 		}
 	}
 	return err
 }
 
-// doesExist takes a path string and returns a bool
-// on whether or not the path exists
+// doesExist takes a path string and returns a bool on whether the path exists
 func doesExist(path string) bool {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return false
@@ -75,29 +76,38 @@ func getDirectories() (homeDir, configDir, cwd string, err error) {
 		Logger.Fatal(err)
 	}
 
-	cwd, cwderr := os.Getwd()
-	if cwderr != nil {
+	cwd, err = os.Getwd()
+	if err != nil {
 		Logger.Errorf("Error: %s", err)
 	}
 	return homeDir, configDir, cwd, err
 }
 
-// backupFile copies the file at source to dest
-// we use this when creating a config file.
-// if a existing config file is present, we back it up
-// prior to overwriting it.
+// backupFile copies the file at source to dest we use this when creating a
+// config file. if a existing config file is present, we back it up prior
+// to overwriting it.
 func backupFile(source, dest string) error {
 	srcFile, err := os.Open(source)
 	if err != nil {
 		return err
 	}
-	defer srcFile.Close()
+	defer func(srcFile *os.File) {
+		err := srcFile.Close()
+		if err != nil {
+			Logger.Error(err)
+		}
+	}(srcFile)
 
 	destFile, err := os.Create(dest)
 	if err != nil {
 		return err
 	}
-	defer destFile.Close()
+	defer func(destFile *os.File) {
+		err := destFile.Close()
+		if err != nil {
+			Logger.Error(err)
+		}
+	}(destFile)
 
 	_, err = io.Copy(destFile, srcFile)
 	if err != nil {
@@ -107,20 +117,26 @@ func backupFile(source, dest string) error {
 	return err
 }
 
-// initLogger is how we initially create Logger. The values passed are based on 'Verbose' being true
-// Colors are defined here https://github.com/charmbracelet/x/blob/aedd0cd23ed703ff7cbccc5c4f9ab51a4768a9e6/ansi/color.go#L15-L32
+// initLogger is how we initially create Logger. The values passed are based on
+// 'Verbose' being true Colors are defined here
+// https://github.com/charmbracelet/x/blob/aedd0cd23ed703ff7cbccc5c4f9ab51a4768a9e6/ansi/color.go#L15-L32
 // 14 is Bright Cyan, 9 is Red -- no more purple
-func initLogger(ReportCaller, ReportTimestamp bool, TimeFormat string) (Logger *log.Logger) {
-	Logger = log.NewWithOptions(os.Stderr, log.Options{
-		ReportCaller:    ReportCaller,
-		ReportTimestamp: ReportTimestamp,
-		TimeFormat:      TimeFormat,
-	})
-	MaxWidth = 4
+func initLogger(
+	ReportCaller, ReportTimestamp bool, TimeFormat string,
+) (Logger *log.Logger) {
+	Logger = log.NewWithOptions(
+		os.Stderr, log.Options{
+			ReportCaller:    ReportCaller,
+			ReportTimestamp: ReportTimestamp,
+			TimeFormat:      TimeFormat,
+		},
+	)
+	MaxWidth := 4
 	styles := log.DefaultStyles()
 	styles.Levels[log.DebugLevel] = lipgloss.NewStyle().
 		SetString(strings.ToUpper(log.DebugLevel.String())).
 		Bold(true).MaxWidth(MaxWidth).Foreground(lipgloss.Color("14"))
+
 	styles.Levels[log.FatalLevel] = lipgloss.NewStyle().
 		SetString(strings.ToUpper(log.FatalLevel.String())).
 		Bold(true).MaxWidth(MaxWidth).Foreground(lipgloss.Color("9"))

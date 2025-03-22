@@ -15,7 +15,12 @@ func TestBackupFile(t *testing.T) {
 	// Create a temporary directory for test files
 	tempDir, err := os.MkdirTemp("", "backup-test")
 	require.NoError(t, err)
-	defer os.RemoveAll(tempDir)
+	defer func(path string) {
+		err := os.RemoveAll(path)
+		if err != nil {
+			Logger.Error(err)
+		}
+	}(tempDir)
 
 	// Test case 1: Successful backup
 	t.Run("SuccessfulBackup", func(t *testing.T) {

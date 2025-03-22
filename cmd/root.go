@@ -4,6 +4,7 @@ package cmd
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -23,12 +24,9 @@ import (
 )
 
 var (
-	binaries           []string
 	configDir          string
 	cfgFile            string
-	homeDir            string
 	out                *bufio.Reader
-	MaxWidth           int
 	mdParam            string
 	spinnerDuration    time.Duration
 	titleCaseConverter cases.Caser
@@ -38,7 +36,6 @@ var (
 	Date               string
 	Commit             string
 	BuiltBy            string
-	exts               []string
 	workingDir         string
 	Logger             *log.Logger
 	bold               = color.New(color.Bold).SprintFunc()
@@ -69,7 +66,9 @@ func buildVersion(Version, Commit, Date, BuiltBy string) string {
 	if BuiltBy != "" {
 		result = fmt.Sprintf("%s\nBuilt by: %s", result, BuiltBy)
 	}
-	result = fmt.Sprintf("%s\nGOOS: %s\nGOARCH: %s", result, runtime.GOOS, runtime.GOARCH)
+	result = fmt.Sprintf(
+		"%s\nGOOS: %s\nGOARCH: %s", result, runtime.GOOS, runtime.GOARCH,
+	)
 	if info, ok := debug.ReadBuildInfo(); ok && info.Main.Sum != "" {
 		result = fmt.Sprintf(
 			"%s\nmodule Version: %s, checksum: %s",
@@ -81,18 +80,21 @@ func buildVersion(Version, Commit, Date, BuiltBy string) string {
 	return result
 }
 
-// rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "tp",
 	Short: "A GitHub CLI extension to submit a pull request with Terraform or OpenTofu plan output.",
-	Long: heredoc.Doc(`
-		'tp' is a GitHub CLI extension to create GitHub pull requests with GitHub Flavored Markdown
-		containing the output from an OpenTofu or Terraform plan output, wrapped around
-		'<details></details>' element so the plan output is collapsed for easier reading on longer outputs.
-		The body of your pull request will look like this https://github.com/esacteksab/gh-tp/example/EXAMPLE-PR.md
+	Long: heredoc.Doc(
+		`
+		'tp' is a GitHub CLI extension to create GitHub pull requests with
+		GitHub Flavored Markdown containing the output from an OpenTofu or
+		Terraform plan output, wrapped around '<details></details>' element so
+		the plan output is collapsed for easier reading on longer outputs. The
+		body of your pull request will look like this
+		https://github.com/esacteksab/gh-tp/example/EXAMPLE-PR.md
 
-		View the README at https://github.com/esacteksab/gh-tp or run 'gh tp init'
-		to use a prompt-based form with suggested values to create your .tp.toml config file now.`),
+		View the README at https://github.com/esacteksab/gh-tp or run
+		'gh tp init' to create your .tp.toml config file now.`,
+	),
 
 	Run: func(cmd *cobra.Command, args []string) {
 		v := viper.IsSet("verbose")
@@ -102,19 +104,23 @@ var rootCmd = &cobra.Command{
 		}
 
 		keys := viper.AllKeys()
-		Logger.Debugf("Defined keys: %s in %s", keys, viper.ConfigFileUsed())
+		Logger.Debugf(
+			"Defined keys: %s in %s", keys, viper.ConfigFileUsed(),
+		)
 
 		if !doesExist(viper.ConfigFileUsed()) {
 			Logger.Debug(viper.ConfigFileUsed())
-			Logger.Error("Config file not found. Please run 'gh tp init' or run 'gh tp help' or refer to the documentation on how to create a config file. https://github.com/esacteksab/gh-tp")
+			Logger.Error(
+				"Config file not found. Please run 'gh tp init' or run 'gh tp help' or refer to the documentation on how to create a config file. https://github.com/esacteksab/gh-tp")
 			os.Exit(1)
-			// May want to put cmd.Help() or something about expectations with config parameters.
 		} else {
 			// Check to see if required 'planFile' parameter is set
 			o := viper.IsSet("planFile")
 			if !o {
 				Logger.Errorf(
-					"Missing Parameter: 'planFile' (type: string) is not defined in %s. This is the name of the plan's output file that will be created by `gh tp`.\n", viper.ConfigFileUsed())
+					"Missing Parameter: 'planFile' (type: string) is not defined in %s. This is the name of the plan's output file that will be created by `gh tp`.\n",
+					viper.ConfigFileUsed(),
+				)
 				os.Exit(1)
 			}
 
@@ -122,7 +128,9 @@ var rootCmd = &cobra.Command{
 			m := viper.IsSet("mdFile")
 			if !m {
 				Logger.Errorf(
-					"Missing Parameter: 'mdFile' (type: string) is not defined in %s. This is the name of the Markdown file that will be created by `gh tp`.\n", viper.ConfigFileUsed())
+					"Missing Parameter: 'mdFile' (type: string) is not defined in %s. This is the name of the Markdown file that will be created by `gh tp`.\n",
+					viper.ConfigFileUsed(),
+				)
 				os.Exit(1)
 			}
 			Logger.Debugf("Using config file: %s", viper.ConfigFileUsed())
@@ -132,28 +140,37 @@ var rootCmd = &cobra.Command{
 		if b {
 			binary = viper.GetString("binary")
 		} else {
-			exists := []string{}
+			var binaries []string
+			var exists []string
+
+			exists = []string{}
 			binaries = []string{"tofu", "terraform"}
+
 			for _, v := range binaries {
 				bin, err := safeexec.LookPath(v)
 				if err != nil {
 					Logger.Debugf("%s", err)
 				}
-				// It's possible for both `tofu` and `terraform` to exist on $PATH and we need to handle that.
+				// It's possible for both `tofu` and `terraform` to exist on $PATH, and we need to handle that.
 				if len(bin) > 0 {
 					exists = append(exists, bin)
 				}
 			}
 			if len(exists) == len(binaries) {
-				Logger.Errorf("Found both `tofu` and `terraform` in your $PATH. We're not sure which one to use. Please set the 'binary' parameter in your %s config file to the binary you want to use.", viper.ConfigFileUsed())
+				Logger.Errorf(
+					"Found both `tofu` and `terraform` in your $PATH. We're not sure which one to use. Please set the 'binary' parameter in your %s config file to the binary you want to use.",
+					viper.ConfigFileUsed(),
+				)
 				os.Exit(1)
 			}
 		}
 
 		planPath = viper.GetString("planFile")
-		exts = []string{".tf", ".tofu"}
-		files := checkFilesByExtension(workingDir, exts)
-		// we check to see if there are tf or tofu files in the current working directory. If not, we don't call tf.plan
+
+		fileExts := []string{".tf", ".tofu"}
+		files := checkFilesByExtension(workingDir, fileExts)
+		// we check to see if there are tf or tofu files in the current working
+		// directory. If not, there is no sense in tf.plan
 		if files {
 			if len(args) == 0 {
 				Logger.Debugf("args: %s", args)
@@ -169,7 +186,9 @@ var rootCmd = &cobra.Command{
 
 			} else if args[0] == "-" {
 				spinnerDuration = 100
-				s := spinner.New(spinner.CharSets[14], spinnerDuration*time.Millisecond)
+				s := spinner.New(
+					spinner.CharSets[14], spinnerDuration*time.Millisecond,
+				)
 				s.Suffix = "  Creating the Plan...\n"
 				s.Start()
 
@@ -208,8 +227,11 @@ var rootCmd = &cobra.Command{
 				s.Stop()
 			}
 		} else {
-			Logger.Errorf("No %s files found. Please run this in a directory with %s files present.",
-				cases.Title(language.English).String(binary), cases.Title(language.English).String(binary))
+			Logger.Errorf(
+				"No %s files found. Please run this in a directory with %s files present.",
+				cases.Title(language.English).String(binary),
+				cases.Title(language.English).String(binary),
+			)
 			os.Exit(1)
 		}
 
@@ -241,12 +263,24 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
-	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
-	rootCmd.Flags().StringP("binary", "b", "", "The name of the binary to use. Expect either `tofu` or `terraform`. Must exist on your $PATH.")
-	rootCmd.Flags().StringP("outFile", "o", "", "The name of the plan output file created by tp.")
-	rootCmd.Flags().StringP("mdFile", "m", "", "The name of the Markdown file created by tp.")
+	rootCmd.PersistentFlags().BoolVarP(
+		&Verbose, "verbose", "v", false, "Verbose output",
+	)
+	rootCmd.Flags().StringP(
+		"binary", "b", "",
+		"Expect either 'tofu' or 'terraform'. Must exist on your $PATH.",
+	)
+	rootCmd.Flags().StringP(
+		"outFile", "o", "",
+		"The name of the plan output file to be created by tp.",
+	)
+	rootCmd.Flags().StringP(
+		"mdFile", "m", "", "The name of the Markdown file to be created by tp.",
+	)
 
-	err := viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
+	err := viper.BindPFlag(
+		"verbose", rootCmd.PersistentFlags().Lookup("verbose"),
+	)
 	if err != nil {
 		Logger.Error("Unable to bind to verbose flag: ", err)
 	}
@@ -264,14 +298,16 @@ func init() {
 	}
 
 	rootCmd.Flags().
-		StringVarP(&cfgFile,
+		StringVarP(
+			&cfgFile,
 			"config",
 			"c",
 			"",
-			`use this configuration file (default lookup:
-			1. a .tp.toml file in your project's root
-			2. $XDG_CONFIG_HOME/gh-tp/.tp.toml
-			3. $HOME/.tp.toml)`)
+			`Config file to use (default lookup:
+		1. a .tp.toml file in your project's root
+		2. $XDG_CONFIG_HOME/gh-tp/.tp.toml
+		3. $HOME/.tp.toml)`,
+		)
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -290,10 +326,11 @@ func initConfig() {
 		cfgFile = configFile.Path
 	} else {
 		// Find home directory and home config directory.
-		homeDir, configDir, _, _ = getDirectories()
+		homeDir, configDir, _, _ := getDirectories()
 
-		// Search config in home directory with name ".tp.toml"
-		// Current Working Directory - Presumed project's root
+		// Search config in os.UserConfigDir/gh-tp with name ".tp.toml"
+		// Search config in os.UserHomeDir with name ".tp.toml"
+		// Current Working Directory '.' - Presumed project's root
 		viper.SetConfigName(".tp.toml")
 		viper.SetConfigType("toml")
 		viper.AddConfigPath(".")
@@ -307,13 +344,13 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.UnsupportedConfigError); ok {
-			Logger.Errorf("Unsupported Format. Config file should be named .tp.toml %s.", err)
-			os.Exit(1)
-			// This handles the situation where a duplicate key exists.
-		} else if _, ok := err.(viper.ConfigParseError); ok {
-			Logger.Errorf("There is an issue %s.", err)
-			os.Exit(1)
+		var unsupportedConfigError viper.UnsupportedConfigError
+		if !errors.As(err, &unsupportedConfigError) {
+			var configParseError viper.ConfigParseError
+			if errors.As(err, &configParseError) {
+				Logger.Error(err)
+				os.Exit(1)
+			}
 		}
 	}
 }
