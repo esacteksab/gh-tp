@@ -1,4 +1,4 @@
-`tp` is a GitHub [CLI](https://github.com/cli/cli) extension to create GitHub pull requests with [GitHub Flavored Markdown](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/about-writing-and-formatting-on-github) containing the output from an [OpenTofu](https://opentofu.org/) or [Terraform](https://www.terraform.io/) plan's output [^1] [^2], wrapped around a [`<details></details>`](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/organizing-information-with-collapsed-sections) block so the plan output can be collapsed for easier reading. The body of your pull request will look like this [example](./example/EXAMPLE-PR.md) in the example directory.
+`tp` is a GitHub [CLI](https://github.com/cli/cli) extension to create GitHub pull requests with [GitHub Flavored Markdown](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/about-writing-and-formatting-on-github) containing the output from an [OpenTofu](https://opentofu.org/) or [Terraform](https://www.terraform.io/) plan's output [^1] [^2] wrapped around a `<details></details>` [elements](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/organizing-information-with-collapsed-sections) so the plan output can be collapsed for easier reading. The body of your pull request will look like this [example](./example/EXAMPLE-PR.md) in the example directory.
 
 > [!TIP]
 > View it in 'rich diff' mode to see the rendered view.
@@ -17,7 +17,7 @@ An annotated copy exists in the [example](./example) directory. **_The config fi
 
 | Parameter | Type   | Flag              | Required | Description                                                                                                                                                          |
 | --------- | ------ | ----------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| binary    | string | `-b`, `--binary`  | N [^3]   | We look on your `$PATH` for `tofu` or `terraform`, if both exist, you _must_ define _one_ in your config or pass the flag `-b` or `--binary`. _Default: `undefined`_ |
+| binary    | string | `-b`,`--binary`   | N [^3]   | We look on your `$PATH` for `tofu` or `terraform`, if both exist, you _must_ define _one_ in your config or pass the flag `-b` or `--binary`. _Default: `undefined`_ |
 | planFile  | string | `-o`, `--outFile` | Y        | The name of the plan's output file created by `gh tp`. _Default: `""`_                                                                                               |
 | mdFile    | string | `-m`, `--mdFile`  | Y        | The name of the Markdown file created by `gh tp`. _Default: `""`_                                                                                                    |
 | verbose   | bool   | `-v`, `--verbose` | N        | Enable verbose logging. _Default: `false`_                                                                                                                           |
@@ -137,8 +137,7 @@ GOARCH: amd64
 
 #### Disclaimer
 
-> [!NOTE]
-> This is a personal project that was born out of need and want to automate the repetitive task out of my life. `tp` is in no way affiliated with or associated with Terraform, HashiCorp, OpenTofu or any entities official or unofficial. The views expressed here are my own and don't reflect any past, current or future employer.
+> This is a personal project that was born out of need and want to automate the repetitive task out of my life. `tp` is in no way affiliated with or associated with Terraform, HashiCorp, IBM, OpenTofu or any entities official or unofficial. The views expressed here are my own and don't reflect any past, current or future employer.
 
 [^1]: https://opentofu.org/docs/cli/commands/plan/#other-options <!-- markdownlint-disable-line MD034 -->
 
