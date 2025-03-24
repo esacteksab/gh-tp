@@ -16,6 +16,11 @@ repos:
       - id: check-merge-conflict
         name: "Check Merge Conflicts"
 
+  - repo: https://github.com/google/keep-sorted
+    rev: v0.6.0
+    hooks:
+      - id: keep-sorted
+
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.31.3
     hooks:
