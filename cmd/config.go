@@ -30,10 +30,10 @@ type ConfigFile struct {
 }
 
 type ConfigParams struct {
-	Binary   string `toml:"binary" comment:"binary: (type: string) The name of the binary, expect either 'tofu' or 'terraform'. Must exist on your $PATH." validate:"oneof=terraform tofu"`
-	PlanFile string `toml:"planFile" comment:"planFile: (type: string) The name of the plan file created by 'gh tp'." validate:"required"`
-	MdFile   string `toml:"mdFile" comment:"mdFile: (type: string) The name of the Markdown file created by 'gh tp'." validate:"required,nefield=PlanFile"`
-	Verbose  bool   `toml:"verbose" comment:"verbose: (type: bool) Enable Verbose Logging. Default is false." validate:"boolean"`
+	Binary   string `toml:"binary"   comment:"binary: (type: string) The name of the binary, expect either 'tofu' or 'terraform'. Must exist on your $PATH." validate:"oneof=terraform tofu"`
+	PlanFile string `toml:"planFile" comment:"planFile: (type: string) The name of the plan file created by 'gh tp'."                                        validate:"required"`
+	MdFile   string `toml:"mdFile"   comment:"mdFile: (type: string) The name of the Markdown file created by 'gh tp'."                                      validate:"required,nefield=PlanFile"`
+	Verbose  bool   `toml:"verbose"  comment:"verbose: (type: bool) Enable Verbose Logging. Default is false."                                               validate:"boolean"`
 }
 
 func genConfig(conf ConfigParams) (data []byte, err error) {

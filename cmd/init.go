@@ -95,7 +95,9 @@ var initCmd = &cobra.Command{
 						func(pf string) error {
 							if pf == "" {
 								//lint:ignore ST1005 User-facing error message. I want pretty.
-								return errors.New("This field is required. Please enter what your plan's output file should be named") //nolint:stylecheck
+								return errors.New( //nolint:stylecheck
+									"This field is required. Please enter what your plan's output file should be named",
+								)
 							}
 							return nil
 						},
@@ -114,12 +116,16 @@ var initCmd = &cobra.Command{
 						func(md string) error {
 							if md == "" {
 								//lint:ignore ST1005 User-facing error message. I want pretty.
-								return errors.New("This field is required. Please enter what your Markdown file should be named") //nolint:stylecheck
+								return errors.New( //nolint:stylecheck
+									"This field is required. Please enter what your Markdown file should be named",
+								)
 							}
 							pf := configFile.Params.PlanFile
 							if md == pf {
 								//lint:ignore ST1005 User-facing error message. I want pretty.
-								return errors.New("Your Markdown file should not share the same name as your plan output file.") //nolint:stylecheck
+								return errors.New( //nolint:stylecheck
+									"Your Markdown file should not share the same name as your plan output file.",
+								)
 							}
 							return nil
 						},

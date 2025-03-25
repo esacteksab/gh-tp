@@ -81,7 +81,10 @@ func getDirectories() (homeDir, configDir, cwd string, err error) {
 	// Get current working directory
 	cwd, err = os.Getwd()
 	if err != nil {
-		return homeDir, configDir, "", fmt.Errorf("failed to get current working directory: %w", err)
+		return homeDir, configDir, "", fmt.Errorf(
+			"failed to get current working directory: %w",
+			err,
+		)
 	}
 
 	return homeDir, configDir, cwd, nil

@@ -112,7 +112,8 @@ var rootCmd = &cobra.Command{
 		if !configExists {
 			Logger.Debug(viper.ConfigFileUsed())
 			Logger.Error(
-				"Config file not found. Please run 'gh tp init' or run 'gh tp help' or refer to the documentation on how to create a config file. https://github.com/esacteksab/gh-tp")
+				"Config file not found. Please run 'gh tp init' or run 'gh tp help' or refer to the documentation on how to create a config file. https://github.com/esacteksab/gh-tp",
+			)
 			os.Exit(1)
 		} else {
 			// Check to see if required 'planFile' parameter is set
