@@ -1,3 +1,4 @@
+# https://golangci-lint.rum/jsonschema/golangci.v1.jsonschema.json
 # Influenced from https://github.com/golang-templates/seed/blob/main/.golangci.yml
 # Along with official docs https://golangci-lint.run/usage/linters/
 linters:

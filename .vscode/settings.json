@@ -48,5 +48,8 @@
   "go.useLanguageServer": true,
   "gopls": {
     "formatting.gofumpt": true
+  },
+  "yaml.schemas": {
+    "https://golangci-lint.run/jsonschema/golangci.v1.jsonschema.json": "file:///home/bmorriso/local-repo/projects/tp/gh-tp/.golangci.yaml"
   }
 }
