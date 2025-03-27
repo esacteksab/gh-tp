@@ -52,7 +52,7 @@ func existsOrCreated(files []tpFile) error {
 			)
 		}
 	}
-	return err
+	return nil
 }
 
 // doesExist takes a path string and returns a bool on whether the path exists
