@@ -1,55 +1,32 @@
 {
-  "cSpell.words": [
-    "charmbracelet",
-    "CODEOWNERS",
-    "Debugf",
-    "dotenv",
-    "dupl",
-    "dylib",
-    "envrc",
-    "errcheck",
-    "esacteksab",
-    "eslintcache",
-    "funlen",
-    "gocyclo",
-    "godox",
-    "gofumpt",
-    "goheader",
-    "goimports",
-    "goreleaser",
-    "gosec",
-    "gosimple",
-    "ineffassign",
-    "Infof",
-    "jscoverage",
-    "jspm",
-    "makezero",
-    "mderr",
-    "mdoutfile",
-    "Microbundle",
-    "nolintlint",
-    "nuxt",
-    "perfsprint",
-    "pids",
-    "plmd",
-    "safeexec",
-    "staticcheck",
-    "stylecheck",
-    "stylelintcache",
-    "terraformrc",
-    "tfexec",
-    "tfstate",
-    "tfvars",
-    "venv",
-    "vitepress",
-    "vuepress",
-    "wscript"
-  ],
+  "go.formatTool": "gofumpt",
   "go.useLanguageServer": true,
   "gopls": {
     "formatting.gofumpt": true
   },
   "yaml.schemas": {
     "https://golangci-lint.run/jsonschema/golangci.v1.jsonschema.json": "file:///home/bmorriso/local-repo/projects/tp/gh-tp/.golangci.yaml"
-  }
+  },
+  "json.schemas": [
+    {
+      "fileMatch": [".prettierrc"],
+      "url": "https://json.schemastore.org/prettierrc.json"
+    },
+    {
+      "fileMatch": ["renovate.json"],
+      "url": "https://docs.renovatebot.com/renovate-schema.json"
+    },
+    {
+      "fileMatch": [".pre-commit-config.yaml"],
+      "url": "https://json.schemastore.org/pre-commit-config.json"
+    },
+    {
+      "fileMatch": [".github/dependabot.yml"],
+      "url": "https://json.schemastore.org/dependabot-2.0.json"
+    },
+    {
+      "fileMatch": [".github/workflows/*.yml"],
+      "url": "https://json.schemastore.org/github-action.json"
+    }
+  ]
 }
