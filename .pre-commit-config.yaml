@@ -54,7 +54,7 @@ repos:
         args:
           [
             "--schemafile",
-            "https://golangci-lint.run/jsonschema/golangci.jsonschema.json",
+            "https://golangci-lint.run/jsonschema/golangci.v1.jsonschema.json",
           ]
       - id: check-jsonschema
         name: "Validate goreleaser config"
@@ -102,12 +102,6 @@ repos:
           - mdformat-gfm-alerts
           - mdformat-tables
           - mdformat-footnote
-
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
-    hooks:
-      - id: codespell
-        name: "Code Spell"
 
   - repo: https://github.com/crate-ci/typos
     rev: v1.30.2

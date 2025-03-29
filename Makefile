@@ -6,7 +6,7 @@ SHELL := bash
 .SUFFIXES:
 
 .PHONY: audit
-audit:
+audit: tidy format
 	go vet ./...
 	go tool -modfile=go.tool.mod staticcheck ./...
 	go tool -modfile=go.tool.mod govulncheck ./...
@@ -47,7 +47,6 @@ ifneq (,$(wildcard ./coverage))
 
 endif
 
-
 .PHONY: build
 build:
 
@@ -63,28 +62,15 @@ build:
 
 .PHONY: format
 format:
-	gofumpt -l -w -extra .
+	golines --base-formatter=gofumpt -w .
+	go tool -modfile=go.tool.mod gofumpt -l -w -extra .
 
-.PHONY: tidy
-tidy:
-	go mod tidy
+.PHONY: lint
+lint:
+	golangci-lint run -v
 
-
-.PHONY: realbuild
-realbuild: tidy format audit
-
-	goreleaser build --clean --single-target --snapshot
-	cp dist/gh-tp_linux_amd64_v1/gh-tp .
-
-	gh ext remove tp
-
-	gh ext install .
-
-	-gh tp --version
-
-
-.PHONY: reallyclean
-reallyclean: clean
+.PHONY: moreclean
+moreclean: clean
 
 ifneq (,$(wildcard ./.tp.toml*))
 	rm .tp.toml*
@@ -106,11 +92,10 @@ ifneq (,$(wildcard ~/.config/gh-tp/.tp.toml*))
 	rm -rf ~/.config/gh-tp
 endif
 
-
 .PHONY: test
-test:
-	go test ./...
+test: tidy
+	go test ./... -cover
 
-.PHONY: reallytest
-reallytest: realbuild
-	go test ./...
+.PHONY: tidy
+tidy:
+	go mod tidy

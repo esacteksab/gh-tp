@@ -3,10 +3,14 @@
 package cmd
 
 import (
+	"bytes"
+	"io"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/charmbracelet/log"
+	"github.com/fatih/color"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -98,4 +102,127 @@ func TestBackupFile(t *testing.T) {
 		// Assert error occurred (may be permission denied)
 		assert.Error(t, err)
 	})
+}
+
+func TestCheckFilesByExtensionExist(t *testing.T) {
+	fileExts := []string{".tofu", ".tf"}
+
+	tf, err := os.CreateTemp("", "foo-*.tf")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove(tf.Name())
+
+	tofu, err := os.CreateTemp("", "foo-*.tofu")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove(tofu.Name())
+
+	files := checkFilesByExtension("/tmp", fileExts)
+
+	require.FileExists(t, tf.Name())
+	require.FileExists(t, tofu.Name())
+	assert.True(t, files)
+}
+
+func TestCheckFilesByExtensionDoNotExist(t *testing.T) {
+	fileExts := []string{".tofu", ".tf"}
+
+	files := checkFilesByExtension("/tmp", fileExts)
+
+	assert.False(t, files)
+}
+
+func TestExistsOrCreatedExists(t *testing.T) {
+	if Logger == nil {
+		Logger = initLogger(true, true, "2006/01/02 15:04:05")
+		log.SetLevel(log.InfoLevel)
+		log.SetDefault(Logger)
+	}
+	plan, err := os.CreateTemp("", "plan.out")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove(plan.Name())
+
+	md, err := os.CreateTemp("", "plan.md")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove(md.Name())
+
+	files := []tpFile{
+		{Name: plan.Name(), Purpose: "Plan"},
+		{Name: md.Name(), Purpose: "Markdown"},
+	}
+
+	// Capture stdout
+	// oldStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	color.Output = w
+
+	exists := existsOrCreated(files)
+
+	err = w.Close()
+	if err != nil {
+		log.Fatalf("Error closing pipe: %s", err)
+	}
+
+	// os.Stdout = oldStdout
+	var buf bytes.Buffer
+
+	_, err = io.Copy(&buf, r)
+	if err != nil {
+		log.Fatalf("Error copying from reader: %s", err)
+	}
+
+	// fmt.Println(buf.String())
+	output := buf.String()
+	expectedOutput := "✔  Plan Created...\n✔  Markdown Created..."
+	assert.Contains(t, output, expectedOutput)
+	// assert.Equal(t, "✔  Plan Created...", "✔  Plan Created...")
+	// assert.Equal(t, expectedOutput, buf.String())
+	// assert.Equal(t, "✔  Markdown Created...", "✔  Markdown Created...")
+	// assert.Equal(t, "✔  Markdown Created...", "")
+	assert.NoError(t, exists)
+}
+
+func TestExistsOrCreatedDoesNotExists(t *testing.T) {
+	if Logger == nil {
+		Logger = initLogger(true, true, "2006/01/02 15:04:05")
+		log.SetLevel(log.InfoLevel)
+		log.SetDefault(Logger)
+	}
+
+	files := []tpFile{
+		{Name: "plan.out", Purpose: "Plan"},
+		{Name: "plan.md", Purpose: "Markdown"},
+	}
+
+	// Capture stdout
+	// oldStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	color.Output = w
+
+	exists := existsOrCreated(files)
+
+	err = w.Close()
+	if err != nil {
+		log.Fatalf("Error closing pipe: %s", err)
+	}
+
+	// os.Stdout = oldStdout
+	var buf bytes.Buffer
+
+	_, err = io.Copy(&buf, r)
+	if err != nil {
+		log.Fatalf("Error copying from reader: %s", err)
+	}
+
+	// fmt.Println(buf.String())
+	output := buf.String()
+	expectedOutput := "✕  Plan Failed to Create\n✕  Markdown Failed to Create\n"
+	assert.Contains(t, output, expectedOutput)
+	assert.NoError(t, exists)
 }

@@ -1,0 +1,4 @@
+binary = "terraform"
+planFile = "plan.out"
+# mdFile = "plan.md"
+verbose = false

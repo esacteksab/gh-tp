@@ -1,0 +1,15 @@
+# Passing it an empty stdin
+exec /home/bmorriso/local-repo/projects/tp/gh-tp/gh-tp -
+stdout '✕  Plan Failed to Create'
+stdout '✕  Markdown Failed to Create'
+
+-- .tp.toml --
+binary = 'terraform'
+planFile = 'plan.out'
+mdFile = 'plan.md'
+verbose = false
+
+-- foo.tf --
+
+-- formatters --
+# This exists because the formatters try and remove more than one line and it breaks golden.md
