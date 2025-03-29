@@ -1,20 +1,52 @@
 {
-  "go.formatTool": "gofumpt",
+  "editorconfig.generateAuto": false,
+  "markdown.validate.enabled": true,
   "go.useLanguageServer": true,
-  "gopls": {
-    "formatting.gofumpt": true
+  "editor.formatOnSave": true,
+  "go.formatTool": "gofumpt",
+  "[go]": {
+    "editor.semanticHighlighting.enabled": true
   },
-  "yaml.schemas": {
-    "https://golangci-lint.run/jsonschema/golangci.v1.jsonschema.json": "file:///home/bmorriso/local-repo/projects/tp/gh-tp/.golangci.yaml"
+  "gopls": {
+    "formatting.gofumpt": true,
+    "ui.semanticTokens": true,
+    "formatting.local": "github.com/esacteksab"
+  },
+  "emeraldwalk.runonsave": {
+    "commands": [
+      {
+        "match": "\\.go$",
+        "cmd": "golines ${file} -w --base-formatter=gofumpt"
+      }
+    ]
+  },
+  "[toml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "json.schemas": [
+    {
+      "fileMatch": ["./config/_default/*.toml", "config.toml"],
+      "url": "https://json.schemastore.org/hugo.json"
+    },
     {
       "fileMatch": [".prettierrc"],
       "url": "https://json.schemastore.org/prettierrc.json"
     },
     {
-      "fileMatch": ["renovate.json"],
-      "url": "https://docs.renovatebot.com/renovate-schema.json"
+      "fileMatch": ["theme.toml"],
+      "url": "https://json.schemastore.org/hugo-theme.json"
+    },
+    {
+      "fileMatch": ["package.json"],
+      "url": "https://json.schemastore.org/package.json"
+    },
+    {
+      "fileMatch": [".stylelintrc.json"],
+      "url": "https://json.schemastore.org/stylelintrc.json"
+    },
+    {
+      "fileMatch": ["pyproject.toml"],
+      "url": "https://json.schemastore.org/pyproject.json"
     },
     {
       "fileMatch": [".pre-commit-config.yaml"],
@@ -27,6 +59,16 @@
     {
       "fileMatch": [".github/workflows/*.yml"],
       "url": "https://json.schemastore.org/github-action.json"
+    },
+    {
+      "fileMatch": [".golangci.yaml"],
+      "url": "https://golangci-lint.run/jsonschema/golangci.v1.jsonschema.json"
     }
-  ]
+  ],
+  "yaml.schemas": {
+    "https://golangci-lint.run/jsonschema/golangci.v1.jsonschema.json": [
+      "${workspaceFolder}/.golangci.yaml",
+      "file:///home/bmorriso/local-repo/projects/tp/gh-tp/.golangci.yaml"
+    ]
+  }
 }
