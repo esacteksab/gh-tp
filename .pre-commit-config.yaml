@@ -103,12 +103,6 @@ repos:
           - mdformat-tables
           - mdformat-footnote
 
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
-    hooks:
-      - id: codespell
-        name: "Code Spell"
-
   - repo: https://github.com/crate-ci/typos
     rev: v1.30.2
     hooks:
