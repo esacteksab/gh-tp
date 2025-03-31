@@ -54,7 +54,7 @@ repos:
         args:
           [
             "--schemafile",
-            "https://golangci-lint.run/jsonschema/golangci.jsonschema.json",
+            "https://golangci-lint.run/jsonschema/golangci.v1.jsonschema.json",
           ]
       - id: check-jsonschema
         name: "Validate goreleaser config"
