@@ -69,7 +69,7 @@ repos:
         name: "Golanglint Full"
         description: Fast linters runner for Go. Runs on all files in the repo. Use this hook if you use pre-commit in CI.
         entry: golangci-lint run -v
-        types: [go]
+        types: ["go"]
         language: golang
         require_serial: true
         pass_filenames: false
@@ -102,12 +102,6 @@ repos:
           - mdformat-gfm-alerts
           - mdformat-tables
           - mdformat-footnote
-
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
-    hooks:
-      - id: codespell
-        name: "Code Spell"
 
   - repo: https://github.com/crate-ci/typos
     rev: v1.30.2

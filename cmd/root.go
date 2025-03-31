@@ -108,17 +108,19 @@ var rootCmd = &cobra.Command{
 			"Defined keys: %s in %s", keys, viper.ConfigFileUsed(),
 		)
 
-		if !doesExist(viper.ConfigFileUsed()) {
+		configExists := doesExist(viper.ConfigFileUsed())
+		if !configExists {
 			Logger.Debug(viper.ConfigFileUsed())
 			Logger.Error(
-				"Config file not found. Please run 'gh tp init' or run 'gh tp help' or refer to the documentation on how to create a config file. https://github.com/esacteksab/gh-tp")
+				"Config file not found. Please run 'gh tp init' or run 'gh tp help' or refer to the documentation on how to create a config file. https://github.com/esacteksab/gh-tp",
+			)
 			os.Exit(1)
 		} else {
 			// Check to see if required 'planFile' parameter is set
 			o := viper.IsSet("planFile")
 			if !o {
 				Logger.Errorf(
-					"Missing Parameter: 'planFile' (type: string) is not defined in %s. This is the name of the plan's output file that will be created by `gh tp`.\n",
+					"Missing Parameter: 'planFile' (type: string) is not defined in %s. This is the name of the plan's output file that will be created by `gh tp`.",
 					viper.ConfigFileUsed(),
 				)
 				os.Exit(1)
@@ -128,7 +130,7 @@ var rootCmd = &cobra.Command{
 			m := viper.IsSet("mdFile")
 			if !m {
 				Logger.Errorf(
-					"Missing Parameter: 'mdFile' (type: string) is not defined in %s. This is the name of the Markdown file that will be created by `gh tp`.\n",
+					"Missing Parameter: 'mdFile' (type: string) is not defined in %s. This is the name of the Markdown file that will be created by `gh tp`.",
 					viper.ConfigFileUsed(),
 				)
 				os.Exit(1)

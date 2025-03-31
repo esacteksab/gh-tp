@@ -70,7 +70,10 @@ func createPlan() (planStr string, err error) {
 		// }
 		// We need to exit on this error. tf.Plan actually returns status 1
 		// -- maybe some day we can intercept it or have awareness that it was returned.
-		Logger.Infof("Check the output of `%s plan` locally. If you believe this is a bug, please report the issue. TPE001.", binary)
+		Logger.Infof(
+			"Check the output of `%s plan` locally. If you believe this is a bug, please report the issue. TPE001.",
+			binary,
+		)
 		os.Exit(1)
 	}
 	s.Stop()
