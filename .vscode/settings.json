@@ -66,9 +66,6 @@
     }
   ],
   "yaml.schemas": {
-    "https://golangci-lint.run/jsonschema/golangci.v1.jsonschema.json": [
-      "${workspaceFolder}/.golangci.yaml",
-      "file:///home/bmorriso/local-repo/projects/tp/gh-tp/.golangci.yaml"
-    ]
+    "https://golangci-lint.run/jsonschema/golangci.v1.jsonschema.json": ".golangci.yaml"
   }
 }

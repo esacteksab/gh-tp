@@ -22,7 +22,7 @@ repos:
       - id: keep-sorted
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.31.3
+    rev: 0.32.1
     hooks:
       - id: check-github-workflows
       - id: check-dependabot
@@ -38,13 +38,13 @@ repos:
           ]
       - id: check-jsonschema
         name: "Validate MarkdownLint"
-        files: ^\.markdownlint.yml+$
+        files: ^\.markdownlint-cli2.yaml+$
         types:
           - yaml
         args:
           [
             "--schemafile",
-            "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json",
+            "https://raw.githubusercontent.com/DavidAnson/markdownlint-cli2/v0.17.2/schema/markdownlint-cli2-config-schema.json",
           ]
       - id: check-jsonschema
         name: "Validate golangci-lint config"
@@ -65,13 +65,10 @@ repos:
 
   - repo: local
     hooks:
-      - id: golangci-lint-full
-        name: "Golanglint Full"
-        description: Fast linters runner for Go. Runs on all files in the repo. Use this hook if you use pre-commit in CI.
-        entry: golangci-lint run -v
-        types: ["go"]
-        language: golang
-        require_serial: true
+      - id: make-lint
+        name: "Make Lint"
+        entry: "make lint"
+        language: system
         pass_filenames: false
 
   - repo: local
@@ -95,7 +92,7 @@ repos:
     hooks:
       - id: mdformat
         exclude: ^testdata/
-        name: "Markdown Formatter"
+        name: "Markdown Format"
         additional_dependencies:
           - mdformat-gfm
           - mdformat-toc
@@ -104,11 +101,11 @@ repos:
           - mdformat-footnote
 
   - repo: https://github.com/crate-ci/typos
-    rev: v1.30.2
+    rev: v1.31.1
     hooks:
       - id: typos
         args: [--force-exclude]
-        name: "Typos"
+        name: "Spell Check"
 
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: v0.10.0.1
