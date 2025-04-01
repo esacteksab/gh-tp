@@ -43,7 +43,7 @@ func TestNoConfigFileFound(t *testing.T) { //nolint:dupl
 // It's possible that both tofu and terraform exists on a person's $PATH. We need to handle it.
 func TestDuplicateBinaries(t *testing.T) { //nolint:dupl
 	cmd := exec.Command("gh", "tp", "--config", "../testdata/duplicateBinaries/.tp.toml")
-	msg := "ERRO Found both `tofu` and `terraform` in your $PATH. We're not sure which one to use. Please set the 'binary' parameter in your ../testdata/duplicateBinaries/.tp.toml config file to the binary you want to use."
+	msg := "ERRO Found both tofu and terraform in your $PATH. We're not sure which one to use. Please set the binary parameter in ../testdata/duplicateBinaries/.tp.toml to the binary you want to use."
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
