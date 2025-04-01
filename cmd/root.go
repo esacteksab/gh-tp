@@ -160,7 +160,7 @@ var rootCmd = &cobra.Command{
 			}
 			if len(exists) == len(binaries) {
 				Logger.Errorf(
-					"Found both `tofu` and `terraform` in your $PATH. We're not sure which one to use. Please set the 'binary' parameter in your %s config file to the binary you want to use.",
+					"Found both tofu and terraform in your $PATH. We're not sure which one to use. Please set the binary parameter in %s to the binary you want to use.",
 					viper.ConfigFileUsed(),
 				)
 				os.Exit(1)
