@@ -1,5 +1,5 @@
 # Passing it an empty stdin
-exec /home/bmorriso/local-repo/projects/tp/gh-tp/gh-tp -
+exec gh-tp -
 stdout '✕  Plan Failed to Create'
 stdout '✕  Markdown Failed to Create'
 

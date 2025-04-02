@@ -1,5 +1,5 @@
 # Passing it a bad config file with the 'binary' key defined twice
-! exec /home/bmorriso/local-repo/projects/tp/gh-tp/gh-tp
+! exec gh-tp
 ! stdout .
 stderr 'ERRO While parsing config: toml: key binary is already defined'
 
