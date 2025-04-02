@@ -1,5 +1,5 @@
 # An empty directory -- I can't get this to work, so this exists in cmd/root_test.go TestNoConfigFileFound()
-! exec /home/bmorriso/local-repo/projects/tp/gh-tp/gh-tp
+! exec gh-tp
 stderr 'ERRO Config file not found. Please run ''gh tp init'' or run ''gh tp help'' or refer to the documentation on how to create a config file. https://github.com/esacteksab/gh-tp'
 
 -- formatters --

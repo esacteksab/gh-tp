@@ -1,5 +1,5 @@
 # Passing it a config file, but no .tf or .tofu files exist
-! exec /home/bmorriso/local-repo/projects/tp/gh-tp/gh-tp
+! exec gh-tp
 ! stdout .
 stderr 'ERRO No Terraform files found. Please run this in a directory with Terraform files present.'
 

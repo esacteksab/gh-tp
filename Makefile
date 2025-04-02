@@ -12,6 +12,19 @@ audit: tidy format
 	go tool -modfile=go.tool.mod govulncheck ./...
 	golangci-lint run -v
 
+
+.PHONY: build
+build:
+
+	goreleaser build --clean --single-target --snapshot
+	cp dist/gh-tp_linux_amd64_v1/gh-tp .
+
+	gh ext remove tp
+
+	gh ext install .
+
+	-gh tp --version
+
 .PHONY: clean
 clean:
 ifneq (,$(wildcard ./*plan.md))
@@ -47,18 +60,9 @@ ifneq (,$(wildcard ./coverage))
 
 endif
 
-.PHONY: build
-build:
-
-	goreleaser build --clean --single-target --snapshot
-	cp dist/gh-tp_linux_amd64_v1/gh-tp .
-
-	gh ext remove tp
-
-	gh ext install .
-
-	-gh tp --version
-
+.PHONY: container
+container: tidy
+	./scripts/build-container.sh
 
 .PHONY: format
 format:
@@ -93,8 +97,8 @@ ifneq (,$(wildcard ~/.config/gh-tp/.tp.toml*))
 endif
 
 .PHONY: test
-test: tidy
-	go test ./... -cover
+test: container
+	@tag=$(shell git describe --tags --abbrev=0) && docker run esacteksab/tpt:$$tag
 
 .PHONY: tidy
 tidy:

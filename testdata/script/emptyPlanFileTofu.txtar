@@ -1,5 +1,5 @@
 # Passing it a config file, .tf file exits, plan.out and plan.md should be created
-exec /home/bmorriso/local-repo/projects/tp/gh-tp/gh-tp
+exec gh-tp
 stdout '✔  Plan Created...'\n'✔  Markdown Created...'
 exists plan.out
 exists plan.md
