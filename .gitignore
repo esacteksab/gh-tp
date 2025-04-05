@@ -29,8 +29,6 @@ _site/
 # Test binary, built with `go test -c`
 *.test
 .env
-# The world isn't ready for this. Or this isn't ready for the world
-/cmd/config_test.go
 /gh-tp
 /gh-tp.exe
 # Go workspace file
