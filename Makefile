@@ -103,3 +103,8 @@ test: container
 .PHONY: tidy
 tidy:
 	go mod tidy
+
+.PHONY: update
+update:
+	go get -u ./...
+	go mod tidy
