@@ -1,8 +1,8 @@
 [files]
-extend-exclude = ['.goreleaser.yaml']
+  extend-exclude = ['.goreleaser.yaml', 'testdata/*']
 
 [default.extend-words]
-Hashi = 'Hashi'
-optin = 'optin'
-fa-adn = 'fa-adn'
-ERRO = 'ERRO'
+  Hashi  = 'Hashi'
+  optin  = 'optin'
+  fa-adn = 'fa-adn'
+  ERRO   = 'ERRO'
