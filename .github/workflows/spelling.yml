@@ -16,4 +16,4 @@ concurrency:
 
 jobs:
   typos-reusable:
-    uses: esacteksab/.github/.github/workflows/spelling.yml@21bd7f88fef63b0a428dcbed6db9b5020c689682
+    uses: esacteksab/.github/.github/workflows/spelling.yml@eedf9f480f8dde199f2ea6d561ab6ea703b0cc31
