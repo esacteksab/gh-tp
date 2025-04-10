@@ -2,20 +2,30 @@ version: 2
 updates:
   - package-ecosystem: "pip"
     directory: "/"
-    minor-and-patch:
-      update-types:
-        - "minor"
-        - "patch"
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "saturday"
+      time: "03:00"
+      timezone: "America/Chicago"
+
   - package-ecosystem: "gomod"
     directory: "/"
-    minor-and-patch:
-      update-types:
-        - "minor"
-        - "patch"
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "saturday"
+      time: "03:00"
+
+      timezone: "America/Chicago"
   - package-ecosystem: "npm"
     directory: "/"
     groups:
@@ -24,8 +34,15 @@ updates:
           - "minor"
           - "patch"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "saturday"
+      time: "03:00"
+      timezone: "America/Chicago"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "saturday"
+      time: "03:00"
+      timezone: "America/Chicago"
