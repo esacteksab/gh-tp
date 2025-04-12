@@ -1,5 +1,4 @@
-# keep-sorted start
-go 1.24.2
-node 22.14.0
-python 3.12.9
-# keep-sorted end
+golang 1.24.2
+nodejs 22.14.0
+python 3.12
+uv     latest

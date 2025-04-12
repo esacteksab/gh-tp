@@ -66,7 +66,7 @@ container: tidy
 
 .PHONY: format
 format:
-	golines --base-formatter=gofumpt -w .
+	go tool -modfile=go.tool.mod golines -w .
 	go tool -modfile=go.tool.mod gofumpt -l -w -extra .
 
 .PHONY: lint
