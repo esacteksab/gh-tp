@@ -1,2 +1,4 @@
 # Passing it a non-existent config file
 ! exec gh-tp --config /tmp/foo/.tp.toml
+
+stderr 'Error: config file not found. Please run ''gh tp init'' or refer to the documentation'

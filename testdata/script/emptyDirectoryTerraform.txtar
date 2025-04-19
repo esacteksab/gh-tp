@@ -1,5 +1,6 @@
 # Passing it a config file, but no .tf or .tofu files exist
 ! exec gh-tp
+stderr 'Error: no Terraform files found in current directory. Please run this in a directory with Terraform files'
 
 -- .tp.toml --
 binary = 'terraform'

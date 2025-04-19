@@ -3,6 +3,7 @@
 ! exists ../plan.out
 ! exists plan.out
 ! exists plan.md
+stderr '"\.\./plan\.out" must be a filename only \(no directory separators\)'
 
 -- .tp.toml --
 binary = "terraform"

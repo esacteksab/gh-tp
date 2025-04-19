@@ -1,5 +1,6 @@
 # Passing it a bad config file with the 'binary' key defined twice
 ! exec gh-tp
+stderr 'Error: While parsing config: toml: key binary is already defined'
 
 -- .tp.toml --
 binary = 'terraform'

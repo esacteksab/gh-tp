@@ -1,5 +1,6 @@
 # Passing it an empty stdin
 ! exec gh-tp -
+stderr 'Error: received empty plan from stdin'
 
 -- .tp.toml --
 binary = 'tofu'
