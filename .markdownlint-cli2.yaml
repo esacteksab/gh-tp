@@ -19,3 +19,4 @@ fix: false
 # Define glob expressions to ignore
 ignores:
   - "testdata/**"
+  - "testdata/golden.md"

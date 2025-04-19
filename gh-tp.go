@@ -2,7 +2,9 @@
 
 package main
 
-import "github.com/esacteksab/gh-tp/cmd"
+import (
+	"github.com/esacteksab/gh-tp/cmd"
+)
 
 func main() {
 	cmd.Execute()

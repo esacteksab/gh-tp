@@ -2,11 +2,36 @@
 package cmd
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
+	"github.com/charmbracelet/log"
 	"github.com/go-playground/validator/v10"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
+
+func TestGenConfig(t *testing.T) {
+	// Setup test struct
+	conf := ConfigParams{
+		Binary:   "terraform",
+		PlanFile: "test.out",
+		MdFile:   "test.md",
+		Verbose:  false,
+	}
+
+	// Call the function
+	data, err := genConfig(conf)
+
+	// Assert results
+	require.NoError(t, err)
+	require.NotNil(t, data)
+	require.Contains(t, string(data), "terraform")
+	require.Contains(t, string(data), "test.out")
+	require.Contains(t, string(data), "test.md")
+	require.Contains(t, string(data), "false")
+}
 
 func TestCreateConfig_ValidationPlanAndMdAreNotTheSame(t *testing.T) {
 	validate := validator.New(validator.WithRequiredStructEnabled())
@@ -34,7 +59,7 @@ func TestCreateConfig_ValidationPlanAndMdAreNotTheSame(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases { //nolint:dupl
+	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			conf := ConfigParams{
 				Binary:   tc.binary,
@@ -99,7 +124,7 @@ func TestCreateConfig_ValidationPlanFileRequired(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases { //nolint:dupl
+	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			conf := ConfigParams{
 				Binary:   tc.binary,
@@ -160,7 +185,7 @@ func TestCreateConfig_ValidationMdFileRequired(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases { //nolint:dupl
+	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			conf := ConfigParams{
 				Binary:   tc.binary,
@@ -229,7 +254,7 @@ func TestCreateConfig_ValidationExpectedBinary(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases { //nolint:dupl
+	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			conf := ConfigParams{
 				Binary:   tc.binary,
@@ -299,4 +324,149 @@ func TestCreateConfig_ValidationVerboseIsABool(t *testing.T) {
 
 	errFalse := validate.Var(false, "boolean")
 	require.NoError(t, errFalse, "False value should pass boolean validation")
+}
+
+// Make sure your mock types embed mock.Mock
+type MockFileChecker struct {
+	mock.Mock // This provides all the On(), Called(), etc. methods
+}
+
+func (m *MockFileChecker) DoesExist(cfgFile string) bool {
+	args := m.Called(cfgFile)
+	return args.Bool(0)
+}
+
+type MockUserPrompt struct {
+	mock.Mock // This provides all the On(), Called(), etc. methods
+}
+
+func (m *MockUserPrompt) AskOverwrite(configExists bool) (bool, error) {
+	args := m.Called(configExists)
+	return args.Bool(0), args.Error(1)
+}
+
+func TestCreateOrOverwriteWithMock(t *testing.T) {
+	// Setup - initialize the logger if needed
+	if Logger == nil {
+		// Initialize your logger here
+		Logger = log.NewWithOptions(os.Stderr, log.Options{
+			Level:           log.InfoLevel,
+			ReportCaller:    true,
+			ReportTimestamp: true,
+		})
+	}
+
+	tempFile := "test-config"
+
+	// Test case 1: Config doesn't exist, user chooses to create
+	t.Run("ConfigDoesNotExist_UserCreates", func(t *testing.T) {
+		// Create mocks
+		mockFileChecker := new(MockFileChecker)
+		mockUserPrompt := new(MockUserPrompt)
+
+		// Set expectations
+		mockFileChecker.On("DoesExist", tempFile).Return(false)
+		mockUserPrompt.On("AskOverwrite", false).Return(true, nil)
+
+		// Call the function with mocks
+		configExists, createFile, err := createOrOverwrite(
+			tempFile,
+			mockFileChecker,
+			mockUserPrompt,
+		)
+
+		// Assert results
+		require.NoError(t, err)
+		require.False(t, configExists)
+		require.True(t, createFile)
+
+		// Verify that the expectations were met
+		mockFileChecker.AssertExpectations(t)
+		mockUserPrompt.AssertExpectations(t)
+	})
+}
+
+type MockFormRunner struct {
+	createFilePtr *bool
+	userSelection bool // What the "user" selected
+	err           error
+}
+
+func (m *MockFormRunner) Run() error {
+	// Set the createFile pointer to simulate user input
+	if m.createFilePtr != nil {
+		*m.createFilePtr = m.userSelection
+	}
+	return m.err
+}
+
+func TestCreateConfig(t *testing.T) {
+	// Setup test logger if needed
+	if Logger == nil {
+		Logger = log.NewWithOptions(os.Stderr, log.Options{
+			Level: log.InfoLevel,
+		})
+	}
+
+	originalFactory := formRunnerFactory
+
+	// Create temp directory for test files
+	tmpDir := t.TempDir()
+	cfgFile := filepath.Join(tmpDir, ".tp.toml")
+	cfgMdFile := "test.md"
+	cfgPlanFile := "test.out"
+	cfgBinary := "terraform"
+
+	defer os.Remove(".tp.toml")
+	defer os.Remove("test.md")
+	defer os.Remove("test.out")
+
+	// Test case 1: New config file, creation successful
+	t.Run("NewConfigCreationSuccess", func(t *testing.T) {
+		formRunnerFactory = func(title string, createFile *bool, accessible bool) FormRunner {
+			// Set the createFile value to true, simulating "Yes" selection
+			*createFile = true
+			return &MockFormRunner{err: nil}
+		}
+
+		// Restore original factory after test
+		defer func() {
+			formRunnerFactory = originalFactory
+		}()
+		// Mock the file checker and user prompt
+		// Store original values
+		originalFileChecker := defaultFileChecker
+		originalUserPrompt := defaultUserPrompt
+
+		// Create mocks
+		mockFileChecker := new(MockFileChecker)
+		mockUserPrompt := new(MockUserPrompt)
+
+		// Replace globals with mocks
+		defaultFileChecker = mockFileChecker
+		defaultUserPrompt = mockUserPrompt
+
+		// Restore after test
+		defer func() {
+			defaultFileChecker = originalFileChecker
+			defaultUserPrompt = originalUserPrompt
+		}()
+
+		// Set up mock expectations with Anything matcher
+		// Set up exact mock expectations
+		mockFileChecker.On("DoesExist", cfgFile).Return(false)
+		mockUserPrompt.On("AskOverwrite", false).Return(true, nil)
+
+		// Call the function
+		err := createConfig(cfgBinary, cfgFile, cfgMdFile, cfgPlanFile)
+
+		// Debug - print actual calls
+		// t.Logf("Mock file checker calls: %v", mockFileChecker.Calls)
+		// t.Logf("Mock user prompt calls: %v", mockUserPrompt.Calls)
+
+		// Assert results
+		require.NoError(t, err)
+		mockFileChecker.AssertExpectations(t)
+		mockUserPrompt.AssertExpectations(t)
+	})
 }

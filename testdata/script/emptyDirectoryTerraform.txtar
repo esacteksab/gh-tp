@@ -1,10 +1,9 @@
-# Passing it a bad config file with the 'binary' key defined twice
+# Passing it a config file, but no .tf or .tofu files exist
 ! exec gh-tp
-stderr 'Error: While parsing config: toml: key binary is already defined'
+stderr 'Error: no Terraform files found in current directory. Please run this in a directory with Terraform files'
 
 -- .tp.toml --
 binary = 'terraform'
-binary = 'tofu'
 planFile = 'plan.out'
 mdFile = 'plan.md'
 verbose = false

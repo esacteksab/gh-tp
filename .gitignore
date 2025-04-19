@@ -14,9 +14,6 @@ _site/
 #############
 # keep-sorted start
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
-
 *.dll
 *.dylib
 # Binaries for programs and plugins
@@ -30,6 +27,9 @@ _site/
 .env
 /gh-tp
 /gh-tp.exe
+# Dependency directories (remove the comment below to include it)
+# vendor/
+coverdata/
 # Go workspace file
 go.work
 go.work.sum
@@ -232,3 +232,6 @@ terraform.rc
 .vscode/*
 
 # keep-sorted end
+
+# exists for local development -- Does need checked in
+.current-tag

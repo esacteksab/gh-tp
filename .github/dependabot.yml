@@ -21,11 +21,10 @@ updates:
           - "minor"
           - "patch"
     schedule:
-      interval: "weekly"
-      day: "saturday"
+      interval: "daily"
       time: "03:00"
-
       timezone: "America/Chicago"
+
   - package-ecosystem: "npm"
     directory: "/"
     groups:
@@ -42,7 +41,13 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "saturday"
+      interval: "daily"
+      time: "03:00"
+      timezone: "America/Chicago"
+
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "daily"
       time: "03:00"
       timezone: "America/Chicago"

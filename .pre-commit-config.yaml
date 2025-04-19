@@ -17,12 +17,12 @@ repos:
         name: "Check Merge Conflicts"
 
   - repo: https://github.com/google/keep-sorted
-    rev: v0.6.0
+    rev: v0.6.1
     hooks:
       - id: keep-sorted
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.32.1
+    rev: 0.33.0
     hooks:
       - id: check-github-workflows
       - id: check-dependabot
@@ -54,7 +54,7 @@ repos:
         args:
           [
             "--schemafile",
-            "https://golangci-lint.run/jsonschema/golangci.v1.jsonschema.json",
+            "https://golangci-lint.run/jsonschema/golangci.jsonschema.json",
           ]
       - id: check-jsonschema
         name: "Validate goreleaser config"
