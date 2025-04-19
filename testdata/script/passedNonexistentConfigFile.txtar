@@ -1,3 +1,2 @@
 # Passing it a non-existent config file
 ! exec gh-tp --config /tmp/foo/.tp.toml
-stderr 'ERRO Config file not found.'

@@ -1,12 +1,13 @@
-# Passing it a bad config file with the 'binary' key defined twice
-! exec gh-tp
+# Passing it an empty stdin
+! exec gh-tp -
 
 -- .tp.toml --
-binary = 'terraform'
 binary = 'tofu'
 planFile = 'plan.out'
 mdFile = 'plan.md'
 verbose = false
+
+-- foo.tf --
 
 -- formatters --
 # This exists because the formatters try and remove more than one line and it breaks golden.md

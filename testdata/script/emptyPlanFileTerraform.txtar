@@ -3,7 +3,7 @@ exec gh-tp
 stdout '✔  Plan Created...'\n'✔  Markdown Created...'
 exists plan.out
 exists plan.md
-cmp plan.md golden.md
+cmp plan.md tfgolden.md
 
 -- .tp.toml --
 binary = 'terraform'
@@ -13,8 +13,8 @@ verbose = false
 
 -- foo.tf --
 
--- golden.md --
-<details><summary>Terraform Plan</summary>
+-- tfgolden.md --
+<details><summary>Terraform plan</summary>
 
 ```terraform
 
@@ -26,6 +26,5 @@ and found no differences, so no changes are needed.
 ```
 
 </details>
-
 -- formatters --
 # This exists because the formatters try and remove more than one line and it breaks golden.md

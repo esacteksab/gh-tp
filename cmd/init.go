@@ -4,9 +4,9 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/charmbracelet/bubbles/key"
@@ -49,7 +49,11 @@ var initCmd = &cobra.Command{
 		}
 
 		// Should we run in accessible mode?
-		accessible, _ = strconv.ParseBool(os.Getenv("ACCESSIBLE"))
+		accessible, err := strconv.ParseBool(os.Getenv("ACCESSIBLE"))
+		if err != nil {
+			accessible = false
+			Logger.Debugf("Invalid ACCESSIBLE value, defaulting to false: %v", err)
+		}
 		configFile := ConfigFile{}
 
 		form := huh.NewForm(
@@ -95,7 +99,7 @@ var initCmd = &cobra.Command{
 						func(pf string) error {
 							if pf == "" {
 								//lint:ignore ST1005 User-facing error message. I want pretty.
-								return errors.New( //nolint:stylecheck
+								return errors.New( //nolint:staticcheck
 									"This field is required. Please enter what your plan's output file should be named",
 								)
 							}
@@ -116,14 +120,14 @@ var initCmd = &cobra.Command{
 						func(md string) error {
 							if md == "" {
 								//lint:ignore ST1005 User-facing error message. I want pretty.
-								return errors.New( //nolint:stylecheck
+								return errors.New( //nolint:staticcheck
 									"This field is required. Please enter what your Markdown file should be named",
 								)
 							}
 							pf := configFile.Params.PlanFile
 							if md == pf {
 								//lint:ignore ST1005 User-facing error message. I want pretty.
-								return errors.New( //nolint:stylecheck
+								return errors.New( //nolint:staticcheck
 									"Your Markdown file should not share the same name as your plan output file.",
 								)
 							}
@@ -253,12 +257,16 @@ var initCmd = &cobra.Command{
 
 		err = form.Run()
 		if err != nil {
-			Logger.Fatal(err)
+			// Check for user cancellation (check actual error strings used by huh)
+			if strings.Contains(err.Error(), "canceled") || strings.Contains(err.Error(), "quit") {
+				Logger.Error("Configuration cancelled by user.")
+				return // Exit without error code
+			}
+
+			// For other errors, provide context but still exit
+			Logger.Errorf("Error during configuration: %s\n", err)
+			os.Exit(1)
 		}
-		fmt.Println(configFile.Path)
-		fmt.Println(configFile.Params.Binary)
-		fmt.Println(configFile.Params.PlanFile)
-		fmt.Println(configFile.Params.MdFile)
 
 		err = createConfig(
 			configFile.Params.Binary,

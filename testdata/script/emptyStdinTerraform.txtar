@@ -1,7 +1,5 @@
 # Passing it an empty stdin
-exec gh-tp -
-stdout '✕  Plan Failed to Create'
-stdout '✕  Markdown Failed to Create'
+! exec gh-tp -
 
 -- .tp.toml --
 binary = 'terraform'

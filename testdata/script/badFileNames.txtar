@@ -1,0 +1,16 @@
+# This should fail given the invalid file name
+! exec gh-tp
+! exists ../plan.out
+! exists plan.out
+! exists plan.md
+
+-- .tp.toml --
+binary = "terraform"
+planFile = '../plan.out'
+mdFile = 'plan.md'
+verbose = false
+
+-- foo.tf --
+
+-- formatters --
+# this exists because the formatters try and remove more than one line and it breaks things
