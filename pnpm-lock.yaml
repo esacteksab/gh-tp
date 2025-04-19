@@ -26,8 +26,8 @@ importers:
 
 packages:
 
-  '@reteps/dockerfmt@0.3.4':
-    resolution: {integrity: sha512-IHIyUHVsASQmUheWTmIVxnMdOayvIa4e9XGyt1qpuz6l+dv89H8WXg/jV6PNMX9286O0m2wd3zvmNfgpp7IsCA==}
+  '@reteps/dockerfmt@0.3.6':
+    resolution: {integrity: sha512-Tb5wIMvBf/nLejTQ61krK644/CEMB/cpiaIFXqGApfGqO3GwcR3qnI0DbmkFVCl2OyEp8LnLX3EkucoL0+tbFg==}
     engines: {node: ^v12.20.0 || ^14.13.0 || >=16.0.0}
 
   '@taplo/core@0.2.0':
@@ -140,7 +140,7 @@ packages:
 
 snapshots:
 
-  '@reteps/dockerfmt@0.3.4': {}
+  '@reteps/dockerfmt@0.3.6': {}
 
   '@taplo/core@0.2.0': {}
 
@@ -156,7 +156,7 @@ snapshots:
 
   prettier-plugin-sh@0.17.2(prettier@3.5.3):
     dependencies:
-      '@reteps/dockerfmt': 0.3.4
+      '@reteps/dockerfmt': 0.3.6
       prettier: 3.5.3
       sh-syntax: 0.5.6
 
