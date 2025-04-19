@@ -95,6 +95,7 @@ func createPlan() (planStr string, err error) {
 		Logger.Warnf("Interruption flag set. Terraform process likely interrupted.")
 
 		cleanupSignalResources()
+
 		Logger.Debugf("[DIAG] Skipping signal cleanup call for test.")
 		Logger.Debugf("[DIAG] About to return ErrInterrupted from createPlan.")
 

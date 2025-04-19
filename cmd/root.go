@@ -111,21 +111,13 @@ var rootCmd = &cobra.Command{
 		var planFileValidated string
 		var mdFileValidated string
 
-		// v := viper.IsSet("verbose")
-		// if v {
-		// Verbose = viper.GetBool("verbose")
-		// Consider if logger needs update here if verbosity changes post-init
-		// }
-
 		keys := viper.AllKeys()
 		Logger.Debugf(
 			"Defined keys: %s in %s", keys, viper.ConfigFileUsed(),
 		)
 
 		// Check config existence
-		fmt.Printf("viper.ConfigFileUsed(): %s", viper.ConfigFileUsed())
 		configExists := doesExist(viper.ConfigFileUsed())
-		fmt.Printf("configExists: %v\n", configExists)
 		if !configExists {
 			Logger.Debug(viper.ConfigFileUsed())
 			return errors.New(
@@ -233,9 +225,7 @@ var rootCmd = &cobra.Command{
 					} else if removeErr == nil {
 						Logger.Debugf("[LOG 5d] Cleanup success for %q.", planPathForCleanup)
 					}
-
-					Logger.Debug("[LOG 6] Flushing stderr...")
-					_ = os.Stderr.Sync()
+					Logger.Debug("[LOG 6] see https://github.com/cli/cli/issues/9237")
 					Logger.Debug("[LOG 7] Calling os.Exit(1) due to interruption.")
 					os.Exit(1) // Exit directly
 				} else { // Other errors
@@ -329,6 +319,8 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
+	// Initial Logger -- InfoLevel
+	createLogger(false)
 	// --- Check ENV VAR for Initial Verbosity ---
 	debugEnvVal := os.Getenv(ghTpInitDebugEnv)
 	// Parse bool allows "true", "TRUE", "True", "1"
@@ -343,10 +335,6 @@ func Execute() {
 		ghTpInitDebugEnv,
 		initialVerbose,
 	)
-
-	// Set Silence flags
-	// rootCmd.SilenceUsage = true
-	// rootCmd.SilenceErrors = true
 
 	Logger.Debug("[EXECUTE_DEBUG] Calling rootCmd.Execute()...")
 	executeErr := rootCmd.Execute()
@@ -371,7 +359,7 @@ func Execute() {
 			"[LOG 13] Exiting(1) because rootCmd.Execute() returned error: %v",
 			executeErr,
 		)
-		// os.Exit(1)
+		os.Exit(1)
 	}
 	Logger.Debug("[LOG 14] rootCmd.Execute() completed without error.")
 }
@@ -445,15 +433,11 @@ func initConfig() {
 		)
 		if err != nil {
 			if os.IsNotExist(err) {
-				// Use fmt because Logger might not exist if exit happens
 				Logger.Debugf(
 					"ERROR: Config file specified via --config (%s) not found.",
-					cfgFile,
-				)
-				os.Exit(1)
+					cfgFile)
 			} else {
 				Logger.Debugf("ERROR: Error reading specified config file %s: %v", cfgFile, err)
-				os.Exit(1)
 			}
 		} else {
 			Logger.Debugf("[INITCONFIG_DEBUG] Successfully read config file: %s", viper.ConfigFileUsed())
@@ -467,7 +451,6 @@ func initConfig() {
 			// Is there a better way to handle this scenario? We would typically want to os.Exit(1) as these values are necessary
 			// But this breaks `gh tp init`
 		} else {
-
 			// Search config in os.UserConfigDir/gh-tp with name ".tp.toml"
 			// Search config in os.UserHomeDir with name ".tp.toml"
 			// Current Working Directory '.' - Presumed project's root
@@ -478,11 +461,16 @@ func initConfig() {
 			viper.AddConfigPath(homeDir)
 			Logger.Debugf("[INITCONFIG_DEBUG] Viper search paths: ., %s, %s", filepath.Join(configDir, TpDir), homeDir)
 
-			err := viper.ReadInConfig()
-			Logger.Debugf("[INITCONFIG_DEBUG] ReadInConfig (default search) returned error: %v", err)
-
-			if err != nil {
-				if errors.As(err, &viper.ConfigFileNotFoundError{}) {
+			if err := viper.ReadInConfig(); err != nil {
+				Logger.Debugf("[INITCONFIG_DEBUG] ReadInConfig (default search) returned error: %v", err)
+				var unsupportedConfigError viper.UnsupportedConfigError
+				if !errors.As(err, &unsupportedConfigError) {
+					var configParseError viper.ConfigParseError
+					if errors.As(err, &configParseError) {
+						fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+						os.Exit(1) // There is something wrong with the config file, exit
+					}
+				} else if errors.As(err, &viper.ConfigFileNotFoundError{}) {
 					// This is OK
 					Logger.Debug("[INITCONFIG_DEBUG] No config file (.tp.toml) found in default locations.")
 				} else {
@@ -495,7 +483,6 @@ func initConfig() {
 			}
 		}
 	}
-
 	// Set AutomaticEnv AFTER attempting to read config
 	viper.AutomaticEnv()
 
