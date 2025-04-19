@@ -143,7 +143,6 @@ func TestExistsOrCreatedExists(t *testing.T) {
 		log.Fatalf("Error copying from reader: %s", err)
 	}
 
-	// fmt.Println(buf.String())
 	output := buf.String()
 	expectedOutput := "✔  Plan Created...\n✔  Markdown Created..."
 	assert.Contains(t, output, expectedOutput)
@@ -178,7 +177,6 @@ func TestExistsOrCreatedDoesNotExists(t *testing.T) {
 		log.Fatalf("Error copying from reader: %s", err)
 	}
 
-	// fmt.Println(buf.String())
 	output := buf.String()
 	expectedOutput := "✕  Plan Failed to Create\n✕  Markdown Failed to Create\n"
 	assert.Contains(t, output, expectedOutput)
