@@ -1,0 +1,8 @@
+# binary: (type: string) The name of the binary, expect either 'tofu' or 'terraform'. Must exist on your $PATH.
+binary = 'terraform'
+# planFile: (type: string) The name of the plan file created by 'gh tp'.
+planFile = 'plan.out'
+# mdFile: (type: string) The name of the Markdown file created by 'gh tp'.
+mdFile = 'plan.md'
+# verbose: (type: bool) Enable Verbose Logging. Default is false.
+verbose = true

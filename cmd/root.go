@@ -85,10 +85,9 @@ func buildVersion(Version, Commit, Date, BuiltBy string) string {
 }
 
 var rootCmd = &cobra.Command{
-	Use:           "tp",
-	Short:         "A GitHub CLI extension to submit a pull request with Terraform or OpenTofu plan output.",
-	SilenceUsage:  true, // Keep silenced
-	SilenceErrors: true, // Keep silenced
+	Use:          "tp",
+	SilenceUsage: true,
+	Short:        "A GitHub CLI extension to submit a pull request with Terraform or OpenTofu plan output.",
 	Long: heredoc.Doc(`
 	'tp' is a GitHub CLI extension to create GitHub pull requests with
 	GitHub Flavored Markdown containing the output from an OpenTofu or
@@ -124,7 +123,9 @@ var rootCmd = &cobra.Command{
 		)
 
 		// Check config existence
+		fmt.Printf("viper.ConfigFileUsed(): %s", viper.ConfigFileUsed())
 		configExists := doesExist(viper.ConfigFileUsed())
+		fmt.Printf("configExists: %v\n", configExists)
 		if !configExists {
 			Logger.Debug(viper.ConfigFileUsed())
 			return errors.New(
@@ -344,8 +345,8 @@ func Execute() {
 	)
 
 	// Set Silence flags
-	rootCmd.SilenceUsage = true
-	rootCmd.SilenceErrors = true
+	// rootCmd.SilenceUsage = true
+	// rootCmd.SilenceErrors = true
 
 	Logger.Debug("[EXECUTE_DEBUG] Calling rootCmd.Execute()...")
 	executeErr := rootCmd.Execute()
@@ -370,7 +371,7 @@ func Execute() {
 			"[LOG 13] Exiting(1) because rootCmd.Execute() returned error: %v",
 			executeErr,
 		)
-		os.Exit(1)
+		// os.Exit(1)
 	}
 	Logger.Debug("[LOG 14] rootCmd.Execute() completed without error.")
 }
@@ -379,15 +380,24 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "Verbose output")
+	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
 	rootCmd.Flags().
-		StringP("binary", "b", "", "Expect either 'tofu' or 'terraform'. Must exist on your $PATH.")
+		StringP("binary", "b", "", "expect either 'tofu' or 'terraform'. Must exist on your $PATH.")
 	rootCmd.Flags().
-		StringP("planFile", "o", "", "The name of the plan output file to be created by tp (e.g., plan.out).")
+		StringP("planFile", "o", "", "the name of the plan output file to be created by tp (e.g., plan.out).")
 	rootCmd.Flags().
-		StringP("mdFile", "m", "", "The name of the Markdown file to be created by tp (e.g., plan.md).")
+		StringP("mdFile", "m", "", "the name of the Markdown file to be created by tp (e.g., plan.md).")
 	rootCmd.Flags().
-		StringVarP(&cfgFile, "config", "c", "", `Config file to use in non-standard location`)
+		StringVarP(
+			&cfgFile,
+			"config",
+			"c",
+			"",
+			`config file to use not in (default lookup:
+			1. a .tp.toml file in your project's root
+			2. $XDG_CONFIG_HOME/gh-tp/.tp.toml
+			3. $HOME/.tp.toml)`,
+		)
 
 		// Local var for binding errors
 	var bindErr error
@@ -417,15 +427,17 @@ func init() {
 func initConfig() {
 	Logger.Debug("[INITCONFIG_DEBUG] Entering initConfig()...")
 
+	configFile := ConfigFile{}
+
 	// --- Viper config setup ---
 	if cfgFile != "" {
 		// Path 1: Config file specified via -c/--config flag
+		viper.SetConfigFile(cfgFile)
+		cfgFile = configFile.Path
 		Logger.Debugf(
 			"[INITCONFIG_DEBUG] Using explicit config file from flag: %s",
 			cfgFile,
 		)
-		viper.SetConfigFile(cfgFile)
-
 		err := viper.ReadInConfig()
 		Logger.Debugf(
 			"[INITCONFIG_DEBUG] ReadInConfig (explicit file) returned error: %v",
@@ -455,6 +467,10 @@ func initConfig() {
 			// Is there a better way to handle this scenario? We would typically want to os.Exit(1) as these values are necessary
 			// But this breaks `gh tp init`
 		} else {
+
+			// Search config in os.UserConfigDir/gh-tp with name ".tp.toml"
+			// Search config in os.UserHomeDir with name ".tp.toml"
+			// Current Working Directory '.' - Presumed project's root
 			viper.SetConfigName(".tp.toml")
 			viper.SetConfigType("toml")
 			viper.AddConfigPath(".")

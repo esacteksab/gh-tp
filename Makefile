@@ -17,13 +17,6 @@ audit: tidy fmt
 build:
 
 	goreleaser build --clean --single-target --snapshot
-	cp dist/gh-tp_linux_amd64_v1/gh-tp .
-
-	gh ext remove tp
-
-	gh ext install .
-
-	-gh tp --version
 
 .PHONY: clean
 clean:
@@ -68,6 +61,18 @@ container: tidy
 fmt:
 	golines --base-formatter=gofumpt -w .
 	go tool -modfile=go.tool.mod gofumpt -l -w -extra .
+
+
+.PHONY: install
+install: build
+
+	cp dist/gh-tp_linux_amd64_v1/gh-tp .
+
+	gh ext remove tp
+
+	gh ext install .
+
+	-gh tp --version
 
 .PHONY: lint
 lint:

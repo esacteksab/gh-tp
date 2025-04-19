@@ -19,8 +19,6 @@ import (
 var initCmd = &cobra.Command{
 	Use:               "init",
 	Aliases:           []string{"i"},
-	SilenceUsage:      true,
-	SilenceErrors:     true,
 	Args:              cobra.NoArgs,
 	ValidArgsFunction: cobra.NoFileCompletions,
 	Short:             "A interactive prompt-based form to generate a config file for tp.",
@@ -40,7 +38,6 @@ var initCmd = &cobra.Command{
 		v := viper.IsSet("verbose")
 		if v {
 			Verbose = viper.GetBool("verbose")
-			createLogger(Verbose)
 		}
 
 		homeDir, configDir, cwd, err := getDirectories()
