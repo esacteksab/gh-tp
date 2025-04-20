@@ -1,5 +1,0 @@
-! exec gh-tp
-stderr 'Error: config file not found. Please run ''gh tp init'' or refer to the documentation'
-
--- formatters --
-# This exists because the formatters try and remove more than one line and it breaks golden.md

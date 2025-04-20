@@ -1,4 +1,6 @@
 # Passing it a non-existent config file
+env PATH=/go/bin:/usr/local/go/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/sbin:/bin
 ! exec gh-tp --config /tmp/foo/.tp.toml
+stderr 'Config file specified via --config not found'
 
-stderr 'Error: config file not found. Please run ''gh tp init'' or refer to the documentation'
+

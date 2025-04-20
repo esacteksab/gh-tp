@@ -1,0 +1,31 @@
+exec gh-tp -o plan.out -m plan.md -b terraform
+exists plan.out
+exists plan.md
+! exists tfplan
+! exists tfplan.md
+stdout '✔  Plan Created...'\n'✔  Markdown Created...'
+cmp plan.md tfgolden.md
+
+-- .tp.toml --
+binary = 'tofu'
+planFile = 'tfplan'
+mdFile = 'tfplan.md'
+verbose = false
+
+-- foo.tf --
+
+-- tfgolden.md --
+<details><summary>Terraform plan</summary>
+
+```terraform
+
+No changes. Your infrastructure matches the configuration.
+
+Terraform has compared your real infrastructure against your configuration
+and found no differences, so no changes are needed.
+
+```
+
+</details>
+-- formatters --
+# This exists because the formatters try and remove more than one line and it breaks golden.md

@@ -1,0 +1,7 @@
+# No config file but tofu and terraform exists on $PATH
+! exec gh-tp
+stderr 'Error: found both tofu and terraform in your PATH. Specify the desired one using the -b flag or create %s and set the ''binary'' parameter in .tp.toml'
+
+
+-- formatters --
+# This exists because the formatters try and remove more than one line and it breaks golden.md
