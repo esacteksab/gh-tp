@@ -14,13 +14,100 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/log"
+	"github.com/cli/safeexec"
 	"github.com/fatih/color"
+	"github.com/spf13/viper"
 )
 
 const (
 	// Max filename length (common limit)
 	maxFilenameLength = 255
 )
+
+// determineBinary finds the IaC binary to use based on flags, config, or PATH discovery.
+func determineBinary() (string, error) {
+	// 1. Check Viper (which checks flags first, then config)
+	binaryFromConfig, err := getBinaryFromConfig()
+	if err != nil {
+		return "", err
+	}
+	if binaryFromConfig != "" {
+		return binaryFromConfig, nil
+	}
+
+	// 2. Auto-detect if not specified
+	detectedBinary, err := autoDetectBinary()
+	if err != nil {
+		return "", err
+	}
+	if detectedBinary != "" {
+		return detectedBinary, nil
+	}
+
+	// 3. Handle the case where no binary is found
+	return "", buildNoBinaryFoundError()
+}
+
+// getBinaryFromConfig checks for a binary specified via flag or config.
+func getBinaryFromConfig() (string, error) {
+	v := viper.IsSet("binary")
+	Logger.Debugf("Binary is set: %v", v)
+	viperBinary := viper.GetString("binary")
+	if viperBinary == "" {
+		return "", nil // Not set
+	}
+
+	// Validate if specified
+	if viperBinary != "terraform" && viperBinary != "tofu" {
+		return "", fmt.Errorf(
+			"invalid binary specified ('%s'): must be 'terraform' or 'tofu'",
+			viperBinary,
+		)
+	}
+
+	// Ensure it's actually findable
+	_, err := safeexec.LookPath(viperBinary)
+	if err != nil {
+		return "", fmt.Errorf(
+			"binary '%s' specified but not found in PATH: %w",
+			viperBinary,
+			err,
+		)
+	}
+
+	Logger.Debugf("Using binary specified via flag or config: %s", viperBinary)
+	return viperBinary, nil
+}
+
+// autoDetectBinary attempts to find 'tofu' or 'terraform' in the PATH.
+func autoDetectBinary() (string, error) {
+	Logger.Debug("Binary not specified, attempting auto-detection...")
+	binariesToFind := []string{"tofu", "terraform"}
+	var foundBinaries []string
+	for _, binName := range binariesToFind {
+		binPath, lookupErr := safeexec.LookPath(binName)
+		if lookupErr == nil && len(binPath) > 0 {
+			foundBinaries = append(foundBinaries, binName)
+			Logger.Debugf("Found '%s' in PATH at '%s'", binName, binPath)
+		} else {
+			Logger.Debugf("Did not find '%s' in PATH: %v", binName, lookupErr)
+		}
+	}
+
+	// Evaluate auto-detection results
+	if len(foundBinaries) == 0 {
+		return "", nil // No binaries found, handle in the main function
+	}
+
+	if len(foundBinaries) > 1 {
+		return "", buildMultipleBinariesFoundError(foundBinaries)
+	}
+
+	// Exactly one binary found
+	detectedBinary := foundBinaries[0]
+	Logger.Debugf("Auto-detected binary: %s", detectedBinary)
+	return detectedBinary, nil
+}
 
 // Regex for allowed filename characters
 var validFilenameChars = regexp.MustCompile(`^[a-zA-Z0-9_\-\.]+$`)

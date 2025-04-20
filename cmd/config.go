@@ -16,6 +16,10 @@ import (
 	"github.com/pelletier/go-toml/v2"
 )
 
+const TpDir = "gh-tp"
+
+const ConfigName = ".tp.toml"
+
 // Global variables used throughout the configuration management system
 var (
 	accessible         bool                             // Flag to enable accessibility mode for UI interactions

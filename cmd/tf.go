@@ -21,11 +21,11 @@ func createPlan() (planStr string, err error) {
 	// --- Parameter Validation & Setup ---
 	workingDir := "."
 	tfBinaryPath := viper.GetString("binary")
-	if tfBinaryPath == "" {
-		tfBinaryPath = binary
-		if tfBinaryPath == "" {
-			return "", errors.New("binary not configured")
+	if tfBinaryPath == "" { // Primary source (Viper) is empty
+		if binary == "" { // Check fallback source BEFORE assigning
+			return "", errors.New("binary not configured: No path provided via config or default")
 		}
+		tfBinaryPath = binary
 	}
 	pf := viper.GetString("planFile")
 	planPath, err := validateFilePath(pf)
