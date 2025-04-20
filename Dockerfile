@@ -9,7 +9,7 @@ RUN apt update && apt install -y unzip wget git \
   && dpkg -i gh_2.69.0_linux_amd64.deb && rm gh_2.69.0_linux_amd64.deb \
   && wget https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_linux_amd64.zip \
   && unzip terraform_1.5.7_linux_amd64.zip && rm terraform_1.5.7_linux_amd64.zip \
-  && mv terraform /usr/local/bin/terraform && chmod +x /usr/local/bin/terraform \
+  && mv terraform /usr/bin/terraform && chmod +x /usr/bin/terraform \
   && wget https://github.com/opentofu/opentofu/releases/download/v1.9.0/tofu_1.9.0_amd64.deb \
   && dpkg -i tofu_1.9.0_amd64.deb && rm tofu_1.9.0_amd64.deb
 
