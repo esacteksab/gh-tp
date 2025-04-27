@@ -15,6 +15,7 @@ changelog:
       labels:
         - "type: feature"
         - "type: enhancement"
+        - "type: refactor"
 
     - title: ":lady_beetle: Bug fixes"
       labels:
@@ -38,7 +39,3 @@ changelog:
         - "type: build"
         - "type: chore"
         - "type: task"
-
-    - title: ":question: What's Changed"
-      labels:
-        - "type: refactor"
