@@ -32,7 +32,7 @@ func buildMultipleBinariesFoundError(foundBinaries []string) error {
 	if configPath != "" && doesExist(configPath) {
 		errMsg += ". Specify the desired one using the -b flag or set the 'binary' parameter in " + configPath
 	} else {
-		errMsg += ". Specify the desired one using the -b flag or create %s and set the 'binary' parameter in " + ConfigName
+		errMsg += fmt.Sprintf(". Specify the desired one using the -b flag or create %s and set the 'binary' parameter", ConfigName)
 	}
 	return errors.New(errMsg)
 }
