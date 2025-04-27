@@ -1,14 +1,15 @@
-# Passing it a config file, .tf file exits, plan.out and plan.md should be created
-exec gh-tp
-stdout '✔  Plan Created...'\n'✔  Markdown Created...'
+exec gh-tp -o plan.out -m plan.md -b terraform
 exists plan.out
 exists plan.md
+! exists tfplan
+! exists tfplan.md
+stdout '✔  Plan Created...'\n'✔  Markdown Created...'
 cmp plan.md tfgolden.md
 
 -- .tp.toml --
-binary = 'terraform'
-planFile = 'plan.out'
-mdFile = 'plan.md'
+binary = 'tofu'
+planFile = 'tfplan'
+mdFile = 'tfplan.md'
 verbose = false
 
 -- foo.tf --

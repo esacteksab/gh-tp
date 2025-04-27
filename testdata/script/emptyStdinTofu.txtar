@@ -1,10 +1,9 @@
 # Passing it an empty stdin
-exec gh-tp -
-stdout '✕  Plan Failed to Create'
-stdout '✕  Markdown Failed to Create'
+! exec gh-tp -
+stderr 'Error: received empty plan from stdin'
 
 -- .tp.toml --
-binary = 'terraform'
+binary = 'tofu'
 planFile = 'plan.out'
 mdFile = 'plan.md'
 verbose = false

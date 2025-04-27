@@ -6,7 +6,7 @@ SHELL := bash
 .SUFFIXES:
 
 .PHONY: audit
-audit: tidy format
+audit: tidy fmt
 	go vet ./...
 	go tool -modfile=go.tool.mod staticcheck ./...
 	go tool -modfile=go.tool.mod govulncheck ./...
@@ -17,13 +17,6 @@ audit: tidy format
 build:
 
 	goreleaser build --clean --single-target --snapshot
-	cp dist/gh-tp_linux_amd64_v1/gh-tp .
-
-	gh ext remove tp
-
-	gh ext install .
-
-	-gh tp --version
 
 .PHONY: clean
 clean:
@@ -64,10 +57,22 @@ endif
 container: tidy
 	./scripts/build-container.sh
 
-.PHONY: format
-format:
+.PHONY: fmt
+fmt:
 	golines --base-formatter=gofumpt -w .
 	go tool -modfile=go.tool.mod gofumpt -l -w -extra .
+
+
+.PHONY: install
+install: build
+
+	cp dist/gh-tp_linux_amd64_v1/gh-tp .
+
+	gh ext remove tp
+
+	gh ext install .
+
+	-gh tp --version
 
 .PHONY: lint
 lint:
@@ -98,7 +103,15 @@ endif
 
 .PHONY: test
 test: container
-	@tag=$(shell git describe --tags --abbrev=0) && docker run esacteksab/tpt:$$tag
+	@mkdir -p coverdata
+	@docker run --rm -v $(PWD)/coverdata:/app/coverdata esacteksab/tpt:$(shell cat .current-tag)
+	@if [ -f "coverdata/coverage.out" ]; then \
+		go tool cover -html=coverdata/coverage.out -o coverdata/coverage.html; \
+		echo "Coverage report generated: coverage.html"; \
+	else \
+		echo "Error: Coverage file not found"; \
+		exit 1; \
+	fi
 
 .PHONY: tidy
 tidy:

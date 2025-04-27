@@ -1,13 +1,14 @@
-# Passing it a config file, but no .tf or .tofu files exist
-! exec gh-tp
-! stdout .
-stderr 'ERRO No Terraform files found. Please run this in a directory with Terraform files present.'
+# Passing it an empty stdin
+! exec gh-tp -
+stderr 'Error: received empty plan from stdin'
 
 -- .tp.toml --
 binary = 'terraform'
 planFile = 'plan.out'
 mdFile = 'plan.md'
 verbose = false
+
+-- foo.tf --
 
 -- formatters --
 # This exists because the formatters try and remove more than one line and it breaks golden.md

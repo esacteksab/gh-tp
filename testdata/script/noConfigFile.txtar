@@ -1,6 +1,0 @@
-# An empty directory -- I can't get this to work, so this exists in cmd/root_test.go TestNoConfigFileFound()
-! exec gh-tp
-stderr 'ERRO Config file not found. Please run ''gh tp init'' or run ''gh tp help'' or refer to the documentation on how to create a config file. https://github.com/esacteksab/gh-tp'
-
--- formatters --
-# This exists because the formatters try and remove more than one line and it breaks golden.md
