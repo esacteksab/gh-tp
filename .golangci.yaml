@@ -10,6 +10,7 @@ linters:
   enable:
     - dupl
     - errcheck
+    - funlen
     - gocyclo
     - godox
     - goheader
@@ -30,7 +31,7 @@ linters:
       threshold: 100
     funlen:
       lines: 100
-      statements: 50
+      statements: 60
       ignore-comments: true
     gocyclo:
       min-complexity: 15
