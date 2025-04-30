@@ -117,6 +117,16 @@ func createPlan() (planStr string, err error) {
 	cleanupSignalResources()
 	Logger.Debug("Terraform plan completed successfully.")
 
+	planStr, err = showPlan(tf, planPath)
+	if err != nil {
+		Logger.Debug(err)
+		return "", err
+	}
+
+	return planStr, err
+}
+
+func showPlan(tf *tfexec.Terraform, planPath string) (planStr string, err error) {
 	// --- Show Plan Output ---
 	Logger.Debug("Generating plan output...")
 	showCtx, showCancel := context.WithTimeout(context.Background(), 30*time.Second) //nolint:mnd
