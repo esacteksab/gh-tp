@@ -1,11 +1,16 @@
 {
+  "telemetry.feedback.enabled": false,
+  "redhat.telemetry.enabled": false,
+  "docker.lsp.telemetry": "off",
+  "rest-client.enableTelemetry": false,
   "editorconfig.generateAuto": false,
   "markdown.validate.enabled": true,
   "go.useLanguageServer": true,
   "editor.formatOnSave": true,
   "go.formatTool": "gofumpt",
   "[go]": {
-    "editor.semanticHighlighting.enabled": true
+    "editor.semanticHighlighting.enabled": true,
+    "editor.defaultFormatter": "golang.go"
   },
   "gopls": {
     "formatting.gofumpt": true,
@@ -62,22 +67,25 @@
     },
     {
       "fileMatch": [".golangci.yaml"],
-      "url": "https://golangci-lint.run/jsonschema/golangci.v1.jsonschema.json"
+      "url": "https://golangci-lint.run/jsonschema/golangci.jsonschema.json"
     }
   ],
   "yaml.schemas": {
-    "https://golangci-lint.run/jsonschema/golangci.jsonschema.json": ".golangci.yaml"
+    "https://golangci-lint.run/jsonschema/golangci.jsonschema.json": [
+      ".golangci.yaml"
+    ]
   },
   "material-icon-theme.files.associations": {
+    "go.tool.mod": "go-mod",
+    "go.tool.sum": "go-mod",
     "*.txtar": "Go_gopher",
-    "go.tool.sum": "Go-mod",
-    "go.tool.mod": "Go-mod"
+    ".current-tag": "docker"
   },
   "material-icon-theme.folders.associations": {
     "testdata": "Test"
   },
   "files.associations": {
-    "go.tool.mod": "go.sum",
+    "go.tool.mod": "go.mod",
     "go.tool.sum": "go.sum"
   }
 }
