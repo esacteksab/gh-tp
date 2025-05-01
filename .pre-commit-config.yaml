@@ -22,6 +22,12 @@ repos:
       - id: check-merge-conflict
         name: "Check Merge Conflicts"
 
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.24.2
+    hooks:
+      - id: gitleaks
+        name: "Git Leaks"
+
   - repo: https://github.com/google/keep-sorted
     rev: v0.6.1
     hooks:
