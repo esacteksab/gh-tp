@@ -68,3 +68,4 @@ insert_final_newline = false
 
 [*.txtar]
 trim_trailing_whitespace = false
+insert_final_newline = false
