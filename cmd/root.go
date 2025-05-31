@@ -18,20 +18,20 @@ var (
 	cfgFile string
 )
 
-// --- Environment variable for init-phase debugging ---
+// Environment variable for init-phase debugging
 const ghTpInitDebugEnv = "GH_TP_INIT_DEBUG" // Or your preferred name
 
 func Execute() {
 	// Initial Logger -- InfoLevel
-	// createLogger(false)
-	// --- Check ENV VAR for Initial Verbosity ---
+	createLogger(false)
+	// Check ENV VAR for Initial Verbosity
 	debugEnvVal := os.Getenv(ghTpInitDebugEnv)
 	// Parse bool allows "true", "TRUE", "True", "1"
 	initialVerbose, _ := strconv.ParseBool(debugEnvVal)
 	// If parsing fails (e.g., empty string), initialVerbose remains false
 
-	// --- Create INITIAL logger based on ENV VAR ---
-	createLogger(initialVerbose) // Initia/Configlize with level based on debug env var
+	// Create logger based on ENV VAR
+	createLogger(initialVerbose)
 	// This log will NOW appear if GH_TP_INIT_DEBUG=true
 	Logger.Debugf(
 		"Initial logger created in Execute(). Initial Verbose based on %s: %t",
@@ -82,7 +82,7 @@ func Execute() {
 	executeErr := rootCmd.Execute()
 	Logger.Debugf("[EXECUTE_DEBUG] rootCmd.Execute() returned. Error: %v", executeErr)
 
-	// --- Defensive Check: Ensure Logger was created ---
+	// ensure Logger was created
 	if Logger == nil {
 		// This should ideally never happen if initConfig runs correctly
 		fmt.Fprintln(os.Stderr, "[EXECUTE_DEBUG] FATAL: Logger is nil after Execute()!")
@@ -94,7 +94,6 @@ func Execute() {
 			Logger.Debug("Command finished (logger was nil initially).")
 		}
 	}
-	// --- End Defensive Check ---
 
 	if executeErr != nil {
 		Logger.Debugf(
@@ -120,9 +119,9 @@ func initConfig() {
 
 	configFile := ConfigFile{}
 
-	// --- Viper config setup ---
+	// Viper config setup
 	if cfgFile != "" {
-		// Path 1: Config file specified via -c/--config flag
+		// Path 1: Config file specified via -c / --config flag
 		viper.SetConfigFile(cfgFile)
 		cfgFile = configFile.Path
 		Logger.Debugf(
@@ -146,13 +145,13 @@ func initConfig() {
 			Logger.Debugf("[INITCONFIG_DEBUG] Successfully read config file: %s", viper.ConfigFileUsed())
 		}
 	} else {
-		// Path 2: No -c/--config flag, search default locations
+		// Path 2: No -c / --config flag, search default locations
 		Logger.Debug("[INITCONFIG_DEBUG] Searching default locations for .tp.toml...")
 		homeDir, configDir, _, dirErr := getDirectories()
 		if dirErr != nil {
 			Logger.Debugf("ERROR: Cannot determine home/config directories: %v. Relying on flags/env.", dirErr)
 			// Is there a better way to handle this scenario? We would typically want to os.Exit(1) as these values are necessary
-			// But this breaks `gh tp init`
+			// #152 But this breaks `gh tp init`
 		} else {
 			// Search config in os.UserConfigDir/gh-tp with name ".tp.toml"
 			// Search config in os.UserHomeDir with name ".tp.toml"
@@ -189,7 +188,7 @@ func initConfig() {
 	// Set AutomaticEnv AFTER attempting to read config
 	viper.AutomaticEnv()
 
-	// --- Determine final verbosity from Viper ---
+	// Determine final verbosity from Viper
 	v := viper.IsSet("verbose")
 	if v {
 		finalVerboseValue := viper.GetBool("verbose")
