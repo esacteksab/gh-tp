@@ -151,7 +151,7 @@ func initConfig() {
 		if dirErr != nil {
 			Logger.Debugf("ERROR: Cannot determine home/config directories: %v. Relying on flags/env.", dirErr)
 			// Is there a better way to handle this scenario? We would typically want to os.Exit(1) as these values are necessary
-			// TODO: #152 But this breaks `gh tp init`
+			// #152 But this breaks `gh tp init`
 		} else {
 			// Search config in os.UserConfigDir/gh-tp with name ".tp.toml"
 			// Search config in os.UserHomeDir with name ".tp.toml"
