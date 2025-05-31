@@ -3,13 +3,11 @@
 package cmd
 
 import (
-	// Import errors for validation
 	"fmt"
-	"os" // Import regexp for character validation
+	"os"
 	"strings"
 
 	md "github.com/nao1215/markdown"
-	// Assuming Logger is properly initialized elsewhere
 )
 
 // SyntaxHighlight represents the language identifier used for syntax
@@ -51,7 +49,6 @@ func createMarkdown(mdParam, planStr, binaryName string) (string, error) {
 		return mdParam, err
 	}
 
-	// --- Handle Empty Plan ---
 	if len(planStr) == 0 {
 		Logger.Debugf(
 			"Plan output is empty. Skipping Markdown file creation for %q.",
@@ -61,7 +58,7 @@ func createMarkdown(mdParam, planStr, binaryName string) (string, error) {
 		return validatedFilename, nil
 	}
 
-	// --- Prepare Markdown Content ---
+	// Prepare Markdown Content
 	codeBlockMarkdown := md.NewMarkdown(&sbPlanBuilder)
 	err = codeBlockMarkdown.CodeBlocks(
 		md.SyntaxHighlight(SyntaxHighlightTerraform), planStr,
@@ -84,10 +81,9 @@ func createMarkdown(mdParam, planStr, binaryName string) (string, error) {
 	}
 	Logger.Debugf("Markdown details title: %s", title)
 
-	// --- Write to File ---
-	// Use the validatedFilename directly - it's just the filename for the current dir.
 	Logger.Debugf("Attempting to create/write markdown file: %s", validatedFilename)
 
+	// Use the validatedFilename directly - it's just the filename for the current dir.
 	planMdFile, err := os.Create( //nolint:gosec // validateFilename is sanitized by validateFilePath
 		validatedFilename,
 	)
