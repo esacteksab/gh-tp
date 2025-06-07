@@ -1,6 +1,6 @@
 module github.com/esacteksab/gh-tp
 
-go 1.24.3
+go 1.24.4
 
 require (
 	github.com/MakeNowJust/heredoc v1.0.0
