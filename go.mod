@@ -45,7 +45,7 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/hashicorp/go-version v1.7.0 // indirect
-	github.com/hashicorp/terraform-json v0.26.0 // indirect
+	github.com/hashicorp/terraform-json v0.27.1 // indirect
 	github.com/karrick/godirwalk v1.17.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.3.0 // indirect; indirect/
@@ -67,7 +67,7 @@ require (
 require (
 	github.com/cli/safeexec v1.0.1
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
-	github.com/hashicorp/terraform-exec v0.23.1
+	github.com/hashicorp/terraform-exec v0.24.0
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4
