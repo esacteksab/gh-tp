@@ -5,6 +5,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -134,7 +135,7 @@ func initConfig() {
 			err,
 		)
 		if err != nil {
-			if os.IsNotExist(err) {
+			if errors.Is(err, fs.ErrNotExist) {
 				Logger.Error(
 					"Config file specified via --config not found.")
 				os.Exit(1)
