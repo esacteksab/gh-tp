@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -188,7 +189,7 @@ func existsOrCreated(files []tpFile) error {
 //
 //	bool - true if the path exists, false otherwise
 func doesExist(path string) bool {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
+	if _, err := os.Stat(path); errors.Is(err, fs.ErrNotExist) {
 		return false
 	}
 	return true
@@ -234,7 +235,7 @@ func BackupFile(source, dest string) error {
 	// Check if source exists using os.Stat
 	sourceInfo, statErr := os.Stat(source)
 	if statErr != nil {
-		if os.IsNotExist(statErr) {
+		if errors.Is(statErr, fs.ErrNotExist) {
 			// If the source doesn't exist for a backup, this should be an error
 			return fmt.Errorf("backup source file %q does not exist: %w", source, os.ErrNotExist)
 		}
