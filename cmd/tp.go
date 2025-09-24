@@ -45,7 +45,7 @@ type tpFile struct {
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:          "tp [-o <planfile>] [-m <mdfile>] [-b <binary>] | tp -",
+	Use:          "tp [-o <planfile>] [-m <mdfile>] [-b <binary>] [-t <templateFile>] | tp -",
 	SilenceUsage: true,
 	Short:        "A GitHub CLI extension to submit a pull request with Terraform or OpenTofu plan output.",
 	Long: heredoc.Doc(`
@@ -56,7 +56,7 @@ var rootCmd = &cobra.Command{
 	body of your pull request will look like this
 	https://github.com/esacteksab/gh-tp/example/EXAMPLE-PR.md
 
-	Flags (-o, -m, -b) can be used instead of a config file if a unique
+	Flags (-o, -m, -b, -t) can be used instead of a config file if a unique
 	binary (terraform or tofu) is found in your PATH. If flags are provided,
 	they override any config file settings.
 

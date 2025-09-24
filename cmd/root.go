@@ -58,6 +58,8 @@ func Execute() {
 			2. $XDG_CONFIG_HOME/gh-tp/.tp.toml
 			3. $HOME/.tp.toml)`,
 		)
+	rootCmd.Flags().
+		StringP("templateFile", "t", "", "the name of the PR template file to use")
 
 	// Local var for binding errors
 	var bindErr error
@@ -77,6 +79,10 @@ func Execute() {
 	bindErr = viper.BindPFlag("mdFile", rootCmd.Flags().Lookup("mdFile"))
 	if bindErr != nil {
 		Logger.Fatalf("Internal error binding mdFile flag: %v", bindErr)
+	}
+	bindErr = viper.BindPFlag("templateFile", rootCmd.Flags().Lookup("templateFile"))
+	if bindErr != nil {
+		Logger.Fatalf("Internal error binding templateFile flag: %v", bindErr)
 	}
 
 	Logger.Debug("[EXECUTE_DEBUG] Calling rootCmd.Execute()...")

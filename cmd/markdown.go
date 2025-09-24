@@ -83,9 +83,13 @@ func createMarkdown(mdParam, planStr, binaryName string) (string, error) {
 
 	Logger.Debugf("Attempting to create/write markdown file: %s", validatedFilename)
 
+	templatePath, err := getTemplateFromConfig()
+
 	// Use the validatedFilename directly - it's just the filename for the current dir.
-	planMdFile, err := os.Create( //nolint:gosec // validateFilename is sanitized by validateFilePath
+	planMdFile, err := os.OpenFile(
 		validatedFilename,
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY,
+		0o644,
 	)
 	if err != nil {
 		Logger.Errorf("Failed to create markdown file '%s': %v", validatedFilename, err)
@@ -132,6 +136,13 @@ func createMarkdown(mdParam, planStr, binaryName string) (string, error) {
 			validatedFilename,
 			err,
 		)
+	}
+	if templatePath != "" {
+		templateFile, err := os.ReadFile(templatePath)
+		if err != nil {
+			Logger.Errorf("Failed to read templateFile: %s", templateFile)
+		}
+		_, err = templateFile.Write(planMdFile)
 	}
 
 	Logger.Debugf("Successfully wrote markdown content to %s", validatedFilename)
