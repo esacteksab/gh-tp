@@ -36,19 +36,16 @@ const (
 func createMarkdown(mdParam, planStr, binaryName string) (string, error) {
 	// Use local variables
 	var sbPlanBuilder strings.Builder
-
 	Logger.Debugf(
 		"createMarkdown called for binary: %s, output file parameter: %q",
 		binaryName,
 		mdParam,
 	)
-
 	// If we reach here, validatedFilename is considered safe and is just the filename.
 	validatedFilename, err := validateFilePath(mdParam)
 	if err != nil {
 		return mdParam, err
 	}
-
 	if len(planStr) == 0 {
 		Logger.Debugf(
 			"Plan output is empty. Skipping Markdown file creation for %q.",
@@ -57,7 +54,6 @@ func createMarkdown(mdParam, planStr, binaryName string) (string, error) {
 		// Return the validated path, indicating it wasn't processed, and no error.
 		return validatedFilename, nil
 	}
-
 	// Prepare Markdown Content
 	codeBlockMarkdown := md.NewMarkdown(&sbPlanBuilder)
 	err = codeBlockMarkdown.CodeBlocks(
@@ -68,7 +64,6 @@ func createMarkdown(mdParam, planStr, binaryName string) (string, error) {
 		return validatedFilename, fmt.Errorf("markdown generation failed (code block): %w", err)
 	}
 	sbPlan := sbPlanBuilder.String()
-
 	title := ""
 	switch strings.ToLower(binaryName) {
 	case "tofu":
@@ -80,16 +75,17 @@ func createMarkdown(mdParam, planStr, binaryName string) (string, error) {
 		Logger.Warnf("Unknown binary name '%s', using default markdown title.", binaryName)
 	}
 	Logger.Debugf("Markdown details title: %s", title)
-
 	Logger.Debugf("Attempting to create/write markdown file: %s", validatedFilename)
-
 	templatePath, err := getTemplateFromConfig()
-
+	if err != nil {
+		Logger.Error(err)
+	}
+	Logger.Debugf("Using PR template: %s", templatePath)
 	// Use the validatedFilename directly - it's just the filename for the current dir.
-	planMdFile, err := os.OpenFile(
+	planMdFile, err := os.OpenFile( //nolint:gosec // validatedFilename is checked above
 		validatedFilename,
-		os.O_APPEND|os.O_CREATE|os.O_WRONLY,
-		0o644,
+		os.O_TRUNC|os.O_CREATE|os.O_WRONLY,
+		0o600, //nolint:mnd
 	)
 	if err != nil {
 		Logger.Errorf("Failed to create markdown file '%s': %v", validatedFilename, err)
@@ -106,7 +102,6 @@ func createMarkdown(mdParam, planStr, binaryName string) (string, error) {
 			Logger.Debugf("Closed markdown file: %s", validatedFilename)
 		}
 	}()
-
 	// Build final markdown directly into the file handle
 	finalMarkdown := md.NewMarkdown(planMdFile)
 	buildErr := finalMarkdown.Details(title, "\n"+sbPlan+"\n").Build()
@@ -122,7 +117,6 @@ func createMarkdown(mdParam, planStr, binaryName string) (string, error) {
 			buildErr,
 		)
 	}
-
 	// Add final newline to mdFile
 	_, err = planMdFile.WriteString("\n")
 	if err != nil {
@@ -138,13 +132,21 @@ func createMarkdown(mdParam, planStr, binaryName string) (string, error) {
 		)
 	}
 	if templatePath != "" {
-		templateFile, err := os.ReadFile(templatePath)
+		// read the contents of the templateFile if passed in with `-t/templateFile`
+		templateFile, err := os.ReadFile(templatePath) //nolint:gosec
 		if err != nil {
-			Logger.Errorf("Failed to read templateFile: %s", templateFile)
+			Logger.Errorf("Failed to read templateFile: %s", err)
+			return validatedFilename, fmt.Errorf("failed to read template file: %w", err)
 		}
-		_, err = templateFile.Write(planMdFile)
+		Logger.Debugf("PR template body is: %s\n", string(templateFile))
+		validatedFilename, err := createWithTemplate(validatedFilename, templateFile, planMdFile)
+		if err != nil {
+			Logger.Errorf("failed to generate markdown file with PR template")
+			return validatedFilename, fmt.Errorf(
+				"failed to generate markdown file with PR template: %w", err,
+			)
+		}
 	}
-
 	Logger.Debugf("Successfully wrote markdown content to %s", validatedFilename)
 	// Return the validatedFilename used and nil error on success
 	return validatedFilename, nil
