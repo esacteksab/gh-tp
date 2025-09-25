@@ -110,6 +110,13 @@ func Execute() {
 		os.Exit(1)
 	}
 	Logger.Debug("[LOG 14] rootCmd.Execute() completed without error.")
+
+	// this exists for early testing/iteration. TODO: Remove before release
+	paths, err := findPRTemplate()
+	if err != nil {
+		Logger.Errorf("unable to find PR template: %s", err)
+	}
+	Logger.Debugf("PR templates: %s", paths)
 }
 
 // init function defines flags and sets up version
