@@ -34,7 +34,7 @@ repos:
       - id: keep-sorted
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.33.3
+    rev: 0.34.1
     hooks:
       - id: check-github-workflows
       - id: check-dependabot
@@ -121,7 +121,7 @@ repos:
           - mdformat-footnote
 
   - repo: https://github.com/crate-ci/typos
-    rev: v1.36.2
+    rev: v1.38.1
     hooks:
       - id: typos
         args: [--force-exclude]

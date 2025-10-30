@@ -1,12 +1,12 @@
-FROM esacteksab/go:1.25.0-2025-10-10@sha256:03079fd8680b4a0784655c18f231e8636e6b9ae28259669402d91e2800f74a5b AS builder
+FROM esacteksab/go:1.25.3-2025-10-25@sha256:0ff5eeb3b6caf277af0563dea4127308a311b9f004dbab3dc909033fd27fa8fe AS builder
 
 # Set GOMODCACHE explicitly (still good practice)
 ENV GOMODCACHE=/go/pkg/mod
 
 # Keep this layer cached if possible
 RUN apt update && apt install -y unzip wget git \
-  && wget https://github.com/cli/cli/releases/download/v2.69.0/gh_2.69.0_linux_amd64.deb \
-  && dpkg -i gh_2.69.0_linux_amd64.deb && rm gh_2.69.0_linux_amd64.deb \
+  && wget https://github.com/cli/cli/releases/download/v2.82.1/gh_2.82.1_linux_amd64.deb \
+  && dpkg -i gh_2.82.1_linux_amd64.deb && rm gh_2.82.1_linux_amd64.deb \
   && wget https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_linux_amd64.zip \
   && unzip terraform_1.5.7_linux_amd64.zip && rm terraform_1.5.7_linux_amd64.zip \
   && mv terraform /usr/bin/terraform && chmod +x /usr/bin/terraform \

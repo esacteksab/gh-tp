@@ -1,11 +1,12 @@
 # https://golangci-lint.rum/jsonschema/golangci.jsonschema.json
 # Influenced from https://github.com/golang-templates/seed/blob/main/.golangci.yml
 # Along with official docs https://golangci-lint.run/usage/linters/
+---
 version: "2"
 run:
   timeout: 5m
   tests: true
-  go: "1.25.0"
+  go: "1.25.3"
 linters:
   enable:
     - dupl
