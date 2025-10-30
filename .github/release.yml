@@ -31,12 +31,17 @@ changelog:
       labels:
         - "type: docs"
 
+    - title: ":link: Library Updates"
+      labels:
+        - "go"
+
     - title: ":hammer: Build/Test Dependency Upgrades"
       labels:
-        - "type: dependencies"
-        - "dependencies"
+        - "github_actions"
+        - "docker"
+        - "npm"
+        - "python"
         - "type: test"
         - "type: ci"
         - "type: build"
-        - "type: chore"
         - "type: task"
