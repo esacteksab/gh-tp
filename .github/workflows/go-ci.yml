@@ -24,4 +24,4 @@ permissions:
 
 jobs:
   audit-reusable:
-    uses: esacteksab/.github/.github/workflows/go-ci.yml@8316d057a8daa64589c2e3db08c08a2e9f23a05e  # v0.50.1
+    uses: esacteksab/.github/.github/workflows/go-ci.yml@c99c43287d41091b7497b8cd8c04bd19107fb3eb  # v0.50.2
