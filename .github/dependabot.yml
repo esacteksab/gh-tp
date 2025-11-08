@@ -5,14 +5,13 @@ updates:
     directory: "/"
     groups:
       minor-and-patch-py:
-        dependency-type: "development"
         update-types:
           - "minor"
           - "patch"
     schedule:
       interval: "weekly"
       day: "friday"
-      time: "19:00"
+      time: "17:00"
       timezone: "America/Chicago"
     labels:
       - "dependencies"
@@ -23,13 +22,12 @@ updates:
     directory: "/"
     groups:
       minor-and-patch-go:
-        dependency-type: "production"
         update-types:
           - "minor"
           - "patch"
     schedule:
       interval: "daily"
-      time: "19:00"
+      time: "17:00"
       timezone: "America/Chicago"
     labels:
       - "dependencies"
@@ -39,14 +37,13 @@ updates:
     directory: "/"
     groups:
       minor-and-patch-npm:
-        dependency-type: "development"
         update-types:
           - "minor"
           - "patch"
     schedule:
       interval: "weekly"
       day: "friday"
-      time: "19:00"
+      time: "17:00"
       timezone: "America/Chicago"
     labels:
       - "dependencies"
@@ -57,14 +54,13 @@ updates:
     directory: "/"
     groups:
       github-actions:
-        dependency-type: "development"
         update-types:
           - "minor"
           - "patch"
     schedule:
       interval: "weekly"
       day: "friday"
-      time: "19:00"
+      time: "17:00"
       timezone: "America/Chicago"
     labels:
       - "dependencies"
@@ -76,7 +72,7 @@ updates:
     schedule:
       interval: "weekly"
       day: "friday"
-      time: "19:00"
+      time: "17:00"
       timezone: "America/Chicago"
     labels:
       - "dependencies"
