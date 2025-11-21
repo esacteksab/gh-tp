@@ -63,8 +63,8 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/zclconf/go-cty v1.17.0 // indirect
-	golang.org/x/crypto v0.43.0 // indirect
-	golang.org/x/term v0.36.0 // indirect
+	golang.org/x/crypto v0.45.0 // indirect
+	golang.org/x/term v0.37.0 // indirect
 )
 
 require (
@@ -83,7 +83,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/subosito/gotenv v1.6.0 // indirect
 	golang.org/x/exp v0.0.0-20251023183803-a4bb9ffd2546 // indirect
-	golang.org/x/sys v0.37.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
 	golang.org/x/text v0.31.0
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
