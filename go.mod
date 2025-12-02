@@ -11,12 +11,13 @@ require (
 	github.com/charmbracelet/log v0.4.2
 	github.com/fatih/color v1.18.0
 	github.com/go-playground/validator/v10 v10.28.0
-	github.com/nao1215/markdown v0.8.3
+	github.com/nao1215/markdown v0.10.0
 	github.com/rogpeppe/go-internal v1.14.1
 	github.com/stretchr/testify v1.11.1
 )
 
 require (
+	github.com/clipperhouse/displaywidth v0.3.1 // indirect
 	github.com/clipperhouse/stringish v0.1.1 // indirect
 	github.com/clipperhouse/uax29/v2 v2.3.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
@@ -59,7 +60,7 @@ require (
 	github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/muesli/termenv v0.16.0 // indirect
-	github.com/olekukonko/tablewriter v1.1.0 // indirect
+	github.com/olekukonko/tablewriter v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/zclconf/go-cty v1.17.0 // indirect
