@@ -1,6 +1,6 @@
 {
   "devDependencies": {
-    "npm": "^11.10.0",
+    "npm": "^11.10.1",
     "prettier": "^3.8.1",
     "prettier-plugin-pkg": "^0.21.2",
     "prettier-plugin-sh": "^0.18.0",
