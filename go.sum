@@ -143,8 +143,8 @@ github.com/muesli/cancelreader v0.2.2 h1:3I4Kt4BQjOR54NavqnDogx/MIoWBFa0StPA8ELU
 github.com/muesli/cancelreader v0.2.2/go.mod h1:3XuTXfFS2VjM+HTLZY9Ak0l6eUKfijIfMUZ4EgX0QYo=
 github.com/muesli/termenv v0.16.0 h1:S5AlUN9dENB57rsbnkPyfdGuWIlkmzJjbFf0Tf5FWUc=
 github.com/muesli/termenv v0.16.0/go.mod h1:ZRfOIKPFDYQoDFF4Olj7/QJbW60Ol/kL1pU3VfY/Cnk=
-github.com/nao1215/markdown v0.10.0 h1:tZMNYFuP9xIBsH5e+8FB6EvogWYCak3DhkNYzXDTWGQ=
-github.com/nao1215/markdown v0.10.0/go.mod h1:9v2JXt3tLeDyBH7gWmadlskJ7We0XzfHXnCX20g1vmo=
+github.com/nao1215/markdown v0.11.0 h1:n78BKNhN83Q6li+7x3cwz6Ncl5ujgMzlZL+TsO0FER0=
+github.com/nao1215/markdown v0.11.0/go.mod h1:XIX10K37z6iVDM1ryUhQjQV8CDwM5+xqq1dX6AvS9zc=
 github.com/olekukonko/cat v0.0.0-20250911104152-50322a0618f6 h1:zrbMGy9YXpIeTnGj4EljqMiZsIcE09mmF8XsD5AYOJc=
 github.com/olekukonko/cat v0.0.0-20250911104152-50322a0618f6/go.mod h1:rEKTHC9roVVicUIfZK7DYrdIoM0EOr8mK1Hj5s3JjH0=
 github.com/olekukonko/errors v1.2.0 h1:10Zcn4GeV59t/EGqJc8fUjtFT/FuUh5bTMzZ1XwmCRo=
