@@ -9,7 +9,7 @@ require (
 	github.com/charmbracelet/huh v0.8.0
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/charmbracelet/log v0.4.2
-	github.com/fatih/color v1.18.0
+	github.com/fatih/color v1.19.0
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/nao1215/markdown v0.13.0
 	github.com/rogpeppe/go-internal v1.14.1
@@ -83,7 +83,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/subosito/gotenv v1.6.0 // indirect
 	golang.org/x/exp v0.0.0-20260209203927-2842357ff358 // indirect
-	golang.org/x/sys v0.41.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
 	golang.org/x/text v0.35.0
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
