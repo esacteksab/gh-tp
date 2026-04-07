@@ -54,7 +54,7 @@ var rootCmd = &cobra.Command{
 	Terraform plan output, wrapped around '<details></details>' element so
 	the plan output is collapsed for easier reading on longer outputs. The
 	body of your pull request will look like this
-	https://github.com/esacteksab/gh-tp/example/EXAMPLE-PR.md
+	https://github.com/esacteksab/gh-tp/blob/main/example/EXAMPLE-PR.md
 
 	Flags (-o, -m, -b) can be used instead of a config file if a unique
 	binary (terraform or tofu) is found in your PATH. If flags are provided,
