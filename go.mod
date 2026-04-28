@@ -64,7 +64,7 @@ require (
 	github.com/olekukonko/tablewriter v1.1.4 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
-	github.com/zclconf/go-cty v1.18.0 // indirect
+	github.com/zclconf/go-cty v1.18.1 // indirect
 	golang.org/x/crypto v0.49.0 // indirect
 	golang.org/x/term v0.41.0 // indirect
 )
@@ -72,7 +72,7 @@ require (
 require (
 	github.com/cli/safeexec v1.0.1
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
-	github.com/hashicorp/terraform-exec v0.25.0
+	github.com/hashicorp/terraform-exec v0.25.1
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/mattn/go-runewidth v0.0.22 // indirect
 	github.com/pelletier/go-toml/v2 v2.3.0
