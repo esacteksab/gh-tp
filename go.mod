@@ -72,7 +72,7 @@ require (
 require (
 	github.com/cli/safeexec v1.0.1
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
-	github.com/hashicorp/terraform-exec v0.25.1
+	github.com/hashicorp/terraform-exec v0.25.2
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/mattn/go-runewidth v0.0.22 // indirect
 	github.com/pelletier/go-toml/v2 v2.3.0
