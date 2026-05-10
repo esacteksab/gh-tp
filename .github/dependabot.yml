@@ -93,18 +93,18 @@ updates:
     cooldown:
       default-days: 7
 
-  - package-ecosystem: pre-commit # zizmor: ignore[dependabot-cooldown]
-    directory: /
+  - package-ecosystem: "pre-commit" # zizmor: ignore[dependabot-cooldown]
+    directory: "/"
     labels:
-      - dependencies
-      - dev
+      - "dependencies"
+      - "dev"
     groups:
       pre-commit-minor-and-patch:
         update-types:
-          - minor
-          - patch
+          - "minor"
+          - "patch"
     schedule:
-      interval: weekly
-      day: friday
-      time: 17:00
-      timezone: America/Chicago
+      interval: "weekly"
+      day: "friday"
+      time: "17:00"
+      timezone: "America/Chicago"
