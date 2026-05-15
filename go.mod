@@ -27,7 +27,7 @@ require (
 	github.com/olekukonko/ll v0.1.8 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/tools v0.43.0 // indirect
+	golang.org/x/tools v0.44.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 )
 
@@ -85,7 +85,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/subosito/gotenv v1.6.0 // indirect
 	golang.org/x/exp v0.0.0-20260312153236-7ab1446f8b90 // indirect
-	golang.org/x/sys v0.42.0 // indirect
-	golang.org/x/text v0.36.0
+	golang.org/x/sys v0.43.0 // indirect
+	golang.org/x/text v0.37.0
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
