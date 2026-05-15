@@ -12,6 +12,7 @@ _site/
 #############
 # Go Things #
 #############
+gh-tp
 # keep-sorted start
 
 *.dll
@@ -233,5 +234,5 @@ terraform.rc
 
 # keep-sorted end
 
-# exists for local development -- Does need checked in
+# exists for local development -- Doesn't need checked in
 .current-tag

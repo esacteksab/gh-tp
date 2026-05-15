@@ -1,55 +1,110 @@
+---
 version: 2
 updates:
   - package-ecosystem: "pip"
     directory: "/"
     groups:
-      minor-and-patch:
+      minor-and-patch-py:
         update-types:
           - "minor"
           - "patch"
     schedule:
       interval: "weekly"
       day: "friday"
-      time: "19:00"
+      time: "17:00"
       timezone: "America/Chicago"
+    labels:
+      - "dependencies"
+      - "dev"
+      - "python"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: "gomod"
     directory: "/"
     groups:
-      minor-and-patch:
+      minor-and-patch-go:
         update-types:
           - "minor"
           - "patch"
     schedule:
       interval: "daily"
-      time: "19:00"
+      time: "17:00"
       timezone: "America/Chicago"
+    labels:
+      - "dependencies"
+      - "go"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: "npm"
     directory: "/"
     groups:
-      minor-and-patch:
+      minor-and-patch-npm:
         update-types:
           - "minor"
           - "patch"
     schedule:
       interval: "weekly"
       day: "friday"
-      time: "19:00"
+      time: "17:00"
       timezone: "America/Chicago"
+    labels:
+      - "dependencies"
+      - "dev"
+      - "javascript"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: "github-actions"
     directory: "/"
+    groups:
+      github-actions:
+        update-types:
+          - "minor"
+          - "patch"
     schedule:
       interval: "weekly"
       day: "friday"
-      time: "19:00"
+      time: "17:00"
       timezone: "America/Chicago"
+    labels:
+      - "dependencies"
+      - "dev"
+      - "github_actions"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: "docker"
     directory: "/"
+    ignore:
+      - dependency-name: "esacteksab/go"
+        update-types:
+          - "version-update:semver-minor"
     schedule:
       interval: "weekly"
       day: "friday"
-      time: "19:00"
+      time: "17:00"
+      timezone: "America/Chicago"
+    labels:
+      - "dependencies"
+      - "dev"
+      - "docker"
+    cooldown:
+      default-days: 7
+
+  - package-ecosystem: "pre-commit" # zizmor: ignore[dependabot-cooldown]
+    directory: "/"
+    labels:
+      - "dependencies"
+      - "dev"
+    groups:
+      pre-commit-minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "17:00"
       timezone: "America/Chicago"

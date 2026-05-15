@@ -1,17 +1,17 @@
-FROM esacteksab/go:1.25.0-2025-09-19@sha256:9412f5c6c99027c2e31def8ab2b61bf8045b44502e6bcab4a895a2b4fab9e0d0 AS builder
+FROM esacteksab/go:1.25.10-2026-05-08@sha256:41469e0e5435e900939207578ab96cdeb288d1b1a6a35e46ed33c0c91fa929de AS builder
 
 # Set GOMODCACHE explicitly (still good practice)
 ENV GOMODCACHE=/go/pkg/mod
 
 # Keep this layer cached if possible
 RUN apt update && apt install -y unzip wget git \
-  && wget https://github.com/cli/cli/releases/download/v2.69.0/gh_2.69.0_linux_amd64.deb \
-  && dpkg -i gh_2.69.0_linux_amd64.deb && rm gh_2.69.0_linux_amd64.deb \
-  && wget https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_linux_amd64.zip \
-  && unzip terraform_1.5.7_linux_amd64.zip && rm terraform_1.5.7_linux_amd64.zip \
-  && mv terraform /usr/bin/terraform && chmod +x /usr/bin/terraform \
-  && wget https://github.com/opentofu/opentofu/releases/download/v1.9.0/tofu_1.9.0_amd64.deb \
-  && dpkg -i tofu_1.9.0_amd64.deb && rm tofu_1.9.0_amd64.deb
+    && wget https://github.com/cli/cli/releases/download/v2.82.1/gh_2.82.1_linux_amd64.deb \
+    && dpkg -i gh_2.82.1_linux_amd64.deb && rm gh_2.82.1_linux_amd64.deb \
+    && wget https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_linux_amd64.zip \
+    && unzip terraform_1.5.7_linux_amd64.zip && rm terraform_1.5.7_linux_amd64.zip \
+    && mv terraform /usr/bin/terraform && chmod +x /usr/bin/terraform \
+    && wget https://github.com/opentofu/opentofu/releases/download/v1.9.0/tofu_1.9.0_amd64.deb \
+    && dpkg -i tofu_1.9.0_amd64.deb && rm tofu_1.9.0_amd64.deb
 
 WORKDIR /app
 
