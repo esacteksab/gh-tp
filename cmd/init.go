@@ -131,6 +131,28 @@ var initCmd = &cobra.Command{
 							return nil
 						},
 					),
+
+				huh.NewConfirm().
+					Title("Enable default pull request template discovery?").
+					Description(
+						"When enabled, tp searches GitHub default template locations when templateFile is not set.",
+					).
+					Affirmative("Yes").
+					Negative("No").
+					Value(&configFile.Params.UseTemplate),
+
+				huh.NewInput().
+					Title("Optional explicit pull request template file path").
+					Placeholder("example: .github/pull_request_template.md").
+					Suggestions(
+						[]string{
+							".github/pull_request_template.md",
+							"docs/pull_request_template.md",
+							"pull_request_template.md",
+							".github/PULL_REQUEST_TEMPLATE/template.md",
+						},
+					).
+					Value(&configFile.Params.TemplateFile),
 			),
 		).WithTheme(huh.ThemeBase16()).
 			// Just in case https://raw.githubusercontent.com/charmbracelet/huh/refs/tags/v0.6.0/keymap.go
@@ -270,6 +292,8 @@ var initCmd = &cobra.Command{
 			configFile.Path,
 			configFile.Params.MdFile,
 			configFile.Params.PlanFile,
+			configFile.Params.UseTemplate,
+			configFile.Params.TemplateFile,
 		)
 		if err != nil {
 			Logger.Fatal(err)

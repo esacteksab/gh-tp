@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/charmbracelet/log"
+	"github.com/spf13/viper"
 )
 
 func Test_createMarkdown(t *testing.T) {
@@ -29,12 +30,15 @@ func Test_createMarkdown(t *testing.T) {
 		binaryName string
 	}
 	tests := []struct {
-		name        string
-		args        args
-		wantPath    string // Expected returned path
-		wantErr     bool
-		wantErrMsg  string   // Optional: Check for specific error message content
-		wantContent []string // Keep this for checking file content on success
+		name              string
+		args              args
+		templateBody      string
+		templateFile      string // passed directly as templateFile viper value (no file is created)
+		useDiscoveredPath bool
+		wantPath          string // Expected returned path
+		wantErr           bool
+		wantErrMsg        string   // Optional: Check for specific error message content
+		wantContent       []string // Keep this for checking file content on success
 	}{
 		{
 			name: "empty plan",
@@ -74,6 +78,51 @@ func Test_createMarkdown(t *testing.T) {
 				"+ resource",
 				"</details>",
 			},
+		},
+		{
+			name: "uses explicit template path",
+			args: args{
+				mdParam:    "plan_with_template.md",
+				planStr:    "Plan content here.",
+				binaryName: "terraform",
+			},
+			templateBody: "## Template Header",
+			wantPath:     "plan_with_template.md",
+			wantErr:      false,
+			wantContent: []string{
+				"## Template Header",
+				"<details><summary>Terraform plan</summary>",
+				"Plan content here.",
+			},
+		},
+		{
+			name: "uses discovered default template",
+			args: args{
+				mdParam:    "plan_with_discovered_template.md",
+				planStr:    "Plan content here.",
+				binaryName: "terraform",
+			},
+			templateBody:      "## Discovered Template Header",
+			useDiscoveredPath: true,
+			wantPath:          "plan_with_discovered_template.md",
+			wantErr:           false,
+			wantContent: []string{
+				"## Discovered Template Header",
+				"<details><summary>Terraform plan</summary>",
+				"Plan content here.",
+			},
+		},
+		{
+			name: "errors on non-existent explicit template",
+			args: args{
+				mdParam:    "plan_bad_template.md",
+				planStr:    "Plan content here.",
+				binaryName: "terraform",
+			},
+			templateFile: "nonexistent-template.md",
+			wantPath:     "plan_bad_template.md",
+			wantErr:      true,
+			wantErrMsg:   "template file does not exist",
 		},
 		// --- Validation Failure Cases ---
 		{
@@ -146,6 +195,28 @@ func Test_createMarkdown(t *testing.T) {
 		t.Cleanup(func() { os.Chdir(cwd) })
 
 		t.Run(tt.name, func(t *testing.T) {
+			viper.Reset()
+			t.Cleanup(viper.Reset)
+
+			if tt.templateFile != "" {
+				viper.Set("templateFile", tt.templateFile)
+			} else if tt.templateBody != "" {
+				templatePath := "template.md"
+				if tt.useDiscoveredPath {
+					viper.Set("useTemplate", true)
+					templatePath = filepath.Join(".github", "pull_request_template.md")
+					if err := os.MkdirAll(".github", 0o755); err != nil {
+						t.Fatalf("Failed to create .github directory: %v", err)
+					}
+				} else {
+					viper.Set("templateFile", templatePath)
+				}
+
+				if err := os.WriteFile(templatePath, []byte(tt.templateBody+"\n"), 0o600); err != nil {
+					t.Fatalf("Failed to write template file %q: %v", templatePath, err)
+				}
+			}
+
 			gotPath, err := createMarkdown(tt.args.mdParam, tt.args.planStr, tt.args.binaryName)
 
 			// 1. Check error status

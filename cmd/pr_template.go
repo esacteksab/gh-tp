@@ -15,7 +15,8 @@ import (
 const (
 	// https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/creating-a-pull-request-template-for-your-repository
 	defaultPRTemplateName = "pull_request_template.md"
-	defaultPRTemplateDirs = "PULL_REQUEST_TEMPLATE"
+	// defaultPRTemplatesDir is the conventional directory for multiple PR templates.
+	defaultPRTemplatesDir = "PULL_REQUEST_TEMPLATE"
 )
 
 // findPRTemplate looks in a handful of places based on the link above
@@ -29,14 +30,33 @@ func findPRTemplate() (PRTemplatePaths []string, err error) {
 	PRTemplatePaths = []string{}
 
 	for _, dir := range defaultPRTemplateRootDirs {
-		// e.g. .pull_request_template.md, .github/pull_request_template.md or docs/pull_request_template.md
-		path := filepath.Join(dir, defaultPRTemplateName)
-		if doesExist(path) {
-			PRTemplatePaths = append(PRTemplatePaths, path)
-			Logger.Debugf("Found PR Template path: %s", path)
+		dirEntries, readErr := os.ReadDir(dir)
+		if readErr != nil {
+			// Ignore missing directories; report other errors and continue scanning.
+			if !os.IsNotExist(readErr) {
+				Logger.Errorf(
+					"Failed to read directory %s while searching for PR templates: %s",
+					dir,
+					readErr,
+				)
+			}
+			continue
 		}
+
+		for _, entry := range dirEntries {
+			if entry.IsDir() {
+				continue
+			}
+			// GitHub treats PR template filenames case-insensitively.
+			if strings.EqualFold(entry.Name(), defaultPRTemplateName) {
+				path := filepath.Join(dir, entry.Name())
+				PRTemplatePaths = append(PRTemplatePaths, path)
+				Logger.Debugf("Found PR Template path: %s", path)
+			}
+		}
+
 		// e.g. .github/PULL_REQUEST_TEMPLATE/, PULL_REQUEST_TEMPLATE/ or docs/PULL_REQUEST_TEMPLATE/
-		nestedPathTemplates := filepath.Join(dir, defaultPRTemplateDirs)
+		nestedPathTemplates := filepath.Join(dir, defaultPRTemplatesDir)
 		if doesExist(nestedPathTemplates) {
 			PRTemplates, err := os.ReadDir(nestedPathTemplates)
 			if err != nil {
@@ -64,42 +84,57 @@ func findPRTemplate() (PRTemplatePaths []string, err error) {
 	return slices.Compact(PRTemplatePaths), nil
 }
 
-func createWithTemplate(
-	validatedFilename string,
-	templateFile []byte,
-	planMdFile *os.File,
-) (string, error) {
+// createWithTemplate prefixes markdown plan content with a PR template body.
+//
+// Returns the combined template and plan markdown with proper spacing.
+func createWithTemplate(templateFile, planMarkdown []byte) []byte {
 	// let's add some padding to the top between the existing template body and the Terraform plan
 	templateStr := string(templateFile)
-	if !strings.HasSuffix(templateStr, "\n\n\n") {
+	if !strings.HasSuffix(templateStr, "\n\n") {
 		templateStr = strings.TrimRight(templateStr, "\n") + "\n\n"
 	}
-	// read planMdFile for it's contents
-	planMdBytes, err := os.ReadFile(planMdFile.Name())
-	if err != nil {
-		Logger.Errorf("Unable to read Markdown file: %s", err)
-		return validatedFilename, fmt.Errorf("failed to read markdown file: %w", err)
-	}
-	combined := append([]byte(templateStr), planMdBytes...)
-	err = os.WriteFile(planMdFile.Name(), combined, 0o600) //nolint:mnd
-	if err != nil {
-		Logger.Errorf("failed to write combined template and markdown: %s", err)
-		return validatedFilename, fmt.Errorf(
-			"failed to write combined template and markdown: %w",
-			err,
-		)
-	}
-	return validatedFilename, nil
+	return append([]byte(templateStr), planMarkdown...)
 }
 
-// getTemplateFromConfig checks for a binary specified via flag or config.
+// getTemplateFromConfig checks for a template specified via flag or config,
+// otherwise it falls back to default GitHub PR template locations.
+// It returns the path to the selected template, or empty string if none is found,
+// and an error if multiple templates are discovered or a specified template does not exist.
 func getTemplateFromConfig() (string, error) {
-	v := viper.IsSet("templateFile")
-	Logger.Debugf("Template is set: %v", v)
-	viperTemplate := viper.GetString("templateFile")
-	if viperTemplate == "" {
-		return "", nil // Not set
+	// Explicit template path has precedence over discovery.
+	viperTemplate := strings.TrimSpace(viper.GetString("templateFile"))
+	if viperTemplate != "" {
+		if !doesExist(viperTemplate) {
+			return "", fmt.Errorf("template file does not exist: %s", viperTemplate)
+		}
+		Logger.Debugf("Using template specified via flag or config: %s", viperTemplate)
+		return viperTemplate, nil
 	}
-	Logger.Debugf("Using template specified via flag or config: %s", viperTemplate)
-	return viperTemplate, nil
+
+	// Discovery is opt-in for rollout safety.
+	if !viper.GetBool("useTemplate") {
+		Logger.Debug("Template discovery disabled; set useTemplate=true to enable default search")
+		return "", nil
+	}
+
+	templates, err := findPRTemplate()
+	if err != nil {
+		return "", fmt.Errorf("failed to discover pull request templates: %w", err)
+	}
+
+	if len(templates) == 0 {
+		Logger.Debug("No pull request template discovered in default locations")
+		return "", nil
+	}
+
+	// Avoid silently choosing one when multiple templates are present.
+	if len(templates) > 1 {
+		return "", fmt.Errorf(
+			"multiple pull request templates discovered (%s); set --templateFile to choose one",
+			strings.Join(templates, ", "),
+		)
+	}
+
+	Logger.Debugf("Using discovered pull request template: %s", templates[0])
+	return templates[0], nil
 }

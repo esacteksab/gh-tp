@@ -39,10 +39,12 @@ type ConfigFile struct {
 // ConfigParams contains all configurable parameters for the application
 // with validation rules and comments for documentation
 type ConfigParams struct {
-	Binary   string `toml:"binary"   comment:"binary: (type: string) The name of the binary, expect either 'tofu' or 'terraform'. Must exist on your $PATH." validate:"oneof=terraform tofu"`
-	PlanFile string `toml:"planFile" comment:"planFile: (type: string) The name of the plan file created by 'gh tp'."                                        validate:"required"`
-	MdFile   string `toml:"mdFile"   comment:"mdFile: (type: string) The name of the Markdown file created by 'gh tp'."                                      validate:"required,nefield=PlanFile"`
-	Verbose  bool   `toml:"verbose"  comment:"verbose: (type: bool) Enable Verbose Logging. Default is false."                                               validate:"boolean"`
+	Binary       string `toml:"binary"       comment:"binary: (type: string) The name of the binary, expect either 'tofu' or 'terraform'. Must exist on your $PATH."          validate:"oneof=terraform tofu"`
+	PlanFile     string `toml:"planFile"     comment:"planFile: (type: string) The name of the plan file created by 'gh tp'."                                                 validate:"required"`
+	MdFile       string `toml:"mdFile"       comment:"mdFile: (type: string) The name of the Markdown file created by 'gh tp'."                                               validate:"required,nefield=PlanFile"`
+	UseTemplate  bool   `toml:"useTemplate"  comment:"useTemplate: (type: bool) Enable default pull request template discovery. Default is false for backward compatibility." validate:"boolean"`
+	TemplateFile string `toml:"templateFile" comment:"templateFile: (type: string) Optional path to a pull request template file used as a prefix for markdown output."`
+	Verbose      bool   `toml:"verbose"      comment:"verbose: (type: bool) Enable Verbose Logging. Default is false."                                                        validate:"boolean"`
 }
 
 // genConfig marshals the configuration parameters into TOML format
@@ -246,11 +248,20 @@ func query(configExists bool) (createFile bool, err error) {
 //	cfgFile - The path to the configuration file
 //	cfgMdFile - The name of the markdown file
 //	cfgPlanFile - The name of the plan file
+//	cfgUseTemplate - Enables default pull request template discovery
+//	cfgTemplateFile - Optional explicit pull request template file path
 //
 // Returns:
 //
 //	error - Any error encountered during the configuration process
-func createConfig(cfgBinary, cfgFile, cfgMdFile, cfgPlanFile string) error {
+func createConfig(
+	cfgBinary,
+	cfgFile,
+	cfgMdFile,
+	cfgPlanFile string,
+	cfgUseTemplate bool,
+	cfgTemplateFile string,
+) error {
 	// Check if config exists and ask user if they want to create/overwrite
 	configExists, createFile, err := createOrOverwrite(
 		cfgFile,
@@ -269,10 +280,12 @@ func createConfig(cfgBinary, cfgFile, cfgMdFile, cfgPlanFile string) error {
 
 	// Create configuration with provided parameters
 	conf := ConfigParams{
-		Binary:   cfgBinary,
-		PlanFile: cfgPlanFile,
-		MdFile:   cfgMdFile,
-		Verbose:  false, // Default to non-verbose mode
+		Binary:       cfgBinary,
+		PlanFile:     cfgPlanFile,
+		MdFile:       cfgMdFile,
+		UseTemplate:  cfgUseTemplate,
+		TemplateFile: cfgTemplateFile,
+		Verbose:      false, // Default to non-verbose mode
 	}
 
 	err = validateConfig(conf)

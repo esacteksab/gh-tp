@@ -15,12 +15,22 @@ I wanted to make as few assumptions about your environment as possible, so `tp` 
 
 An annotated copy exists in the [example](./example) directory. **_The config file, the parameters and possibly the presence of default values is actively being worked on. This behavior may change in a future release._**
 
-| Parameter | Type   | Flag              | Required | Description                                                                                                                                                          |
-| --------- | ------ | ----------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| binary    | string | `-b`,`--binary`   | N [^3]   | We look on your `$PATH` for `tofu` or `terraform`, if both exist, you _must_ define _one_ in your config or pass the flag `-b` or `--binary`. _Default: `undefined`_ |
-| planFile  | string | `-o`, `--outFile` | Y        | The name of the plan's output file created by `gh tp`. _Default: `""`_                                                                                               |
-| mdFile    | string | `-m`, `--mdFile`  | Y        | The name of the Markdown file created by `gh tp`. _Default: `""`_                                                                                                    |
-| verbose   | bool   | `-v`, `--verbose` | N        | Enable verbose logging. _Default: `false`_                                                                                                                           |
+| Parameter    | Type   | Flag                   | Required | Description                                              |
+| ------------ | ------ | ---------------------- | -------- | -------------------------------------------------------- |
+| binary       | string | `-b`,`--binary`        | N [^3]   | Select `tofu` or `terraform`. Default: `undefined`.      |
+| planFile     | string | `-o`, `--outFile`      | Y        | Name of the plan output file. Default: `""`.             |
+| mdFile       | string | `-m`, `--mdFile`       | Y        | Name of the generated Markdown file. Default: `""`.      |
+| useTemplate  | bool   | N/A                    | N        | Enable default PR template discovery. Default: `false`.  |
+| templateFile | string | `-t`, `--templateFile` | N        | Explicit PR template path. Overrides discovery behavior. |
+| verbose      | bool   | `-v`, `--verbose`      | N        | Enable verbose logging. Default: `false`.                |
+
+`templateFile` and `useTemplate` work together as follows:
+
+- `templateFile` set: use that template file.
+- `templateFile` unset and `useTemplate=true`: search default GitHub locations.
+- `templateFile` unset and `useTemplate=false`: do not search for a template.
+
+`useTemplate` currently defaults to `false` for backward compatibility, and may default to `true` in a future release.
 
 #### `gh tp init`
 

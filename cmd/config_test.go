@@ -416,6 +416,8 @@ func TestCreateConfig(t *testing.T) {
 	cfgMdFile := "test.md"
 	cfgPlanFile := "test.out"
 	cfgBinary := "terraform"
+	cfgUseTemplate := true
+	cfgTemplateFile := ".github/pull_request_template.md"
 
 	defer os.Remove(".tp.toml")
 	defer os.Remove("test.md")
@@ -458,7 +460,14 @@ func TestCreateConfig(t *testing.T) {
 		mockUserPrompt.On("AskOverwrite", false).Return(true, nil)
 
 		// Call the function
-		err := createConfig(cfgBinary, cfgFile, cfgMdFile, cfgPlanFile)
+		err := createConfig(
+			cfgBinary,
+			cfgFile,
+			cfgMdFile,
+			cfgPlanFile,
+			cfgUseTemplate,
+			cfgTemplateFile,
+		)
 
 		// Debug - print actual calls
 		// t.Logf("Mock file checker calls: %v", mockFileChecker.Calls)
@@ -466,6 +475,14 @@ func TestCreateConfig(t *testing.T) {
 
 		// Assert results
 		require.NoError(t, err)
+		configBytes, readErr := os.ReadFile(cfgFile)
+		require.NoError(t, readErr)
+		require.Contains(t, string(configBytes), "useTemplate = true")
+		require.Contains(
+			t,
+			string(configBytes),
+			"templateFile = '.github/pull_request_template.md'",
+		)
 		mockFileChecker.AssertExpectations(t)
 		mockUserPrompt.AssertExpectations(t)
 	})

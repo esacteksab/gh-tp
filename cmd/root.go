@@ -110,13 +110,6 @@ func Execute() {
 		os.Exit(1)
 	}
 	Logger.Debug("[LOG 14] rootCmd.Execute() completed without error.")
-
-	// this exists for early testing/iteration. TODO: Remove before release
-	paths, err := findPRTemplate()
-	if err != nil {
-		Logger.Errorf("unable to find PR template: %s", err)
-	}
-	Logger.Debugf("PR templates: %s", paths)
 }
 
 // init function defines flags and sets up version
@@ -150,7 +143,8 @@ func initConfig() {
 		if err != nil {
 			if errors.Is(err, fs.ErrNotExist) {
 				Logger.Error(
-					"Config file specified via --config not found.")
+					"Config file specified via --config not found.",
+				)
 				os.Exit(1)
 			} else {
 				Logger.Debugf("ERROR: Error reading specified config file %s: %v", cfgFile, err)

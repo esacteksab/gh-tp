@@ -9,5 +9,14 @@
 planFile = ''
 # mdFile: (type: string) The name of the Markdown file created by 'gh tp'.
 mdFile = ''
+# useTemplate: (type: bool) Enable default pull request template discovery.
+# Default is false for backward compatibility and may become true in a future release.
+useTemplate = false
+# templateFile: (type: string) Optional path to a pull request template file.
+# When set, this file is used regardless of useTemplate.
+# When omitted and useTemplate=true, gh tp searches default GitHub locations
+# such as .github/pull_request_template.md, docs/pull_request_template.md,
+# and pull_request_template.md.
+# templateFile = ''
 # verbose: (type: bool) Enable Verbose Logging. Default is false.
 verbose = false
