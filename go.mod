@@ -12,7 +12,7 @@ require (
 	github.com/fatih/color v1.19.0
 	github.com/go-playground/validator/v10 v10.30.2
 	github.com/nao1215/markdown v0.13.0
-	github.com/rogpeppe/go-internal v1.14.1
+	github.com/rogpeppe/go-internal v1.15.0
 	github.com/stretchr/testify v1.11.1
 )
 
