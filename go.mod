@@ -10,7 +10,7 @@ require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/charmbracelet/log v1.0.0
 	github.com/fatih/color v1.19.0
-	github.com/go-playground/validator/v10 v10.30.2
+	github.com/go-playground/validator/v10 v10.30.3
 	github.com/nao1215/markdown v0.13.0
 	github.com/rogpeppe/go-internal v1.15.0
 	github.com/stretchr/testify v1.11.1
@@ -65,8 +65,8 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/zclconf/go-cty v1.18.1 // indirect
-	golang.org/x/crypto v0.49.0 // indirect
-	golang.org/x/term v0.41.0 // indirect
+	golang.org/x/crypto v0.52.0 // indirect
+	golang.org/x/term v0.43.0 // indirect
 )
 
 require (
@@ -85,7 +85,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/subosito/gotenv v1.6.0 // indirect
 	golang.org/x/exp v0.0.0-20260312153236-7ab1446f8b90 // indirect
-	golang.org/x/sys v0.43.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/text v0.37.0
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
