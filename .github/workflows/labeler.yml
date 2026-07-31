@@ -11,4 +11,4 @@ permissions:
 
 jobs:
   label-pr:
-    uses: esacteksab/.github/.github/workflows/labeler.yml@889a2cb0115398e6445ea1a306d190692a305ba3  # v0.84.1
+    uses: esacteksab/.github/.github/workflows/labeler.yml@e06e6a72f27755e16f887bc30ce0aafa2a79616a  # v0.85.2
