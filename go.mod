@@ -11,7 +11,7 @@ require (
 	github.com/charmbracelet/log v1.0.0
 	github.com/fatih/color v1.19.0
 	github.com/go-playground/validator/v10 v10.30.3
-	github.com/nao1215/markdown v0.13.0
+	github.com/nao1215/markdown v1.0.0
 	github.com/rogpeppe/go-internal v1.16.0
 	github.com/stretchr/testify v1.12.0
 )
