@@ -1,3 +1,4 @@
+---
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -43,7 +44,11 @@ repos:
         files: ^\.pre-commit-config.yaml+$
         types:
           - yaml
-        args: [ "--schemafile", "https://json.schemastore.org/pre-commit-config.json" ]
+        args:
+          [
+            "--schemafile",
+            "https://json.schemastore.org/pre-commit-config.json",
+          ]
       - id: check-jsonschema
         name: "Validate MarkdownLint"
         files: ^\.markdownlint-cli2.yaml+$
@@ -52,8 +57,7 @@ repos:
         args:
           [
             "--schemafile",
-            "https://raw.githubusercontent.com/DavidAnson/markdownlint-cli2/v\
-              0.17.2/schema/markdownlint-cli2-config-schema.json",
+            "https://raw.githubusercontent.com/DavidAnson/markdownlint-cli2/v0.17.2/schema/markdownlint-cli2-config-schema.json",
           ]
       - id: check-jsonschema
         name: "Validate golangci-lint config"
@@ -70,15 +74,7 @@ repos:
         files: ^\.goreleaser.yaml+$
         types:
           - yaml
-        args: [ "--schemafile", "https://goreleaser.com/static/schema.json" ]
-
-  - repo: local
-    hooks:
-      - id: make-modernize
-        name: "Make Modernize"
-        entry: "make modernize"
-        language: system
-        pass_filenames: false
+        args: ["--schemafile", "https://goreleaser.com/static/schema.json"]
 
   - repo: local
     hooks:
@@ -121,7 +117,7 @@ repos:
     rev: v1.49.0
     hooks:
       - id: typos
-        args: [ --force-exclude ]
+        args: [--force-exclude]
         name: "Spell Check"
 
   - repo: https://github.com/shellcheck-py/shellcheck-py
