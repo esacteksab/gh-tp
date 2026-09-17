@@ -104,7 +104,8 @@ cat plan.md
 ```
 
 ````md
-<details><summary>Terraform plan</summary>
+<details>
+<summary>Terraform plan</summary>
 
 \```terraform
 
@@ -217,7 +218,8 @@ cat plan.md
 ```
 
 ````md
-<details><summary>Terraform plan</summary>
+<details>
+<summary>Terraform plan</summary>
 
 \```terraform
 

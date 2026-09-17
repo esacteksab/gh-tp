@@ -53,7 +53,8 @@ func Test_createMarkdown(t *testing.T) {
 			wantPath: "no_changes_plan.md", // Expect simple filename
 			wantErr:  false,
 			wantContent: []string{
-				"<details><summary>Terraform plan</summary>",
+				"<details>",
+				"<summary>Terraform plan</summary>",
 				"```terraform",
 				"Plan content here.",
 				"</details>",
@@ -69,7 +70,8 @@ func Test_createMarkdown(t *testing.T) {
 			wantPath: "changes_plan_tofu.md", // Expect simple filename
 			wantErr:  false,
 			wantContent: []string{
-				"<details><summary>OpenTofu plan</summary>",
+				"<details>",
+				"<summary>OpenTofu plan</summary>",
 				"```terraform",
 				"+ resource",
 				"</details>",

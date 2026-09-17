@@ -1,6 +1,7 @@
 <!-- markdownlint-disable MD033 -->
 
-<details><summary>Terraform plan</summary>
+<details>
+<summary>Terraform plan</summary>
 
 ```terraform
 
