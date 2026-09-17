@@ -14,7 +14,8 @@ verbose = false
 -- foo.tf --
 
 -- tofugolden.md --
-<details><summary>OpenTofu plan</summary>
+<details>
+<summary>OpenTofu plan</summary>
 
 ```terraform
 
@@ -24,6 +25,7 @@ OpenTofu has compared your real infrastructure against your configuration and
 found no differences, so no changes are needed.
 
 ```
+
 
 </details>
 -- formatters --

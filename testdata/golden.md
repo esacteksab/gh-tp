@@ -1,4 +1,5 @@
-<details><summary>Terraform plan</summary>
+<details>
+<summary>Terraform plan</summary>
 
 ```terraform
 

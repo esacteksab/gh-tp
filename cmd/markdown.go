@@ -105,7 +105,7 @@ func createMarkdown(mdParam, planStr, binaryName string) (string, error) {
 
 	// Build final markdown directly into the file handle
 	finalMarkdown := md.NewMarkdown(planMdFile)
-	buildErr := finalMarkdown.Details(title, "\n"+sbPlan+"\n").Build()
+	buildErr := finalMarkdown.Details(title, string(sbPlan)).Build()
 	if buildErr != nil {
 		Logger.Errorf(
 			"Failed to write <details> block to markdown file '%s': %v",
@@ -116,21 +116,6 @@ func createMarkdown(mdParam, planStr, binaryName string) (string, error) {
 			"failed to write markdown content to %s: %w",
 			validatedFilename,
 			buildErr,
-		)
-	}
-
-	// Add final newline to mdFile
-	_, err = planMdFile.WriteString("\n")
-	if err != nil {
-		Logger.Errorf(
-			"Failed to write final newline to markdown file '%s': %v",
-			validatedFilename,
-			err,
-		)
-		return validatedFilename, fmt.Errorf(
-			"failed write final newline to %s: %w",
-			validatedFilename,
-			err,
 		)
 	}
 

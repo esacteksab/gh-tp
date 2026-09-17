@@ -7,7 +7,8 @@ cmp plan.md tfgolden.md
 -- foo.tf --
 
 -- tfgolden.md --
-<details><summary>Terraform plan</summary>
+<details>
+<summary>Terraform plan</summary>
 
 ```terraform
 
@@ -17,6 +18,7 @@ Terraform has compared your real infrastructure against your configuration
 and found no differences, so no changes are needed.
 
 ```
+
 
 </details>
 -- formatters --
