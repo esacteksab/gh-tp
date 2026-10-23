@@ -1,4 +1,4 @@
-FROM esacteksab/go:1.26.9-2026-10-10@sha256:69cfc33158658721131923c702e9c28ef7b7b9613dd01141c43d7be3c6940289 AS builder
+FROM esacteksab/go:1.26.9-2026-10-16@sha256:c0bfa919bcaf2e39fcd91ecbf904511892774b9cd55a9c0fb4cdad028aa97b31 AS builder
 
 # Set GOMODCACHE explicitly (still good practice)
 ENV GOMODCACHE=/go/pkg/mod
