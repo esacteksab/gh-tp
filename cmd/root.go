@@ -137,7 +137,8 @@ func initConfig() {
 		if err != nil {
 			if errors.Is(err, fs.ErrNotExist) {
 				Logger.Error(
-					"Config file specified via --config not found.")
+					"Config file specified via --config not found.",
+				)
 				os.Exit(1)
 			} else {
 				Logger.Debugf("ERROR: Error reading specified config file %s: %v", cfgFile, err)
