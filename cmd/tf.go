@@ -105,7 +105,7 @@ func createPlan() (planStr string, err error) {
 	// Handle other errors
 	if err != nil {
 		s.Stop()
-		Logger.Errorf("tf.Plan finished with non-interruption error. Type: %T, Value: %v", err, err)
+		Logger.Debugf("tf.Plan finished with non-interruption error. Type: %T, Value: %v", err, err)
 		cleanupSignalResources()
 		// Presumably an unusable plan, so let's clean things up -- we may not want this long-term or maybe make this a parameter
 		_ = os.Remove(planPath) // Attempt cleanup for other errors
