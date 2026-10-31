@@ -167,10 +167,8 @@ func initConfig() {
 
 			if err := viper.ReadInConfig(); err != nil {
 				Logger.Debugf("[INITCONFIG_DEBUG] ReadInConfig (default search) returned error: %v", err)
-				var unsupportedConfigError viper.UnsupportedConfigError
-				if !errors.As(err, &unsupportedConfigError) {
-					var configParseError viper.ConfigParseError
-					if errors.As(err, &configParseError) {
+				if _, ok := errors.AsType[viper.UnsupportedConfigError](err); !ok {
+					if _, ok := errors.AsType[viper.ConfigParseError](err); ok {
 						fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 						os.Exit(1) // There is something wrong with the config file, exit
 					}
