@@ -79,6 +79,10 @@ install: build
 lint:
 	golangci-lint run -v
 
+.PHONY: modernize
+modernize:
+	go run golang.org/x/tools/go/analysis/passes/modernize/cmd/modernize@latest -fix -test ./...
+
 .PHONY: moreclean
 moreclean: clean
 
