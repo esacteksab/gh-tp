@@ -11,7 +11,7 @@ require (
 	github.com/charmbracelet/log v1.0.0
 	github.com/cli/safeexec v1.0.1
 	github.com/fatih/color v1.19.0
-	github.com/go-playground/validator/v10 v10.30.5
+	github.com/go-playground/validator/v10 v10.30.6
 	github.com/hashicorp/terraform-exec v0.26.0
 	github.com/nao1215/markdown v1.1.1
 	github.com/pelletier/go-toml/v2 v2.4.3
