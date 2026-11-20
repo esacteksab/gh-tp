@@ -13,13 +13,13 @@ require (
 	github.com/fatih/color v1.19.0
 	github.com/go-playground/validator/v10 v10.30.6
 	github.com/hashicorp/terraform-exec v0.26.0
-	github.com/nao1215/markdown v1.1.1
+	github.com/nao1215/markdown v1.1.2
 	github.com/pelletier/go-toml/v2 v2.4.3
 	github.com/rogpeppe/go-internal v1.16.0
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
-	golang.org/x/text v0.43.0
+	golang.org/x/text v0.44.0
 )
 
 require (
